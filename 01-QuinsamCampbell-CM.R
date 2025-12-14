@@ -216,9 +216,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_12.05.25.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_12.13.25.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_12.05.25.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_12.13.25.rds")
 
 
 #### Fit with log productivity = 1 ----
@@ -288,7 +288,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = unique(full_table$BROOD_YEAR),
-    dir = "CM", filename = "QuinsamCampbell_12.05"
+    dir = "CM", filename = "QuinsamCampbell_12.13"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)
