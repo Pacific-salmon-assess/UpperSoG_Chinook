@@ -167,12 +167,11 @@ d <- list(
   cwtcatPT = array(round(cwt_catch/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatT = NULL,
   bvulPT = vulPT,
-  bvulT = vulT,
   RelRegFPT = rep(1, Ldyr),
   RelRegFT = rep(1, Ldyr),
   mobase = M_CTC,
   bmatt = mat,
-  hatchsurv = 0.5, #Walters and Korman (2024); 1 used for WCVI Chinook
+  hatchsurv = 0.8, #From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
   pHOS_init = 0.75,
   spawn_init = 8400,
   gamma = 0.8,
@@ -181,8 +180,8 @@ d <- list(
   obsescape = esc$escapement,
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
   hatchrelease = rel_Quinsam$n_rel, #rep(0, Ldyr + 1),
-  #obs_pHOS = pHOS_df$pHOS[1:Ldyr], # By brood year!
-  #pHOS_sd = 0.5,
+  # obs_pHOS = pHOS_df$pHOS[1:Ldyr], # By brood year!
+  # pHOS_sd = 0.5,
   finitPT = 0.8, # Walters and Korman (2024)
   finitT = 0,
   cwtExp = cwtExp
@@ -217,9 +216,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_12.03.25.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_12.13.25.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_12.03.25.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_12.13.25.rds")
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
 
@@ -263,7 +262,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = unique(full_table$BROOD_YEAR),
-    dir = "CM", filename = "QuinsamCampbell_12.03"
+    dir = "CM", filename = "QuinsamCampbell_12.13"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

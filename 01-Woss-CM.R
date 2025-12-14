@@ -125,7 +125,7 @@ d <- list(
   RelRegFT = rep(1, Ldyr),
   mobase = M_CTC,
   bmatt = mat,
-  hatchsurv = 0.5, #Walters and Korman (2024); 1 used for WCVI Chinook
+  hatchsurv = 0.8, #From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
   pHOS_init = 0.13,
   spawn_init = 500/0.4, #Expanded to account for Woss:Nimpkish ratio, M. Clarke pers. comm. 21 Nov 2025
   gamma = 0.8,
@@ -167,9 +167,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Woss_12.03.25.rds")
+saveRDS(samp, file = "CM/Woss_12.14.25.rds")
 
-samp <- readRDS(file = "CM/Woss_12.03.25.rds")
+samp <- readRDS(file = "CM/Woss_12.14.25.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -178,5 +178,5 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_table$BROOD_YEAR),
-  dir = "CM", filename = "Woss_12.03"
+  dir = "CM", filename = "Woss_12.14"
 )
