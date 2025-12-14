@@ -210,17 +210,43 @@ map$lnE_sd <- factor(NA)
 
 start <- list(log_so = log(3 * max(d$obsescape)))
 
-# Fit with sampling rate = 1
-fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
+#### Fit with estimated productivity parameter (log_cr)
+fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_12.13.25.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_12.05.25.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_12.13.25.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_12.05.25.rds")
+
+
+#### Fit with log productivity = 1 ----
+fit_p1 <- local({
+  map$log_cr <- factor(NA) # Fixes the parameter
+  start$log_cr <- 1        # Gives the starting value
+  fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
+})
+samp_p1 <- sample_CM(fit_p1, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
+                     control=list(adapt_delta = 0.999,
+                                  stepsize = 0.01,
+                                  max_treedepth = 20))
+saveRDS(samp_p1, file = "CM/QuinsamCampbell_12.05.25_p1.rds")
+
+#### Fit with higher older M for age 1+
+fit2 <- local({
+  d$covariate <- matrix(1, d$Ldyr, 1)
+  fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
+})
+samp2 <- sample_CM(fit2, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
+                   control=list(adapt_delta = 0.999,
+                                stepsize = 0.01,
+                                max_treedepth = 20))
+saveRDS(samp2, file = "CM/QuinsamCampbell_12.05.25_age2M.rds")
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
+
+  #samp <- samp2
 
   # Check fits quickly
   report <- salmonMSE::get_report(samp)
@@ -262,7 +288,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = unique(full_table$BROOD_YEAR),
-    dir = "CM", filename = "QuinsamCampbell_12.13"
+    dir = "CM", filename = "QuinsamCampbell_12.05"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)
