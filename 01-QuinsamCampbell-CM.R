@@ -162,7 +162,7 @@ Ldyr <- dim(cwt_esc)[1]
 Nages <- 5#6
 
 #mat <- c(0, 0.1, 0.4, 0.95, 1) # from WCVI = c(0, 0.1, 0.4, 0.95, 1)
-mat <- c(0, 0.01, 0.1, 0.6, 1) # Need to tune this vector for initial abundance
+mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance
 vulPT <- c(0, 0.075, 0.9, 0.9, 1) #  from WCVI = c(0, 0.075, 0.9, 0.9, 1)
 vulT <- rep(0, Nages)
 
