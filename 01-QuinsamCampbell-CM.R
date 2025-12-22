@@ -4,10 +4,21 @@ library(readxl)
 library(salmonMSE)
 
 # Quinsam CWT recovery
-rec <- readxl::read_excel(
-  file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
-  sheet = "Estimated"
-) %>%
+rec <- local({
+  rec1 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    sheet = "Estimated"
+  ) %>%
+    select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
+
+  rec2 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-12-18-QuinsamCN-CatchbyStat-1980-2005.xlsx"),
+    sheet = "Estimated"
+  ) %>%
+    select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
+
+  rbind(rec1, rec2)
+}) %>%
   mutate(is_catch = TotCatch > 0, is_esc = Escape > 0)
 
 
@@ -18,37 +29,47 @@ cwt_rs <- rec %>%
   summarise(
     n_catch = sum(TotCatch),
     n_esc = sum(Escape),
-    .by = c(Age, BROOD_YEAR)#, RS)
+    .by = c(Age, RELEASE_YEAR)
   )
 
-
 # Quinsam - CWT releases
-rel <- readxl::read_excel(
-  file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
-  sheet = "Releases"
-)
+rel <- local({
+
+  rel1 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    sheet = "Releases"
+  )
+
+  rel2 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-12-18-QuinsamCN-Releases-1980-2005.xlsx"),
+    sheet = "Actual Release"
+  )
+
+  rbind(rel1, rel2)
+})
 
 rel_rs <- rel %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
   # mutate(RS = "Seapen/Smolt 0+") %>%
-  summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(BROOD_YEAR))#, RS))
+  summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
 
 # Set up matrices
 full_table <- expand.grid(
-  BROOD_YEAR = seq(min(cwt_rs$BROOD_YEAR), 2023), # 2005 - 2023
+  RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 ) %>%
   left_join(cwt_rs)
 
-cwt_catch <- reshape2::acast(full_table, list("BROOD_YEAR", "Age"), value.var = "n_catch", fill = 0)
-cwt_esc <- reshape2::acast(full_table, list("BROOD_YEAR", "Age"), value.var = "n_esc", fill = 0)
+cwt_catch <- reshape2::acast(full_table, list("RELEASE_YEAR", "Age"), value.var = "n_catch", fill = 0)
+cwt_esc <- reshape2::acast(full_table, list("RELEASE_YEAR", "Age"), value.var = "n_esc", fill = 0)
 
 cwt_rel <- left_join(
-  full_table %>% filter(Age == 1) %>% select(BROOD_YEAR),# RS),
+  full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
   rel_rs
 ) %>%
-  reshape2::acast(list("BROOD_YEAR"), fill = 0)
+  reshape2::acast(list("RELEASE_YEAR"), fill = 0)
 
 # Total hatchery releases from Quinsam and Campbell release sites, all release types
 rel_Quinsam.x <- readxl::read_excel(
@@ -68,26 +89,26 @@ rel_Quinsam <- rel_Quinsam.x %>%
            str_starts(RELEASE_SITE_NAME, "Second") |
            str_starts(RELEASE_SITE_NAME, "Discovery") |
            str_starts(RELEASE_SITE_NAME, "Orange")) %>%
-  summarise(n_rel = sum(TotalRelease), .by = c(BROOD_YEAR)) %>%
-  arrange(BROOD_YEAR)
+  summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
 
-# We start the model at brood year with CWT recoveries: min(cwt_rs$BROOD_YEAR) = 2005
-# However, hatchery releases begin prior to that, so we want to have a spool up with a hatchery population
-# going into 2005
+# We start the model at brood year with CWT recoveries: min(cwt_rs$RELEASE_YEAR) = 1981
+# However, hatchery releases begin prior to that (1975), so we want to have a spool up with a hatchery population
+# going into 1981
+
 hatch_init <- rel_Quinsam %>%
-  filter(BROOD_YEAR %in% c(min(cwt_rs$BROOD_YEAR) - seq(5, 1))) %>%
+  filter(RELEASE_YEAR %in% c(min(cwt_rs$RELEASE_YEAR) - seq(5, 1))) %>%
   pull(n_rel) %>%
   mean()
 
 # Crop to years with CWT data PLUS an extra year (to confirm)
-full_year <- data.frame(BROOD_YEAR= seq(min(cwt_rs$BROOD_YEAR),
-                                        max(cwt_rs$BROOD_YEAR) + 1))
-rel_Quinsam <- left_join(full_year, rel_Quinsam, by = "BROOD_YEAR")
+full_year <- data.frame(RELEASE_YEAR = seq(min(full_table$RELEASE_YEAR),
+                                        max(full_table$RELEASE_YEAR) + 1))
+rel_Quinsam <- left_join(full_year, rel_Quinsam, by = "RELEASE_YEAR")
 rel_Quinsam$n_rel[is.na(rel_Quinsam$n_rel)] <- 0
 
 # Escapement time-series
 pop <- c("Quinsam", "Campbell")
-
 
 pop.cap <- str_to_upper(pop)
 esc_all <- readxl::read_excel(
@@ -99,24 +120,23 @@ esc_all <- readxl::read_excel(
          str_starts(WaterbodyName, pop.cap[2])) %>%
   rename(year = "Analysis Year") %>%
   rename(esc.x = "Max Estimate") %>%
+  mutate(nat_spawners =
+           ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
   summarise(
     escapement = sum(esc.x),
-    nat_spawners = sum(`Natural Spawners Adult`),
+    nat_spawners = sum(nat_spawners),
     .by = c(year)
   ) %>%
   select (year, escapement, nat_spawners)
 
-filter(esc_all, year %in% seq(2000, 2004, 1)) %>%
-  pull(nat_spawners) %>%
-  mean()
-plot(nat_spawners ~ year, esc_all, typ = "o")
-
 esc <- esc_all %>%
   right_join(
-    full_table %>% filter(Age == 1) %>% select(BROOD_YEAR),
-    by = c("year" = "BROOD_YEAR")
+    full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
+    by = c("year" = "RELEASE_YEAR")
   ) %>%
+  arrange(year) %>%
   mutate(p_spawn = nat_spawners/escapement)
+esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
 
 # pHOS data (use Quinsam as it's 5-10x larger than Campbell)
 # 2024 value is much different compared to previous years!
@@ -124,7 +144,8 @@ pHOS_df_all <- readxl::read_excel(
   file.path("data", "2025-10-09-UpperSOGChinook-PNI.xlsx"),
   sheet = "Quinsam"
 ) %>%
-  select(`Brood Year`, `pHOS`) %>%
+  mutate(Release_Year = `Brood Year` + 1) %>%
+  select(Release_Year, `pHOS`) %>%
   mutate(pHOS = as.numeric(pHOS))
 
 #filter(pHOS_df, `Brood Year` %in% seq(2000, 2004, 1)) %>%
@@ -133,7 +154,8 @@ pHOS_df_all <- readxl::read_excel(
 #plot(pHOS ~ `Brood Year`, pHOS_df, typ = "o")
 
 pHOS_df <- pHOS_df_all %>%
-  right_join(full_year, by = c("Brood Year" = "BROOD_YEAR"))
+  right_join(full_year, by = c("Release_Year" = "RELEASE_YEAR")) %>%
+  filter(Release_Year <= 2023)
 
 # Data object for model
 Ldyr <- dim(cwt_esc)[1]
@@ -145,7 +167,7 @@ vulPT <- c(0, 0.075, 0.9, 0.9, 1) #  from WCVI = c(0, 0.075, 0.9, 0.9, 1)
 vulT <- rep(0, Nages)
 
 M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation Rate analyses
-M_CTC[1] <- 5 # Need to tune this value for initial abundance
+M_CTC[1] <- 4 # Need to tune this value for initial abundance
 
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 # Eggs/total spawner (not female spawner)
@@ -173,7 +195,7 @@ d <- list(
   bmatt = mat,
   hatchsurv = 0.8, #From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
   pHOS_init = 0.75,
-  spawn_init = 8400,
+  spawn_init = 4000,
   gamma = 0.8,
   ssum = 1, # ppn female. Fecundity is eggs/total spawner, so this is set to 1.
   fec = fec_Quinsam,
@@ -208,7 +230,7 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(3 * max(d$obsescape)))
+start <- list(log_so = log(3 * max(d$obsescape, na.rm = TRUE)))
 
 #### Fit with estimated productivity parameter (log_cr)
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
@@ -216,33 +238,33 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_12.13.25.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_12.22.25.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_12.13.25.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_12.22.25.rds")
 
 
 #### Fit with log productivity = 1 ----
-fit_p1 <- local({
-  map$log_cr <- factor(NA) # Fixes the parameter
-  start$log_cr <- 1        # Gives the starting value
-  fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
-})
-samp_p1 <- sample_CM(fit_p1, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
-                     control=list(adapt_delta = 0.999,
-                                  stepsize = 0.01,
-                                  max_treedepth = 20))
-saveRDS(samp_p1, file = "CM/QuinsamCampbell_12.05.25_p1.rds")
-
-#### Fit with higher older M for age 1+
-fit2 <- local({
-  d$covariate <- matrix(1, d$Ldyr, 1)
-  fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
-})
-samp2 <- sample_CM(fit2, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
-                   control=list(adapt_delta = 0.999,
-                                stepsize = 0.01,
-                                max_treedepth = 20))
-saveRDS(samp2, file = "CM/QuinsamCampbell_12.05.25_age2M.rds")
+#fit_p1 <- local({
+#  map$log_cr <- factor(NA) # Fixes the parameter
+#  start$log_cr <- 1        # Gives the starting value
+#  fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
+#})
+#samp_p1 <- sample_CM(fit_p1, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
+#                     control=list(adapt_delta = 0.999,
+#                                  stepsize = 0.01,
+#                                  max_treedepth = 20))
+#saveRDS(samp_p1, file = "CM/QuinsamCampbell_12.05.25_p1.rds")
+#
+##### Fit with higher older M for age 1+
+#fit2 <- local({
+#  d$covariate <- matrix(1, d$Ldyr, 1)
+#  fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
+#})
+#samp2 <- sample_CM(fit2, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
+#                   control=list(adapt_delta = 0.999,
+#                                stepsize = 0.01,
+#                                max_treedepth = 20))
+#saveRDS(samp2, file = "CM/QuinsamCampbell_12.05.25_age2M.rds")
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
 
@@ -255,19 +277,20 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   CM_fit_pHOS(report, d) # Figure only when fitted to pHOS observations, otherwise nothing
 
   # Compare brood year pHOS when not fitted
-  salmonMSE:::.CM_ts(report, year1 = pHOS_df$`Brood Year`[1], var = "pHOScensus_brood", ci = TRUE, ylab = "pHOScensus") +
-    geom_point(data = pHOS_df, aes(x = `Brood Year`, y = pHOS)) +
-    geom_line(data = pHOS_df, aes(x = `Brood Year`, y = pHOS), linetype = 3) +
-    labs(x = "Brood Year")
+  year <- unique(full_table$RELEASE_YEAR)
+  salmonMSE:::.CM_ts(report, year1 = min(year), var = "pHOScensus_brood", ci = TRUE, ylab = "pHOScensus") +
+    geom_point(data = pHOS_df, aes(x = `Release_Year`, y = pHOS)) +
+    geom_line(data = pHOS_df, aes(x = `Release_Year`, y = pHOS), linetype = 3) +
+    labs(x = "Release Year")
 
-  salmonMSE:::.CM_ts(report, year1 = pHOS_df$`Brood Year`[1], var = "pHOScensus", ci = TRUE, ylab = "pHOS")
+  salmonMSE:::.CM_ts(report, year1 = min(year), var = "pHOScensus", ci = TRUE, ylab = "pHOS")
 
   CM_F(report)
   CM_surv2(report) # Survival to age 2
 
   CM_maturity(report, d, brood = FALSE)
   CM_M(report)
-  CM_SRR(report, year1 = pHOS_df$`Brood Year`[1])
+  CM_SRR(report, year1 = min(year))
 
   # Quickly check convergence
   CM_trace(samp)
@@ -287,8 +310,8 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   rs_names <- c("Smolt 0+")
   salmonMSE::report_CM(
     samp,
-    rs_names = rs_names, name = "Quinsam/Campbell", year = unique(full_table$BROOD_YEAR),
-    dir = "CM", filename = "QuinsamCampbell_12.13"
+    rs_names = rs_names, name = "Quinsam/Campbell", year = year,
+    dir = "CM", filename = "QuinsamCampbell_12.22"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)
