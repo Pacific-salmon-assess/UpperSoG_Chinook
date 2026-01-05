@@ -99,7 +99,7 @@ Bio <- new(
   p_mature = p_mature,
   SRrel = "BH",
   capacity = Inf,
-  kappa = (1 - 0.865) * epro, #Could use CM instead of life-cycle table estimate
+  kappa = (1 - 0.865) * epro, #0.865 = egg-smolt mortality from life-cycle table. Could use CM instead of life-cycle table estimate
   phi = epro,
   Mjuv_NOS = Mjuv_NOS,
   p_female = 1, # p_female specified in fecundity
