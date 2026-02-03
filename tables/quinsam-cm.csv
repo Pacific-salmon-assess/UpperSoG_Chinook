@@ -8,7 +8,9 @@ Time series of relative exploitation ,1,M. Clarke pers. com.
 Base maturity at age,age 1: 2.30; age 2: 0.36; age 3: 0.22; age 4: 0.11; age 5: 0.11,CTC 23-06 p.9; CWT Exploitation Rate analyses
 Survival rate of hatchery smolts shortly after release,0.5,Walters and Korman (2024)
 Fecundity,"age 1:0 ; age 2:  0; age 3: 800, age 4: 2000; age 5: 2500",Walters and Korman (2024)
+Pre-spawn mortality ,0.05,M. Clarke pers. com.
 Proportion female,1,Assumed 1 as fecundity is per adult
+Enroute mortality,0.145,M. Clarke pers. com.
 Relative spawning success of hatchery-origin fish,0.8,Withler et al. (2018)
 Initial preterminal fishing mortality rate for calculating equilbrium spawners at age,0.8,Walters and Korman (2024)- change to lower?
 Initial terminal fishing mortality rate for calculating equilbrium spawners at age,0,

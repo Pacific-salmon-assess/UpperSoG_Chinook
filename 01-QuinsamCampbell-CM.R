@@ -184,6 +184,7 @@ d <- list(
   Ldyr = Ldyr,
   lht = 1,
   n_r = 1,
+  s_enroute = 0.855, # From  M. Clarke life-cycle table = 10% return migration M followed by 5% terminal ER
   cwtrelease = as.vector(cwt_rel),
   cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_catch/cwtExp), c(Ldyr, Nages, 1)),
@@ -198,7 +199,7 @@ d <- list(
   spawn_init = 4000,
   gamma = 0.8,
   ssum = 1, # ppn female. Fecundity is eggs/total spawner, so this is set to 1.
-  fec = fec_Quinsam,
+  fec = fec_Quinsam *0.95, # adjusting for pre-spawn mortality from M. Clarke life-cycle table
   obsescape = esc$escapement,
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
   hatchrelease = rel_Quinsam$n_rel, #rep(0, Ldyr + 1),
@@ -238,9 +239,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_12.22.25.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_02.03.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_12.22.25.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_02.03.26.rds")
 
 
 #### Fit with log productivity = 1 ----
@@ -311,7 +312,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_12.22"
+    dir = "CM", filename = "QuinsamCampbell_02.03"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

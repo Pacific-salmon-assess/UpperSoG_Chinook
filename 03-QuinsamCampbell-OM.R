@@ -286,6 +286,20 @@ Historical <- new(
 ### Habitat ----
 fry_surv <- read.csv("data/Sarita/fry_surv.csv")
 fry_surv_year <- read.csv("data/Sarita/fry_surv_year.csv")
+# instead of sarita fry, take time-seies of median fw surv (exp(-megg) from CM, 'CMoutputs.R')
+
+fry_surv_sd <- fry_surv_year %>%
+  summarise(m = mean(qlogis(fpe)), sd = sd(qlogis(fpe))) %>%
+  pull(sd) %>%
+  round(2)
+
+set.seed(234)
+# instead of mean 0.1, 0.2, or 0.3, take median of fw surv above
+fry_surv_sim <- lapply(c(0.1, 0.2, 0.3), function(m) {
+  samp <- rnorm(nsim * proyears, qlogis(m), fry_surv_sd) %>% matrix(nsim, proyears)
+  samp_trans <- plogis(samp)
+  samp_trans/mean(samp_trans) * m
+})
 
 #g <- ggplot(fry_surv, aes(x, median)) +
 #  geom_line() +
