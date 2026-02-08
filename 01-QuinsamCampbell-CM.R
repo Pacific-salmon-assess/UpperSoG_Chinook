@@ -169,6 +169,12 @@ vulT <- rep(0, Nages)
 M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation Rate analyses
 M_CTC[1] <- 4 # Need to tune this value for initial abundance
 
+covariate1 <- readxl::read_excel(
+  file.path("data", "Quinsam", "covariate1.xlsx"),
+  sheet = "covariate1"
+)
+covariate1 <- as.matrix(covariate1)
+
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 # Eggs/total spawner (not female spawner)
 
@@ -193,6 +199,7 @@ d <- list(
   RelRegFPT = rep(1, Ldyr),
   RelRegFT = rep(1, Ldyr),
   mobase = M_CTC,
+  # covariate1 = covariate1,
   bmatt = mat,
   hatchsurv = 0.8, #From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
   pHOS_init = 0.75,
