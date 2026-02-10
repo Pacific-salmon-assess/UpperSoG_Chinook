@@ -222,7 +222,7 @@ Hatchery <- new(
   pmax_NOB = 0.5, #SEP guideline 0.5, suggested by Lian #Brood rule in projection.R file
   #f_brood = f_brood,  # Function defined in script 4
   ptarget_NOB = 0,  # TBD
-  phatchery = 0, #1 - mean(esc$p_spawn), #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
+  phatchery = NA_real_, #1 - mean(esc$p_spawn), #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
   premove_HOS = 0,
   premove_NOS = 0,
