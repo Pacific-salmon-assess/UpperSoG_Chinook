@@ -4,7 +4,7 @@ library(tidyverse)
 library(salmonMSE)
 
 maxage <- 5
-nsim <- 100
+nsim <- 10 #100
 # nyears <- 2
 proyears <- 50
 n_g <- 1
@@ -79,6 +79,13 @@ Mjuv_NOS[, 4, , ] <- M_CTC[4]
 p_mature <- array(0, c(nsim, maxage, proyears))
 p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
   array(c(nsim, maxage,  proyears))
+# matt.x <- apply(p_mature,2,mean)
+# matt_ppn <- NA
+# matt_ppn[1] <- matt.x[1]
+# matt_ppn[2] <- matt.x[2]-matt_ppn[1]
+# matt_ppn[3] <- matt.x[3]-matt_ppn[2]
+# matt_ppn[4] <- matt.x[4]-matt_ppn[3]
+# matt_ppn[5] <- matt.x[5]-matt_ppn[4]
 
 fec_QC <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
@@ -90,10 +97,11 @@ p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
 
 fec <- fec_QC * p_female
 
-
+# Is Walters and Korman (2024) fecundity actually eggs/total spawner, so no need to multiply by p_female?
 
 
 epro <- mean(sapply(report_QC, getElement, "epro"))
+# Should epro be revised to be internally consistent with pars in the OM?
 
 Bio <- new(
   "Bio",
@@ -203,14 +211,14 @@ Hatchery <- new(
   n_yearling = hatch_rel, # Quinsam traditionals
   n_subyearling = 0,
   s_prespawn = 0.95,  # M. Clarke DFO Science pers. comm.
-  s_egg_smolt = 0.8, #Assumed 20% M shortly after release to match CM and life-cycle table (0.8). Could lower to account for incubation mortality = 0.68
+  s_egg_smolt = 0.68, #Assumed 20% M shortly after release to match CM and life-cycle table (0.8). Could lower to account for incubation mortality = 0.68
   s_egg_subyearling = 1,
   Mjuv_HOS = Mjuv_HOS,
   p_mature_HOS = p_mature_RS,
   # stray_external = matrix(c(rep(0, 5), stray), maxage, 2),
   gamma = 0.8,  # HSRG standard, Sarita AHA inputs
   m = 0,
-  pmax_esc = 0.33, # SEP guideline,
+  pmax_esc = 0.7, #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
   pmax_NOB = 0.5, #SEP guideline 0.5, suggested by Lian #Brood rule in projection.R file
   #f_brood = f_brood,  # Function defined in script 4
   ptarget_NOB = 0,  # TBD

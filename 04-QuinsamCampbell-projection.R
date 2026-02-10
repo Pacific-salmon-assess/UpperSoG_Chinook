@@ -2,7 +2,7 @@
 
 # First, define brood function
 # Code assumes zero strays and mark rate = 1!
-f_brood <- function(NO, HO, stray, m = 1, ptarget_NOB = 0.5, pmax_NOB = 0.5, pmax_esc = 1/3, min_esc = 600) {
+f_brood <- function(NO, HO, stray, m = 0, ptarget_NOB = 0, pmax_NOB = 0.5, pmax_esc = 0.7, min_esc = 600) {
 
   if (!m %in% c(0, 1)) stop("Brood function assumes mark rate of either zero or one.")
 
@@ -77,11 +77,19 @@ f_brood <- function(NO, HO, stray, m = 1, ptarget_NOB = 0.5, pmax_NOB = 0.5, pma
 # Add brood rule to SOM
 SOM@Hatchery@f_brood <- f_brood
 
+# # Add in alternative (higher) fecundity
+# fec_QC <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
+#
+# SOM@Bio@fec <- fec_QC
+# SOM@Hatchery@fec_brood <- fec_QC
+
+
 # Run salmonMSE
 
 SMSE <- salmonMSE(SOM)
-saveRDS(SMSE, file = file.path("SMSE", paste0("QC_02.07.26.rds")))
+# SMSE_highfec <- salmonMSE(SOM)
 report(SMSE)
+saveRDS(SMSE, file = file.path("SMSE", paste0("QC_10.02.26.rds")))
 
 
 # #------------------------------------------------------------------------------
