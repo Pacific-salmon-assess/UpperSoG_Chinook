@@ -88,7 +88,7 @@ SOM@Hatchery@f_brood <- f_brood
 
 SMSE <- salmonMSE(SOM)
 # SMSE_highfec <- salmonMSE(SOM)
-report(SMSE)
+report(SMSE, dir = "SMSE")
 saveRDS(SMSE, file = file.path("SMSE", paste0("QC_10.02.26.rds")))
 
 

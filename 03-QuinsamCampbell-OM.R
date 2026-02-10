@@ -274,8 +274,13 @@ Njuv_HOS <- sapply(1:Hatchery@n_r, function(r) {
 
 Historical <- new(
   "Historical",
+<<<<<<< HEAD
   # InitNOS = NOS_g,
   # InitHOS = HOS_r,
+=======
+  #InitNOS = NOS_g, # Remove for salmonMSE 1.0.0
+  #InitHOS = HOS_r,
+>>>>>>> refs/remotes/origin/main
   InitNjuv_NOS = Njuv_NOS,
   InitNjuv_HOS = Njuv_HOS
 )
@@ -315,7 +320,6 @@ set.seed(234)
 # fry_surv_sim  <- matrix(rnorm(nsim * proyears, fry_surv_mu, fry_surv_sd), nsim, proyears)
 fry_surv_sim  <- matrix(rnorm(nsim * proyears, fry_surv_mu, 0), nsim, proyears)
 fry_surv_sim_trans <- plogis(fry_surv_sim)
-
 
 Habitat <- new(
   "Habitat",
