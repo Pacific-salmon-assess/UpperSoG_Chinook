@@ -260,13 +260,13 @@ HOS_r <- sapply(1:Hatchery@n_r, function(r) {
 # Assign 50% of N juveniles to HOS and 50% fo NOS
 Njuv <- sapply(report_QC[sim_samp], getElement, "N", simplify = "array") # year x age x origin x sim
 Njuv_NOS <- sapply(1:Bio@n_g, function(g) {
-  N <- 0.5 * array(Njuv[nyears_cm, -1, 1, ], c(maxage-1, nsim))
+  N <- 0.5 * array(Njuv[nyears_cm, , 1, ], c(maxage, nsim))
   return(N)
 }, simplify = 'array') %>%
   aperm(c(2, 1, 3))
 
 Njuv_HOS <- sapply(1:Hatchery@n_r, function(r) {
-  N <- 0.5 * array(Njuv[nyears_cm, -1, 2, ], c(maxage-1, nsim))
+  N <- 0.5 * array(Njuv[nyears_cm, , 2, ], c(maxage, nsim))
   return(N)
 }, simplify = 'array') %>%
   aperm(c(2, 1, 3))
@@ -274,8 +274,8 @@ Njuv_HOS <- sapply(1:Hatchery@n_r, function(r) {
 
 Historical <- new(
   "Historical",
-  InitNOS = NOS_g,
-  InitHOS = HOS_r,
+  # InitNOS = NOS_g,
+  # InitHOS = HOS_r,
   InitNjuv_NOS = Njuv_NOS,
   InitNjuv_HOS = Njuv_HOS
 )
