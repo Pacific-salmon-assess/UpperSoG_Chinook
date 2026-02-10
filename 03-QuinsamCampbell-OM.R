@@ -82,10 +82,10 @@ p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
 # matt.x <- apply(p_mature,2,mean)
 # matt_ppn <- NA
 # matt_ppn[1] <- matt.x[1]
-# matt_ppn[2] <- matt.x[2]-matt_ppn[1]
-# matt_ppn[3] <- matt.x[3]-matt_ppn[2]
-# matt_ppn[4] <- matt.x[4]-matt_ppn[3]
-# matt_ppn[5] <- matt.x[5]-matt_ppn[4]
+# matt_ppn[2] <- matt.x[2]-matt.x[1]
+# matt_ppn[3] <- matt.x[3]-matt.x[2]
+# matt_ppn[4] <- matt.x[4]-matt.x[3]
+# matt_ppn[5] <- matt.x[5]-matt.x[4]
 
 fec_QC <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
