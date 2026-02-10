@@ -274,13 +274,8 @@ Njuv_HOS <- sapply(1:Hatchery@n_r, function(r) {
 
 Historical <- new(
   "Historical",
-<<<<<<< HEAD
-  # InitNOS = NOS_g,
-  # InitHOS = HOS_r,
-=======
   #InitNOS = NOS_g, # Remove for salmonMSE 1.0.0
   #InitHOS = HOS_r,
->>>>>>> refs/remotes/origin/main
   InitNjuv_NOS = Njuv_NOS,
   InitNjuv_HOS = Njuv_HOS
 )
