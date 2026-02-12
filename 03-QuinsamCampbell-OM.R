@@ -250,10 +250,10 @@ esc_rem <- left_join(rem_Quinsam, esc_all) %>%
   mutate(nat_spawners_wOR = OtherRemovals_Sum + nat_spawners) %>%
   mutate(ppnOR = OtherRemovals_Sum/nat_spawners_wOR)
 ppnRemoveHOS <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
+# This is too high, as ppn should be ppn of HO spawners, not total spawners
+# Get HO spawners from CM and repeat?
 
 
-# Average removals in the last 6 years (2018-2023)
-ppn_rem <-
 h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
 Hatchery <- new(
   "Hatchery",
@@ -274,7 +274,7 @@ Hatchery <- new(
   ptarget_NOB = 0,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  premove_HOS = ppnRemoveHOS,
+  premove_HOS = 0,#0.05#ppnRemoveHOS,
   premove_NOS = 0,
   fec_brood = fec,
   fitness_type = c("Ford", "none"),
