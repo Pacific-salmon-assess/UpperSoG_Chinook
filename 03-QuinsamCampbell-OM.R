@@ -190,7 +190,7 @@ rel_Quinsam <- rel_Quinsam.x %>%
 
 # Average hatchery releases from Q/C over last 5 years
 hatch_rel <- rel_Quinsam %>%
-  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(5, 1))) %>%
+  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(6, 1))) %>%
   pull(n_rel) %>%
   mean()
 
@@ -204,6 +204,56 @@ stray <- c(0, 0, 7, 28,  17) #Annual strays,"45 (Age-2:0, Age 3: 7, Age 4: 28, A
 # of mature fish return to their natal river and 25 % stray in both populations.
 # By default, an identity matrix is used (no straying).
 
+
+# Removals for other purposes (p_remove), e.g., CWT sampling
+# Non-brood removals are primarily HO fish. Assume 100% HOS
+# Non-brood removals are also selective for older male fish, but this is not accounted for
+rem_Quinsam.x <- readxl::read_excel(
+  file.path("data", "Quinsam", "2026-02-11-QuinsamRiverChinook-RiverReturns-1981-2023.xlsx"),
+  sheet = "River Returns"
+)
+names(rem_Quinsam.x)[names(rem_Quinsam.x)=="Sex/Maturity"] <- "SexMaturity"
+
+# Sum removals for non-brood purposes (Brendan Zoehner pers. comm. 12 Feb 26)
+rem_Quinsam <- rem_Quinsam.x %>%
+  filter(SexMaturity == "Male"| SexMaturity == "Female") %>%
+  mutate(OtherRemovals = rowSums(across(c("04Excess To Spawning Req (ESSR)",
+                                          "05Sold",
+                                          "06Holding Mortalities",
+                                          "07Used For Other Purposes/Other Mortalities")),
+                                 na.rm=TRUE)) %>%
+  rename("year" = "Recovery Year") %>%
+  group_by(year) %>% summarise(OtherRemovals_Sum= sum(OtherRemovals, na.rm=T))
+
+# What ppn are non-brood removals to natural spawners?
+# (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)
+# First get total escapement (used in CM), and 'natural spawners' which account for all removals
+esc_all <- readxl::read_excel(
+  file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds.xlsx"),
+  sheet = "Data") %>%
+  filter(StAD_Use == 1) %>%
+  rename(WaterbodyName = "Waterbody Name") %>%
+  filter(str_starts(WaterbodyName, pop.cap[1]) |
+           str_starts(WaterbodyName, pop.cap[2])) %>%
+  rename(year = "Analysis Year") %>%
+  rename(esc.x = "Max Estimate") %>%
+  mutate(nat_spawners =
+           ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
+  summarise(
+    escapement = sum(esc.x),
+    nat_spawners = sum(nat_spawners),
+    .by = c(year)
+  ) %>%
+  select (year, escapement, nat_spawners)
+# Then combine with removals
+esc_rem <- left_join(rem_Quinsam, esc_all) %>%
+  mutate(nat_spawners_wOR = OtherRemovals_Sum + nat_spawners) %>%
+  mutate(ppnOR = OtherRemovals_Sum/nat_spawners_wOR)
+ppnRemoveHOS <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
+
+
+# Average removals in the last 6 years (2018-2023)
+ppn_rem <-
 h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
 Hatchery <- new(
   "Hatchery",
@@ -217,14 +267,14 @@ Hatchery <- new(
   p_mature_HOS = p_mature_RS,
   # stray_external = matrix(c(rep(0, 5), stray), maxage, 2),
   gamma = 0.8,  # HSRG standard, Sarita AHA inputs
-  m = 0,
+  m = 1, # for purposes of premove_HOS. A different assumption (m=0) is made for f_brood - brood take rule
   pmax_esc = 0.7, #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
   pmax_NOB = 1.0, #SEP guideline 0.5, suggested by Lian #Brood rule in projection.R file
   #f_brood = f_brood,  # Function defined in script 4
   ptarget_NOB = 0,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  premove_HOS = 0,
+  premove_HOS = ppnRemoveHOS,
   premove_NOS = 0,
   fec_brood = fec,
   fitness_type = c("Ford", "none"),
