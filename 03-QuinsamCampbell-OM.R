@@ -228,6 +228,8 @@ rem_Quinsam <- rem_Quinsam.x %>%
 # What ppn are non-brood removals to natural spawners?
 # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)
 # First get total escapement (used in CM), and 'natural spawners' which account for all removals
+pop <- c("Quinsam", "Campbell")
+pop.cap <- str_to_upper(pop)
 esc_all <- readxl::read_excel(
   file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds.xlsx"),
   sheet = "Data") %>%
@@ -275,7 +277,7 @@ Hatchery <- new(
   ptarget_NOB = 0,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  # premove_HOS = 0, # Function described in script 4. ppnRemoveHOS,
+  premove_HOS = 0, # Function described in script 4. ppnRemoveHOS,
   premove_NOS = 0,
   fec_brood = fec,
   fitness_type = c("Ford", "none"),
