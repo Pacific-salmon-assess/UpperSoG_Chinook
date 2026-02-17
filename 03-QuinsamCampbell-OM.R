@@ -185,6 +185,7 @@ rel_Quinsam <- rel_Quinsam.x %>%
            str_starts(RELEASE_SITE_NAME, "Second") |
            str_starts(RELEASE_SITE_NAME, "Discovery") |
            str_starts(RELEASE_SITE_NAME, "Orange")) %>%
+  filter(RELEASE_STAGE_NAME == "Smolt 0+") %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
