@@ -4,7 +4,7 @@ library(tidyverse)
 library(salmonMSE)
 
 maxage <- 5
-nsim <- 10 #100
+nsim <- 3 #100
 # nyears <- 2
 proyears <- 50
 n_g <- 1
@@ -249,9 +249,10 @@ esc_all <- readxl::read_excel(
 esc_rem <- left_join(rem_Quinsam, esc_all) %>%
   mutate(nat_spawners_wOR = OtherRemovals_Sum + nat_spawners) %>%
   mutate(ppnOR = OtherRemovals_Sum/nat_spawners_wOR)
-ppnRemoveHOS <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
+ppnRemove <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
+# 0.102
 # This is too high, as ppn should be ppn of HO spawners, not total spawners
-# Get HO spawners from CM and repeat?
+# Apply this value to pHOS in the premove_HOS function in script 4
 
 
 h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
@@ -274,7 +275,7 @@ Hatchery <- new(
   ptarget_NOB = 0,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  premove_HOS = 0,#0.05#ppnRemoveHOS,
+  # premove_HOS = 0, # Function described in script 4. ppnRemoveHOS,
   premove_NOS = 0,
   fec_brood = fec,
   fitness_type = c("Ford", "none"),
