@@ -10,7 +10,7 @@ Maturity of natural origin component,"Stochastic with means at Age 2: 0.007, Age
 Annual terminal (mature) exploitation rate,0.1,Harvest,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
 En-route survival of escapement to spawning ground,0.95,Bio,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
 "Relative reproductive success, hatchery spawners",0.8,Hatch.,Withler et al. (2018)
-Release strategy,3562294,Hatch.,Average releases (traditionals) to Quinsam and Cambpell 2018-2023
+Release strategy,2092894,Hatch.,Average releases (traditionals) to Quinsam and Cambpell 2018-2023
 pNOB target,0,Hatch.,no pNOB targets for Quinsam/Campbell
 Maximum natural brood-escapement ratio,0.7,Hatch.,"Near maximum oberved ratio of brood to escapement, after enroute mortality"
 Prespawn mortailty in hatchery,0.95,Hatch.,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"

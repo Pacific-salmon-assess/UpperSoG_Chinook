@@ -117,7 +117,7 @@ Bio <- new(
   Mjuv_NOS = Mjuv_NOS,
   p_female = 1, # p_female specified in fecundity
   fec = fec,
-  s_enroute = 0.855# covers return migration mortality and terminal fisheries (not captured with CWTs)
+  s_enroute = (1 - 0.1)*(1 - 0.2)# covers return migration mortality (0.1) and terminal fisheries (0.2) (not captured with CWTs)
 )
 
 ### Harvest, fishery vulnerability ----
