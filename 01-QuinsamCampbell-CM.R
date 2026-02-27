@@ -175,9 +175,16 @@ covariate1 <- readxl::read_excel(
 )
 covariate1 <- as.matrix(covariate1)
 
-fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
+fec_Q <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 # Eggs/total spawner (not female spawner)
+p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
+# "The average percent of WCVI Chinook spawners that are female at each age is
+# <1% at age two (called ‘jills’—i.e. female jacks), 10% female at age 3, 55%
+# female at age 4, and 80% female at ages 5–7. These averages are based mostly
+# on Robertson Creek Hatchery broodstock and Stamp River deadpitch sampling,
+# but appear to be indicative of most WCVI Chinook populations." (p.26)
 
+fec_Quinsam <- fec_Q * p_female
 # CWT expansion factor, the reciprocal is the likelihood weighting factor
 # cwtExp of 0.1 implies weighting scalar of 10, cwtExp = 10 implies weighting scalar of 0.1
 # Since cwt_esc and cwt_catch are fully expanded values, adjust the inputs matrices by the reciprocal of cwtExp
@@ -246,9 +253,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_02.26.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_02.27.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_02.26.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_02.27.26.rds")
 
 
 #### Fit with log productivity = 1 ----
@@ -319,7 +326,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_02.26"
+    dir = "CM", filename = "QuinsamCampbell_02.27"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

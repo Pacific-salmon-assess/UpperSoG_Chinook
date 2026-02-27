@@ -9,8 +9,8 @@ nsim <- 3 #100
 proyears <- 50
 n_g <- 1
 
-# Load exploitation rate model - Quinsam/Campbell
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_02.26.26.rds")
+# Load exploitation rate model - Quinsam/Campbell (with low fecundity)
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_02.27.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
 # Take maturity average from the 6 most recent brood years (2018-2024)
