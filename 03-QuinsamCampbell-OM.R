@@ -10,7 +10,7 @@ proyears <- 50
 n_g <- 1
 
 # Load exploitation rate model - Quinsam/Campbell
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_02.03.26.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_02.26.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
 # Take maturity average from the 6 most recent brood years (2018-2024)
@@ -117,7 +117,7 @@ Bio <- new(
   Mjuv_NOS = Mjuv_NOS,
   p_female = 1, # p_female specified in fecundity
   fec = fec,
-  s_enroute = (1 - 0.1)*(1 - 0.2)# covers return migration mortality (0.1) and terminal fisheries (0.2) (not captured with CWTs)
+  s_enroute = (1 - 0.1)*(1 - 0.15)# covers return migration mortality (0.1) and terminal fisheries (0.2) (not captured with CWTs)
 )
 
 ### Harvest, fishery vulnerability ----
