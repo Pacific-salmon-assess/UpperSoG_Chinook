@@ -278,7 +278,7 @@ Hatchery <- new(
   ptarget_NOB = 0,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  premove_HOS = 0, # Function described in script 4. ppnRemoveHOS,
+  premove_HOS = 0, # Function described in script 4. ppnRemove = 0.102
   premove_NOS = 0,
   fec_brood = fec,
   fitness_type = c("Ford", "none"),
