@@ -1,12 +1,25 @@
 
 library(tidyverse)
 library(readxl)
+library(salmonMSE)
 
 # Quinsam CWT recovery
-rec <- readxl::read_excel(
-  file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
-  sheet = "Estimated"
-) %>%
+
+rec <- local({
+  rec1 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    sheet = "Estimated"
+  ) %>%
+    select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
+
+  # rec2 <- readxl::read_excel(
+  #   file.path("data", "Quinsam", "2025-12-18-QuinsamCN-CatchbyStat-1980-2005.xlsx"),
+  #   sheet = "Estimated"
+  # ) %>%
+  #   select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
+
+  rbind(rec1)#, rec2)
+}) %>%
   mutate(is_catch = TotCatch > 0, is_esc = Escape > 0)
 
 
@@ -14,48 +27,52 @@ rec <- readxl::read_excel(
 cwt_rs <- rec %>%
   filter(RELEASE_STAGE_NAME %in% c("Seapen 0+", "Smolt 0+")) %>%
   # mutate(RS = "Seapen/Smolt 0+") %>%
-  # Add CWT catches from PFMA 13 and 15 to escapement
-  mutate(TotEscSum = rowSums(select(., starts_with("3"),
-                                    starts_with('1PFMA 13'),
-                                    starts_with('1PFMA 15')), na.rm=T)) %>%
-  # Remove CWT catchs from PFMA 13 and 15 to catches
-  select(!starts_with('1PFMA 13')) %>%
-  select(!starts_with('1PFMA 15')) %>%
-  mutate(TotCatchSum = rowSums(select(., starts_with("1"), starts_with("2")), na.rm=T)) %>%
   summarise(
-    n_esc = sum(TotEscSum),
-    n_catch = sum(TotCatchSum),
+    n_catch = sum(TotCatch),
+    n_esc = sum(Escape),
     .by = c(Age, BROOD_YEAR)#, RS)
-  )
+  ) %>%
+  rename("RELEASE_YEAR"="BROOD_YEAR")
 
 
 # Quinsam - CWT releases
-rel <- readxl::read_excel(
-  file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
-  sheet = "Releases"
-)
+rel <- local({
+
+  rel1 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    sheet = "Releases"
+  )
+
+  # rel2 <- readxl::read_excel(
+  #   file.path("data", "Quinsam", "2025-12-18-QuinsamCN-Releases-1980-2005.xlsx"),
+  #   sheet = "Actual Release"
+  # )
+
+  rbind(rel1)#, rel2)
+})
 
 rel_rs <- rel %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
   # mutate(RS = "Seapen/Smolt 0+") %>%
-  summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(BROOD_YEAR))#, RS))
+  summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
 
 # Set up matrices
 full_table <- expand.grid(
-  BROOD_YEAR = seq(min(cwt_rs$BROOD_YEAR), 2023), # 2005 - 2023
+  RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 ) %>%
   left_join(cwt_rs)
 
-cwt_catch <- reshape2::acast(full_table, list("BROOD_YEAR", "Age"), value.var = "n_catch", fill = 0)
-cwt_esc <- reshape2::acast(full_table, list("BROOD_YEAR", "Age"), value.var = "n_esc", fill = 0)
+cwt_catch <- reshape2::acast(full_table, list("RELEASE_YEAR", "Age"), value.var = "n_catch", fill = 0)
+cwt_esc <- reshape2::acast(full_table, list("RELEASE_YEAR", "Age"), value.var = "n_esc", fill = 0)
 
 cwt_rel <- left_join(
-  full_table %>% filter(Age == 1) %>% select(BROOD_YEAR),# RS),
+  full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
   rel_rs
 ) %>%
-  reshape2::acast(list("BROOD_YEAR"), fill = 0)
+  reshape2::acast(list("RELEASE_YEAR"), fill = 0)
 
 # Total hatchery releases from Nimpkish/Woss release sites, all release types
 rel_total.x <- readxl::read_excel(
@@ -69,31 +86,75 @@ rel_total <- rel_total.x %>%
            str_starts(RELEASE_SITE_NAME, "Woss Lk") |
            str_starts(RELEASE_SITE_NAME, "Nimpkish R") |
            str_starts(RELEASE_SITE_NAME, "Nimpkish R Up")) %>%
-  summarise(n_rel = sum(TotalRelease), .by = c(BROOD_YEAR)) %>%
-  arrange(BROOD_YEAR)
+  summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
 
 # Crop to years with CWT data PLUS an extra year (to confirm)
-full_year <- data.frame(BROOD_YEAR= seq(min(cwt_rs$BROOD_YEAR),
-                                        max(cwt_rs$BROOD_YEAR) + 1))
-rel_total <- left_join(full_year, rel_total, by = "BROOD_YEAR")
+full_year <- data.frame(RELEASE_YEAR= seq(min(cwt_rs$RELEASE_YEAR),
+                                        max(cwt_rs$RELEASE_YEAR) + 1))
+rel_total <- left_join(full_year, rel_total, by = "RELEASE_YEAR")
 rel_total$n_rel[is.na(rel_total$n_rel)] <- 0
+
+# pHOS data
+pHOS_df_all <- readxl::read_excel(
+  file.path("data", "2025-10-09-UpperSOGChinook-PNI.xlsx"),
+  sheet = "Nimpkish_Woss"
+) %>%
+  mutate(Release_Year = `Brood Year` + 1) %>%
+  select(Release_Year, `pHOS`) %>%
+  mutate(pHOS = as.numeric(pHOS))
+
+#filter(pHOS_df, `Brood Year` %in% seq(2000, 2004, 1)) %>%
+#  pull(pHOS) %>%
+#  mean()
+#plot(pHOS ~ `Brood Year`, pHOS_df, typ = "o")
+
+pHOS_df <- pHOS_df_all %>%
+  right_join(full_year, by = c("Release_Year" = "RELEASE_YEAR")) %>%
+  filter(Release_Year <= 2023)
 
 # Escapement time-series
 pop <- "Nimpkish" #Campbell, Adam, Nimpkish, Salmon
 
 if(pop %in% c("Adam", "Nimpkish", "Salmon")) {
-  esc <- readxl::read_excel(
+  # esc <- readxl::read_excel(
+  #   file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
+  #   sheet = "Data") %>%
+  #   filter(str_starts(Description, pop)) %>%
+  #   rename(year = "Analysis Year") %>%
+  #   rename(escapement="Max Estimate") %>%
+  #   select (year, escapement) %>%
+  #   right_join(
+  #     full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
+  #     by = c("year" = "RELEASE_YEAR")
+  #   ) %>%
+  #   arrange(year)
+
+
+  esc_all <- readxl::read_excel(
     file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
     sheet = "Data") %>%
     filter(str_starts(Description, pop)) %>%
     rename(year = "Analysis Year") %>%
-    rename(escapement="Max Estimate") %>%
-    select (year, escapement) %>%
-    right_join(
-      full_table %>% filter(Age == 1) %>% select(BROOD_YEAR),
-      by = c("year" = "BROOD_YEAR")
+    rename(esc.x="Max Estimate") %>%
+    rename(rem = "Total Broodstock Removals") %>%
+    summarise(
+      escapement = sum(esc.x),
+      removals = sum(rem),
+      .by = c(year)
     ) %>%
-    arrange(year)
+    select (year, escapement, removals)
+
+  esc <- esc_all %>%
+    right_join(
+      full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
+      by = c("year" = "RELEASE_YEAR")
+    ) %>%
+    arrange(year) %>%
+    mutate(p_spawn = (escapement - removals)/escapement)
+  # Fill in NAs with the first value in the time-series
+  esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
+
 }
 
 
@@ -101,20 +162,29 @@ if(pop %in% c("Adam", "Nimpkish", "Salmon")) {
 Ldyr <- dim(cwt_esc)[1]
 Nages <- 5#6
 
-mat <- c(0, 0.1, 0.4, 0.95, 1) # from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
 vulPT <- c(0, 0.075, 0.9, 0.9, 1) #  from WCVI = c(0, 0.075, 0.9, 0.9, 1)
 vulT <- rep(0, Nages)
 
 M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation Rate analyses
+M_CTC[1] <- 4 # Need to tune this value for initial abundance
 
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
-# Eggs/total spawner (not female spawner)
+# Eggs/female spawner?
+p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
+# "The average percent of WCVI Chinook spawners that are female at each age is
+# <1% at age two (called ‘jills’—i.e. female jacks), 10% female at age 3, 55%
+# female at age 4, and 80% female at ages 5–7. These averages are based mostly
+# on Robertson Creek Hatchery broodstock and Stamp River deadpitch sampling,
+# but appear to be indicative of most WCVI Chinook populations." (p.26)
+fec_Quinsam <- fec_Quinsam * p_female
 
 d <- list(
   Nages = Nages,
   Ldyr = Ldyr,
   lht = 1,
   n_r = 1,
+  s_enroute = 0.855, # From  M. Clarke life-cycle table = 10% return migration M followed by 20% terminal ER
   cwtrelease = as.vector(cwt_rel),
   cwtesc = array(round(cwt_esc), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_catch), c(Ldyr, Nages, 1)),
@@ -126,13 +196,14 @@ d <- list(
   mobase = M_CTC,
   bmatt = mat,
   hatchsurv = 0.8, #From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
-  pHOS_init = 0.13,
-  spawn_init = 500/0.4, #Expanded to account for Woss:Nimpkish ratio, M. Clarke pers. comm. 21 Nov 2025
+  # pHOS_init = 0.13,
+  # spawn_init = 500/0.4, #Expanded to account for Woss:Nimpkish ratio, M. Clarke pers. comm. 21 Nov 2025
   gamma = 0.8,
   ssum = 1, # ppn female. Fecundity is eggs/total spawner, so this is set to 1.
-  fec = fec_Quinsam,
+  fec = fec_Quinsam*0.95,
   obsescape = esc$escapement/0.4,#Expanded to account for Woss:Nimpkish ratio, M. Clarke pers. comm. 21 Nov 2025
-  propwildspawn = rep(1, Ldyr),
+  propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
+  # propwildspawn = rep(1, Ldyr),
   hatchrelease = rel_total$n_rel, #rep(0, Ldyr + 1),
   finitPT = 0.8, # Walters and Korman (2024)
   finitT = 0,  # Walters and Korman (2024)
@@ -160,16 +231,16 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(3 * max(d$obsescape, na.rm=TRUE)))
+start <- list(log_so = log(1.5 * max(d$obsescape, na.rm=TRUE)))
 
 # Fit with sampling rate = 1
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Woss_12.14.25.rds")
+saveRDS(samp, file = "CM/Woss_03.07.26.rds")
 
-samp <- readRDS(file = "CM/Woss_12.14.25.rds")
+samp <- readRDS(file = "CM/Woss_03.07.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -177,6 +248,12 @@ d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
-  rs_names = rs_names, name = "Woss", year = unique(full_table$BROOD_YEAR),
-  dir = "CM", filename = "Woss_12.14"
+  rs_names = rs_names, name = "Woss", year = unique(full_table$RELEASE_YEAR),
+  dir = "CM", filename = "Woss_03.07"
 )
+
+SMSY <- salmonMSE:::.CM_SMSY(report, d)
+Srep <- salmonMSE:::.CM_Srep(report, d)
+Sgen <- salmonMSE:::.CM_Sgen(report, d)
+# alpha <- sapply(report, getElement, "alpha"), but need epro to get UMSY (alpha*epro gives full life cycle prod)
+calc_Umsy_Ricker(2.690)

@@ -198,9 +198,9 @@ d <- list(
   lht = 1,
   n_r = 1,
   s_enroute = 0.72, # From  M. Clarke life-cycle table = 10% return migration M followed by 20% terminal ER
-  cwtrelease = as.vector(cwt_rel),
-  cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
-  cwtcatPT = array(round(cwt_catch/cwtExp), c(Ldyr, Nages, 1)),
+  cwtrelease = as.vector(cwt_rel),#Aligned by RY
+  cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)), #Algined by RY
+  cwtcatPT = array(round(cwt_catch/cwtExp), c(Ldyr, Nages, 1)), #Algined by RY
   cwtcatT = NULL,
   bvulPT = vulPT,
   RelRegFPT = rep(1, Ldyr),
@@ -214,9 +214,9 @@ d <- list(
   gamma = 0.8,
   ssum = 1, # ppn female. Fecundity is eggs/total spawner, so this is set to 1.
   fec = fec_Quinsam *0.95, # adjusting for pre-spawn mortality from M. Clarke life-cycle table
-  obsescape = esc$escapement,
+  obsescape = esc$escapement, #Algined by BY
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
-  hatchrelease = rel_Quinsam$n_rel, #rep(0, Ldyr + 1),
+  hatchrelease = rel_Quinsam$n_rel, #rep(0, Ldyr + 1),#Algined by RY
   # obs_pHOS = pHOS_df$pHOS[1:Ldyr], # By brood year!
   # pHOS_sd = 0.5,
   finitPT = 0.8, # Walters and Korman (2024)
@@ -253,9 +253,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_02.27.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_03.07.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_02.27.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_03.07.26.rds")
 
 
 #### Fit with log productivity = 1 ----
@@ -326,7 +326,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_02.27"
+    dir = "CM", filename = "QuinsamCampbell_03.07"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)
