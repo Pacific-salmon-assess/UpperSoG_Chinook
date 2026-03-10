@@ -3,8 +3,11 @@
 ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_03.07.26.rds")
 report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
-# This is how I initially extracted ERs, but I think this is incorrect....?
-FPT <- sapply(report, getElement, "FPT") %>% aperm(c(2,1))
+# ER by age class - array by MCMC simulation x year x age
+FPT <- sapply(report, function(i) {
+  outer(i$FPT, i$vulPT)
+}, simplify = "array") %>%
+  aperm(c(3, 1, 2))
 UPT <- 1 - exp(-FPT)
 median(UPT)
 #0.44
@@ -28,6 +31,10 @@ year1 <-  1
 ci <-  TRUE
 r <-  1
 
+# Make quantile figure time series
+salmonMSE:::CM_ER(report, brood, type, year1, ci, r, at_age = FALSE)
+
+# Get individual values by MCMC simulation x year
 ER_list <- lapply(report, function(i) {
 
   esc <- apply(i$escyear, 1:2, sum)
@@ -71,6 +78,9 @@ df <- as.data.frame(do.call(
   lapply(ER_list, function(x) x[["ER"]])#[35:40])# could look at just the last 6 years
 ))
 
+
+# Plot all simulations
+as.matrix(df) |> t() |> matplot(typ = 'l')
 
 # Take the mean/quantiles over all years and posterior draws
 quantile(as.matrix(df), probs = c(0.025, 0.5, 0.975), na.rm=T)
