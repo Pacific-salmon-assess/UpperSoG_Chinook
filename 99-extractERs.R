@@ -1,0 +1,73 @@
+# Extract ERs
+
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_03.07.26.rds")
+report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
+
+# I think this is incorrect....?
+FPT <- sapply(report_QC, getElement, "FPT") %>% aperm(c(2,1))
+UPT <- 1 - exp(-FPT)
+
+
+# Alternative using code exracted from CM_ER() in CM_fun.R in salmonMSE
+# https://github.com/Blue-Matter/salmonMSE/blob/85e10c26277f3799755edadbeae3f147f67063b5/R/CMfun.R#L1038
+
+# However, I think this code makes the assumption that:
+# total returns = PT_catch + T_catch + escapement , ie. the denominator
+# For Upper SoG terminal ER is set to zero in the codd, but s_enroute accounts
+# for both terminal ER and return migration.
+# I'm not sure if s_enroute is considered in 'escapement' time-series in the
+# denomiator, i.e., if it is escapement before or after enroute mortality?
+
+
+brood <- FALSE
+type <- "PT"
+year1 <-  1
+ci <-  TRUE
+r <-  1
+
+ER_list <- lapply(report, function(i) {
+
+  esc <- apply(i$escyear, 1:2, sum)
+  morts_PT <- apply(i$cyearPT, 1:2, sum)
+  morts_T <- apply(i$cyearT, 1:2, sum)
+
+  AEQ_PT <- salmonMSE:::calc_AEQ(i)[, , r] # Always by release year
+  AEQ_T <- array(1, dim(esc))
+
+  if (brood) {
+    esc <- CY2BY(esc)
+    morts_PT <- CY2BY(morts_PT)
+    morts_T <- CY2BY(morts_T)
+
+    denom <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T + esc)
+
+  } else {
+    AEQ_PT2 <- array(NA_real_, dim(esc)) # Re-index to align with calendar year
+    nt <- nrow(AEQ_PT2)
+    na <- ncol(AEQ_PT2)
+    for (t in 1:nt) {
+      for (a in 1:na) if (t-a+1>0) AEQ_PT2[t, a] <- AEQ_PT[t-a+1, a]
+    }
+    denom <- rowSums(morts_PT * AEQ_PT2 + morts_T * AEQ_T + esc)
+  }
+
+  if (type == "PT") {
+    num <- rowSums(morts_PT * AEQ_PT)
+  } else if (type == "T") {
+    num <- rowSums(morts_T * AEQ_T)
+  } else {
+    num <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T)
+  }
+
+  list(ER = num/denom)
+})
+
+df <- as.data.frame(do.call(
+  rbind,
+  lapply(ER_list, function(x) x[["ER"]])#[35:40])# could look at just the last 6 years
+))
+
+
+# Take the mean/quantiles over all years and posterior draws
+quantile(as.matrix(df), probs = c(0.025, 0.5, 0.975), na.rm=T)
+quantile(as.matrix(df), probs = 0.5, na.rm=T)
