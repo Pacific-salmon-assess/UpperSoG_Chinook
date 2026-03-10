@@ -9,8 +9,9 @@ FPT <- sapply(report, function(i) {
 }, simplify = "array") %>%
   aperm(c(3, 1, 2))
 UPT <- 1 - exp(-FPT)
-median(UPT)
-#0.44
+dim(UPT)
+# Summarize by age, over draws and years
+apply(UPT, 3, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T)
 
 
 # Alternative using code extracted from CM_ER() in CM_fun.R in salmonMSE
@@ -19,7 +20,7 @@ median(UPT)
 
 # However, I think this code makes the assumption that:
 # total returns = PT_catch + T_catch + escapement , ie. the denominator
-# For Upper SoG terminal ER is set to zero in the codd, but s_enroute accounts
+# For Upper SoG terminal ER is set to zero in the code, but s_enroute accounts
 # for both terminal ER and return migration.
 # I'm not sure if s_enroute is considered in 'escapement' time-series in the
 # denominator, i.e., if it is escapement before or after enroute mortality?
