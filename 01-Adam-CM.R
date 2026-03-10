@@ -3,7 +3,8 @@ library(tidyverse)
 library(readxl)
 library(salmonMSE)
 
-# Quinsam CWT recovery
+# Quinsam CWT recovery, using some of this historical CWTs (in rec2 file)
+# as the escapement time series extends back to 2002
 
 rec <- local({
   rec1 <- readxl::read_excel(
@@ -12,13 +13,13 @@ rec <- local({
   ) %>%
     select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
 
-  # rec2 <- readxl::read_excel(
-  #   file.path("data", "Quinsam", "2025-12-18-QuinsamCN-CatchbyStat-1980-2005.xlsx"),
-  #   sheet = "Estimated"
-  # ) %>%
-  #   select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
+  rec2 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-12-18-QuinsamCN-CatchbyStat-1980-2005.xlsx"),
+    sheet = "Estimated"
+  ) %>%
+    select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
 
-  rbind(rec1)#, rec2)
+  rbind(rec1, rec2)
 }) %>%
   mutate(is_catch = TotCatch > 0, is_esc = Escape > 0)
 
@@ -42,12 +43,12 @@ rel <- local({
     sheet = "Releases"
   )
 
-  # rel2 <- readxl::read_excel(
-  #   file.path("data", "Quinsam", "2025-12-18-QuinsamCN-Releases-1980-2005.xlsx"),
-  #   sheet = "Actual Release"
-  # )
+  rel2 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-12-18-QuinsamCN-Releases-1980-2005.xlsx"),
+    sheet = "Actual Release"
+  )
 
-  rbind(rel1)#, rel2)
+  rbind(rel1, rel2)
 })
 
 
@@ -57,9 +58,21 @@ rel_rs <- rel %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
+# Escapement time-series
+pop <- "Adam" #Campbell, Adam, Nimpkish, Salmon
+
+esc <- readxl::read_excel(
+  file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
+  sheet = "Data") %>%
+  filter(str_starts(Description, pop)) %>%
+  rename(year = "Analysis Year") %>%
+  rename(escapement="Max Estimate") %>%
+  select (year, escapement)
+
 # Set up matrices
 full_table <- expand.grid(
-  RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
+  # RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
+  RELEASE_YEAR = seq(min(esc$year), 2023), # 2005 - 2023
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 ) %>%
@@ -74,25 +87,17 @@ cwt_rel <- left_join(
 ) %>%
   reshape2::acast(list("RELEASE_YEAR"), fill = 0)
 
+esc <- esc %>%
+  right_join(
+    full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
+    by = c("year" = "RELEASE_YEAR")
+  )
+
+
 
 # No hatchery releases from Adam River
 
-# Escapement time-series
-pop <- "Adam" #Campbell, Adam, Nimpkish, Salmon
 
-if(pop %in% c("Adam", "Nimpkish", "Salmon")) {
-  esc <- readxl::read_excel(
-    file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
-    sheet = "Data") %>%
-    filter(str_starts(Description, pop)) %>%
-    rename(year = "Analysis Year") %>%
-    rename(escapement="Max Estimate") %>%
-    select (year, escapement) %>%
-    right_join(
-      full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
-      by = c("year" = "RELEASE_YEAR")
-    )
-}
 
 
 # Data object for model
@@ -108,20 +113,20 @@ M_CTC[1] <- 4 # Need to tune this value for initial abundance
 
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 # Eggs/female spawner?
-p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
+# p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
 # "The average percent of WCVI Chinook spawners that are female at each age is
 # <1% at age two (called ‘jills’—i.e. female jacks), 10% female at age 3, 55%
 # female at age 4, and 80% female at ages 5–7. These averages are based mostly
 # on Robertson Creek Hatchery broodstock and Stamp River deadpitch sampling,
 # but appear to be indicative of most WCVI Chinook populations." (p.26)
-fec_Quinsam <- fec_Quinsam * p_female
+# fec_Quinsam <- fec_Quinsam * p_female
 
 d <- list(
   Nages = Nages,
   Ldyr = Ldyr,
   lht = 1,
   n_r = 1,
-  s_enroute = 0.855, # From  M. Clarke life-cycle table = 10% return migration M followed by 20% terminal ER
+  s_enroute = 0.855, # From  M. Clarke life-cycle table = 10% return migration M followed by 5% terminal ER
   cwtrelease = as.vector(cwt_rel),
   cwtesc = array(round(cwt_esc), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_catch), c(Ldyr, Nages, 1)),
@@ -175,9 +180,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed=1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Adam_03.07.26.rds")
+saveRDS(samp, file = "CM/Adam_03.10.26.rds")
 
-samp <- readRDS(file = "CM/Adam_03.07.26.rds")
+samp <- readRDS(file = "CM/Adam_03.10.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -186,7 +191,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Adam", year = unique(full_table$RELEASE_YEAR),
-  dir = "CM", filename = "Adam_03.07"
+  dir = "CM", filename = "Adam_03.10"
 )
 
 SMSY <- salmonMSE:::.CM_SMSY(report, d)

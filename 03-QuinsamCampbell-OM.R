@@ -121,10 +121,13 @@ Bio <- new(
 )
 
 ### Harvest, fishery vulnerability ----
-# Extract FPT, only one life history group:
-FPT <- sapply(report_QC, getElement, "FPT") %>% aperm(c(2,1))
-UPT <- 1 - exp(-FPT)
-# mean(UPT[14:19,])#Mean over most recent 6 years
+# # Extract FPT, only one life history group:
+# FPT <- sapply(report_QC, getElement, "FPT") %>% aperm(c(2,1))
+# UPT <- 1 - exp(-FPT)
+# # mean(UPT[14:19,])#Mean over most recent 6 years
+
+# Incorrect, see AEQ code in 99-ExtractERs.R
+
 
 vulPT <- sapply(report_QC[sim_samp], getElement, "vulPT")
 vulT <- sapply(report_QC[sim_samp], getElement, "vulT")

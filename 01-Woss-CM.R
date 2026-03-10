@@ -12,13 +12,13 @@ rec <- local({
   ) %>%
     select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
 
-  # rec2 <- readxl::read_excel(
-  #   file.path("data", "Quinsam", "2025-12-18-QuinsamCN-CatchbyStat-1980-2005.xlsx"),
-  #   sheet = "Estimated"
-  # ) %>%
-  #   select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
+  rec2 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-12-18-QuinsamCN-CatchbyStat-1980-2005.xlsx"),
+    sheet = "Estimated"
+  ) %>%
+    select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
 
-  rbind(rec1)#, rec2)
+  rbind(rec1, rec2)
 }) %>%
   mutate(is_catch = TotCatch > 0, is_esc = Escape > 0)
 
@@ -43,12 +43,12 @@ rel <- local({
     sheet = "Releases"
   )
 
-  # rel2 <- readxl::read_excel(
-  #   file.path("data", "Quinsam", "2025-12-18-QuinsamCN-Releases-1980-2005.xlsx"),
-  #   sheet = "Actual Release"
-  # )
+  rel2 <- readxl::read_excel(
+    file.path("data", "Quinsam", "2025-12-18-QuinsamCN-Releases-1980-2005.xlsx"),
+    sheet = "Actual Release"
+  )
 
-  rbind(rel1)#, rel2)
+  rbind(rel1, rel2)
 })
 
 rel_rs <- rel %>%
@@ -57,9 +57,26 @@ rel_rs <- rel %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
+# Escapement time-series
+pop <- "Nimpkish" #Campbell, Adam, Nimpkish, Salmon
+esc_all <- readxl::read_excel(
+  file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
+  sheet = "Data") %>%
+  filter(str_starts(Description, pop)) %>%
+  rename(year = "Analysis Year") %>%
+  rename(esc.x="Max Estimate") %>%
+  rename(rem = "Total Broodstock Removals") %>%
+  summarise(
+    escapement = sum(esc.x),
+    removals = sum(rem),
+    .by = c(year)
+  ) %>%
+  select (year, escapement, removals)
+
 # Set up matrices
 full_table <- expand.grid(
-  RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
+  # RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
+  RELEASE_YEAR = seq(min(esc$year), 2023), # 2005 - 2023
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 ) %>%
@@ -90,7 +107,8 @@ rel_total <- rel_total.x %>%
   arrange(RELEASE_YEAR)
 
 # Crop to years with CWT data PLUS an extra year (to confirm)
-full_year <- data.frame(RELEASE_YEAR= seq(min(cwt_rs$RELEASE_YEAR),
+# full_year <- data.frame(RELEASE_YEAR= seq(min(cwt_rs$RELEASE_YEAR),
+full_year <- data.frame(RELEASE_YEAR= seq(min(esc$year),
                                         max(cwt_rs$RELEASE_YEAR) + 1))
 rel_total <- left_join(full_year, rel_total, by = "RELEASE_YEAR")
 rel_total$n_rel[is.na(rel_total$n_rel)] <- 0
@@ -113,10 +131,7 @@ pHOS_df <- pHOS_df_all %>%
   right_join(full_year, by = c("Release_Year" = "RELEASE_YEAR")) %>%
   filter(Release_Year <= 2023)
 
-# Escapement time-series
-pop <- "Nimpkish" #Campbell, Adam, Nimpkish, Salmon
 
-if(pop %in% c("Adam", "Nimpkish", "Salmon")) {
   # esc <- readxl::read_excel(
   #   file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
   #   sheet = "Data") %>%
@@ -131,31 +146,19 @@ if(pop %in% c("Adam", "Nimpkish", "Salmon")) {
   #   arrange(year)
 
 
-  esc_all <- readxl::read_excel(
-    file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
-    sheet = "Data") %>%
-    filter(str_starts(Description, pop)) %>%
-    rename(year = "Analysis Year") %>%
-    rename(esc.x="Max Estimate") %>%
-    rename(rem = "Total Broodstock Removals") %>%
-    summarise(
-      escapement = sum(esc.x),
-      removals = sum(rem),
-      .by = c(year)
-    ) %>%
-    select (year, escapement, removals)
 
-  esc <- esc_all %>%
-    right_join(
-      full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
-      by = c("year" = "RELEASE_YEAR")
-    ) %>%
-    arrange(year) %>%
-    mutate(p_spawn = (escapement - removals)/escapement)
-  # Fill in NAs with the first value in the time-series
-  esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
 
-}
+esc <- esc_all %>%
+  right_join(
+    full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
+    by = c("year" = "RELEASE_YEAR")
+  ) %>%
+  arrange(year) %>%
+  mutate(p_spawn = (escapement - removals)/escapement)
+# Fill in NAs with the first value in the time-series
+esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
+
+
 
 
 # Data object for model
@@ -170,21 +173,21 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation 
 M_CTC[1] <- 4 # Need to tune this value for initial abundance
 
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
-# Eggs/female spawner?
-p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
+# Eggs/totalspawner?
+# p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
 # "The average percent of WCVI Chinook spawners that are female at each age is
 # <1% at age two (called ‘jills’—i.e. female jacks), 10% female at age 3, 55%
 # female at age 4, and 80% female at ages 5–7. These averages are based mostly
 # on Robertson Creek Hatchery broodstock and Stamp River deadpitch sampling,
 # but appear to be indicative of most WCVI Chinook populations." (p.26)
-fec_Quinsam <- fec_Quinsam * p_female
+# fec_Quinsam <- fec_Quinsam * p_female
 
 d <- list(
   Nages = Nages,
   Ldyr = Ldyr,
   lht = 1,
   n_r = 1,
-  s_enroute = 0.855, # From  M. Clarke life-cycle table = 10% return migration M followed by 20% terminal ER
+  s_enroute = 0.855, # From  M. Clarke life-cycle table = 10% return migration M followed by 5% terminal ER
   cwtrelease = as.vector(cwt_rel),
   cwtesc = array(round(cwt_esc), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_catch), c(Ldyr, Nages, 1)),
