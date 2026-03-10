@@ -3,12 +3,15 @@
 ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_03.07.26.rds")
 report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
-# I think this is incorrect....?
-FPT <- sapply(report_QC, getElement, "FPT") %>% aperm(c(2,1))
+# This is how I initially extracted ERs, but I think this is incorrect....?
+FPT <- sapply(report, getElement, "FPT") %>% aperm(c(2,1))
 UPT <- 1 - exp(-FPT)
+median(UPT)
+#0.44
 
 
-# Alternative using code exracted from CM_ER() in CM_fun.R in salmonMSE
+# Alternative using code extracted from CM_ER() in CM_fun.R in salmonMSE
+# accounts for AEQ
 # https://github.com/Blue-Matter/salmonMSE/blob/85e10c26277f3799755edadbeae3f147f67063b5/R/CMfun.R#L1038
 
 # However, I think this code makes the assumption that:
@@ -16,7 +19,7 @@ UPT <- 1 - exp(-FPT)
 # For Upper SoG terminal ER is set to zero in the codd, but s_enroute accounts
 # for both terminal ER and return migration.
 # I'm not sure if s_enroute is considered in 'escapement' time-series in the
-# denomiator, i.e., if it is escapement before or after enroute mortality?
+# denominator, i.e., if it is escapement before or after enroute mortality?
 
 
 brood <- FALSE
@@ -62,6 +65,7 @@ ER_list <- lapply(report, function(i) {
   list(ER = num/denom)
 })
 
+# Pull elements out of ER_list and put in a data frame
 df <- as.data.frame(do.call(
   rbind,
   lapply(ER_list, function(x) x[["ER"]])#[35:40])# could look at just the last 6 years
@@ -71,3 +75,4 @@ df <- as.data.frame(do.call(
 # Take the mean/quantiles over all years and posterior draws
 quantile(as.matrix(df), probs = c(0.025, 0.5, 0.975), na.rm=T)
 quantile(as.matrix(df), probs = 0.5, na.rm=T)
+#0.47
