@@ -241,9 +241,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                                stepsize = 0.01,
                                max_treedepth = 20))
 
-saveRDS(samp, file = "CM/Salmon_03.07.25.rds")
+saveRDS(samp, file = "CM/Salmon_03.10.26.rds")
 
-samp <- readRDS(file = "CM/Salmon_03.07.25.rds")
+samp <- readRDS(file = "CM/Salmon_03.10.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -252,7 +252,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = unique(full_table$RELEASE_YEAR),
-  dir = "CM", filename = "Salmon_03.07"
+  dir = "CM", filename = "Salmon_03.10"
 )
 
 SMSY <- salmonMSE:::.CM_SMSY(report, d)
