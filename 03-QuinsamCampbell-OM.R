@@ -88,14 +88,14 @@ p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
 # matt_ppn[5] <- matt.x[5]-matt.x[4]
 
 fec_QC <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
-p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
+# p_female <- c(0, 0.01, 0.1, 0.55, 0.8) # Brown et al. in press, WCVI CK
 # "The average percent of WCVI Chinook spawners that are female at each age is
 # <1% at age two (called ‘jills’—i.e. female jacks), 10% female at age 3, 55%
 # female at age 4, and 80% female at ages 5–7. These averages are based mostly
 # on Robertson Creek Hatchery broodstock and Stamp River deadpitch sampling,
 # but appear to be indicative of most WCVI Chinook populations." (p.26)
 
-fec <- fec_QC * p_female
+fec <- fec_QC #* p_female
 
 # Is Walters and Korman (2024) fecundity actually eggs/total spawner, so no need to multiply by p_female?
 
@@ -117,7 +117,7 @@ Bio <- new(
   Mjuv_NOS = Mjuv_NOS,
   p_female = 1, # p_female specified in fecundity
   fec = fec,
-  s_enroute = (1 - 0.1)*(1 - 0.15)# covers return migration mortality (0.1) and terminal fisheries (0.2) (not captured with CWTs)
+  s_enroute = (1 - 0.1)*(1 - 0.15)# covers return migration mortality (0.1) and terminal fisheries (0.15) (not captured with CWTs)
 )
 
 ### Harvest, fishery vulnerability ----
