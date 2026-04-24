@@ -6,7 +6,8 @@ library(salmonMSE)
 # Quinsam CWT recovery
 rec <- local({
   rec1 <- readxl::read_excel(
-    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    # file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    file.path("data", "Quinsam", "2026-03-10-QuinsamChinook_Analyses_2005-2025.xlsx"),
     sheet = "Estimated"
   ) %>%
     select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
@@ -25,7 +26,7 @@ rec <- local({
 # CWT by release strategy, removing fed fry (only traditionals: seapen 0+ and smolt 0+)
 cwt_rs <- rec %>%
   filter(RELEASE_STAGE_NAME %in% c("Seapen 0+", "Smolt 0+")) %>%
-  # mutate(RS = "Seapen/Smolt 0+") %>%
+# mutate(RS = "Seapen/Smolt 0+") %>%
   summarise(
     n_catch = sum(TotCatch),
     n_esc = sum(Escape),
@@ -36,7 +37,8 @@ cwt_rs <- rec %>%
 rel <- local({
 
   rel1 <- readxl::read_excel(
-    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    # file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    file.path("data", "Quinsam", "2026-03-10-QuinsamChinook_Analyses_2005-2025.xlsx"),
     sheet = "Releases"
   )
 
@@ -56,7 +58,7 @@ rel_rs <- rel %>%
 
 # Set up matrices
 full_table <- expand.grid(
-  RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
+  RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2025), # 2005 - 2023
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 ) %>%
@@ -74,6 +76,7 @@ cwt_rel <- left_join(
 # Total hatchery releases from Quinsam and Campbell release sites, all release types
 rel_Quinsam.x <- readxl::read_excel(
   file.path("data", "Quinsam", "2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx"),
+  # File includes 2025
   sheet = "Actual Release"
 )
 
@@ -112,7 +115,8 @@ pop <- c("Quinsam", "Campbell")
 
 pop.cap <- str_to_upper(pop)
 esc_all <- readxl::read_excel(
-  file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds.xlsx"),
+  # file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds.xlsx"),
+  file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds_2025.xlsx"),
   sheet = "Data") %>%
   filter(StAD_Use == 1) %>%
   rename(WaterbodyName = "Waterbody Name") %>%
@@ -155,7 +159,7 @@ pHOS_df_all <- readxl::read_excel(
 
 pHOS_df <- pHOS_df_all %>%
   right_join(full_year, by = c("Release_Year" = "RELEASE_YEAR")) %>%
-  filter(Release_Year <= 2023)
+  filter(Release_Year <= 2025)
 
 # Data object for model
 Ldyr <- dim(cwt_esc)[1]
@@ -253,9 +257,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_03.10.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_04.21.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_03.10.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_04.21.26.rds")
 
 
 #### Fit with log productivity = 1 ----
@@ -326,7 +330,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_03.10"
+    dir = "CM", filename = "QuinsamCampbell_04.21"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

@@ -8,7 +8,8 @@ library(salmonMSE)
 
 rec <- local({
   rec1 <- readxl::read_excel(
-    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    #file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    file.path("data", "Quinsam", "2026-03-10-QuinsamChinook_Analyses_2005-2025.xlsx"),
     sheet = "Estimated"
   ) %>%
     select(RELEASE_STAGE_NAME, TotCatch, Escape, Age, BROOD_YEAR, RELEASE_YEAR, RecovYear)
@@ -30,16 +31,18 @@ cwt_rs <- rec %>%
   summarise(
     n_catch = sum(TotCatch),
     n_esc = sum(Escape),
-    .by = c(Age, BROOD_YEAR)#, RS)
-  ) %>%
-  rename("RELEASE_YEAR"="BROOD_YEAR")
+    # .by = c(Age, BROOD_YEAR)#, RS)
+    .by = c(Age, RELEASE_YEAR)#, RS)
+  ) #%>%
+  # rename("RELEASE_YEAR"="BROOD_YEAR")
 
 
 # Quinsam - CWT releases
 rel <- local({
 
   rel1 <- readxl::read_excel(
-    file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    #file.path("data", "Quinsam", "2025-02-17-QuinsamChinook_Analyses_2005-2024.xlsx"),
+    file.path("data", "Quinsam", "2026-03-10-QuinsamChinook_Analyses_2005-2025.xlsx"),
     sheet = "Releases"
   )
 
@@ -61,22 +64,64 @@ rel_rs <- rel %>%
 # Escapement time-series
 pop <- "Adam" #Campbell, Adam, Nimpkish, Salmon
 
-esc <- readxl::read_excel(
+
+esc_all <- readxl::read_excel(
   file.path("data", "SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx"),
   sheet = "Data") %>%
   filter(str_starts(Description, pop)) %>%
   rename(year = "Analysis Year") %>%
-  rename(escapement="Max Estimate") %>%
-  select (year, escapement)
+  # rename(escapement="Max Estimate") %>%
+  # select (year, escapement)
+  rename(esc.x = "Max Estimate") %>%
+  mutate(nat_spawners =
+           ifelse(is.na(`Natural Adult Spawners`), `Total Natural Spawners`, `Natural Adult Spawners`)) %>%
+  summarise(
+    escapement = sum(esc.x),
+    nat_spawners = sum(nat_spawners),
+    .by = c(year)
+  ) %>%
+  select (year, escapement, nat_spawners)
+
+esc_2024 <-  readxl::read_excel(
+  file.path("data", "PereboomA_20260409_091124 - Salmon and Adam 2024.xlsx"),
+  sheet = "Data") %>%
+  filter(str_starts(Description, pop)) %>%
+  filter(Species == "Chinook") %>%
+  rename(year = "Analysis Year") %>%
+  # rename(escapement="Max Estimate") %>%
+  # select (year, escapement)
+  rename(esc.x = "Max Estimate") %>%
+  mutate(nat_spawners =
+           ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
+  summarise(
+    escapement = sum(esc.x),
+    nat_spawners = sum(nat_spawners),
+    .by = c(year)
+  ) %>%
+  select (year, escapement, nat_spawners)
+
+esc_2025 <- data.frame(year= 2025, escapement = 256, nat_spawners=256) # From Andrew Pereboom 9 April 2026
+esc_all <- rbind(esc_all, esc_2024, esc_2025)
 
 # Set up matrices
 full_table <- expand.grid(
   # RELEASE_YEAR = seq(min(cwt_rs$RELEASE_YEAR), 2023), # 2005 - 2023
-  RELEASE_YEAR = seq(min(esc$year), 2023), # 2005 - 2023
+  RELEASE_YEAR = seq(min(esc_all$year), 2025), # 2005 - 2023
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 ) %>%
   left_join(cwt_rs)
+
+
+esc <- esc_all %>%
+  right_join(
+    full_table %>% filter(Age == 1) %>% select(RELEASE_YEAR),
+    by = c("year" = "RELEASE_YEAR")
+  ) %>%
+  arrange(year) %>%
+  mutate(p_spawn = nat_spawners/escapement)
+esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
+
 
 cwt_catch <- reshape2::acast(full_table, list("RELEASE_YEAR", "Age"), value.var = "n_catch", fill = 0)
 cwt_esc <- reshape2::acast(full_table, list("RELEASE_YEAR", "Age"), value.var = "n_esc", fill = 0)
@@ -144,7 +189,7 @@ d <- list(
   ssum = 1, # ppn female. Fecundity is eggs/total spawner, so this is set to 1.
   fec = fec_Quinsam*0.95,
   obsescape = esc$escapement,
-  propwildspawn = rep(1, Ldyr),
+  propwildspawn = esc$p_spawn, #rep(1, Ldyr),
   hatchrelease = rep(0, Ldyr + 1),
   finitPT = 0.8, # Walters and Korman (2024)
   finitT = 0,  # Walters and Korman (2024)
@@ -180,9 +225,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed=1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Adam_03.10.26.rds")
+saveRDS(samp, file = "CM/Adam_04.24.26.rds")
 
-samp <- readRDS(file = "CM/Adam_03.10.26.rds")
+samp <- readRDS(file = "CM/Adam_04.24.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -191,7 +236,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Adam", year = unique(full_table$RELEASE_YEAR),
-  dir = "CM", filename = "Adam_03.10"
+  dir = "CM", filename = "Adam_04.24"
 )
 
 SMSY <- salmonMSE:::.CM_SMSY(report, d)
