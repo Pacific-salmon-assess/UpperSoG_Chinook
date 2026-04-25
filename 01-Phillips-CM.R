@@ -4,7 +4,8 @@ library(salmonMSE)
 
 
 #### Data ----
-# Phillips escapement 2009-2025
+# Phillips escapement 2009-2025.
+# Data prior to 2009 are unreliable (Thea Rachinsky, pers. comm. March 2026)
 
 esc <- readxl::read_excel(
   file.path("data", "Phillips", "fsar-sog-cn-phillips.xlsx"),
@@ -41,10 +42,6 @@ cwt_rel <- rel %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>% #, "Fed Fry")) %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum),
             .by = c(RELEASE_YEAR)) %>%
-            # .by = c(Age, BROOD_YEAR)#, RS)
-            # .by = c(BROOD_YEAR)
-            # ) %>%
-  # rename("RELEASE_YEAR"="BROOD_YEAR") %>%
   arrange(RELEASE_YEAR)
 
 
@@ -215,9 +212,9 @@ d <- list(
   n_r = 1,
   s_enroute = 1, # For Upper SoG 0.855 = 10% return migration M followed by 5% terminal ER
   cwtrelease = cwt_rel$n_CWT,
-  cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
-  cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)),
-  cwtcatT = array(round(cwt_t/cwtExp), c(Ldyr, Nages, 1)),
+  cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
+  cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
+  cwtcatT = array(round(cwt_t/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
   bvulPT = vulPT,
   bvulT = vulT,
   RelRegFPT = rep(1, Ldyr),
@@ -226,7 +223,7 @@ d <- list(
   mobase = M_CTC,
   hatchsurv = 0.8,#From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
   gamma = 0.8,
-  ssum = 0.4,
+  ssum = 1,
   fec = fec_Quinsam*0.95,
   obsescape = esc$escapement,
   propwildspawn = round(esc$p_spawn, 2),
@@ -266,9 +263,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Phillips_CM_04.24.26.rds"))
+saveRDS(samp, file = paste0("CM/Phillips_CM_04.25.26.rds"))
 
-samp <- readRDS(file = "CM/Phillips_CM_04.24.26.rds")
+samp <- readRDS(file = "CM/Phillips_CM_04.25.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -277,7 +274,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Phillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Phillips_04.24"
+  dir = "CM", filename = "Phillips_04.25"
 )
 
 

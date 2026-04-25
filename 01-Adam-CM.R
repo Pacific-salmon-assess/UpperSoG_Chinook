@@ -34,7 +34,7 @@ cwt_rs <- rec %>%
     # .by = c(Age, BROOD_YEAR)#, RS)
     .by = c(Age, RELEASE_YEAR)#, RS)
   ) #%>%
-  # rename("RELEASE_YEAR"="BROOD_YEAR")
+# rename("RELEASE_YEAR"="BROOD_YEAR")
 
 
 # Quinsam - CWT releases
@@ -60,6 +60,7 @@ rel_rs <- rel %>%
   # mutate(RS = "Seapen/Smolt 0+") %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
+
 
 # Escapement time-series
 pop <- "Adam" #Campbell, Adam, Nimpkish, Salmon
