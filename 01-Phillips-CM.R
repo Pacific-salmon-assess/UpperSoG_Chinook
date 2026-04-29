@@ -28,7 +28,7 @@ esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
 
 
 
-# Phillips - CWT releases 1989-2020 (note, recoveries up to 2024)
+# Phillips - CWT releases 1989-2020 (note, recoveries up to 2024). CWT smolt releases only up to 2019
 
 rel <-  readxl::read_excel(
     file.path("data", "Phillips", "2026-03-10-PhillipsReleases_AllYears.xlsx"),
@@ -44,7 +44,7 @@ cwt_rel <- rel %>%
             .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
-
+lastCWTreleaseYr <- max(cwt_rel %>% filter(n_CWT>0) %>% pull(RELEASE_YEAR))
 
 
 # Releases aligned by BY
@@ -53,9 +53,12 @@ g <- ggplot(cwt_rel, aes(RELEASE_YEAR - 1, n_CWT)) +
   geom_line() +
   labs(x = "Brood Year", y = "Phillips River CWT releases")
 
-# Full matrix of ages (1-5) and years (2009 - 2020)
+# Full matrix of ages (1-5) and years (2009 - 2023), which extends to the last
+# CWT release year of smolt0+ in 2019 plus 4 years (for 5 year old return)
+# Note, there was one 6-year old recovery from 2019 releases in 2024, but this
+# is not included
 full_matrix <- expand.grid(
-  RELEASE_YEAR = min(esc$year):max(rel$RELEASE_YEAR),
+  RELEASE_YEAR = min(esc$year):(lastCWTreleaseYr + 4), #max(rel$RELEASE_YEAR),
   Age = 1:5
 ) %>%
   as.data.frame()
@@ -84,7 +87,7 @@ cwt_dat <- readr::read_csv("data/Phillips/PHI_camp_recovery_wfisheries.csv") %>%
 # cwt_dat[1220,13]
 
 # Only recoveries from release type smolt 0+ and seapen 0+ included by matching
-# tage code in the recoveries with tagcodes from releases for smolts0+ and
+# tag code in the recoveries with tagcodes from releases for smolts0+ and
 # seapen 0+ (~300 recoveries removed)
 # In release year 2020, only fed fry are released and are excluded for now
 
@@ -147,6 +150,7 @@ rel_total <- rel %>%
   ) %>%
   arrange(RELEASE_YEAR)
 
+rel_total$n_rel[which(is.na(rel_total$n_rel))] <- 0
 
 # Plot CWT data
 if (FALSE) {
@@ -263,9 +267,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Phillips_CM_04.25.26.rds"))
+saveRDS(samp, file = paste0("CM/Phillips_CM_04.29.26.rds"))
 
-samp <- readRDS(file = "CM/Phillips_CM_04.25.26.rds")
+samp <- readRDS(file = "CM/Phillips_CM_04.29.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -274,7 +278,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Phillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Phillips_04.25"
+  dir = "CM", filename = "Phillips_04.29"
 )
 
 
