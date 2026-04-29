@@ -6,8 +6,11 @@ report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 ERM_Adam <- readRDS("CM/Adam_04.24.26.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_04.25.26.rds")
+ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_04.29.26.rds")
 report_AdamPhillips <- salmonMSE:::get_report(ERM_AdamPhillips)
+
+ERM_SalmonPhillips <- readRDS("CM/SalmonPhillips_CM_04.29.26.rds")
+report_SalmonPhillips <- salmonMSE:::get_report(ERM_SalmonPhillips)
 
 ERM_Salmon <- readRDS("CM/Salmon_04.24.26.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
@@ -48,10 +51,10 @@ ci <-  TRUE
 r <-  1
 
 # Make quantile figure time series
-salmonMSE:::CM_ER(report_Phillips, brood, type, year1, ci, r, at_age = FALSE)
+salmonMSE:::CM_ER(report_SalmonPhillips, brood, type, year1, ci, r, at_age = FALSE)
 
 # Get individual values by MCMC simulation x year
-ER_list <- lapply(report_Phillips, function(i) {
+ER_list <- lapply(report_SalmonPhillips, function(i) {
 
   esc <- apply(i$escyear, 1:2, sum)
   morts_PT <- apply(i$cyearPT, 1:2, sum)
