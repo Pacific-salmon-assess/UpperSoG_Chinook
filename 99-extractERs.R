@@ -15,7 +15,7 @@ report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 ERM_Woss <- readRDS("CM/Woss_04.24.26.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
-ERM_Phillips <- readRDS("CM/Phillips_CM_04.25.26.rds")
+ERM_Phillips <- readRDS("CM/Phillips_CM_04.29.26.rds")
 report_Phillips <- salmonMSE:::get_report(ERM_Phillips)
 
 # ER by age class - array by MCMC simulation x year x age
@@ -48,10 +48,10 @@ ci <-  TRUE
 r <-  1
 
 # Make quantile figure time series
-salmonMSE:::CM_ER(report_AdamPhillips, brood, type, year1, ci, r, at_age = FALSE)
+salmonMSE:::CM_ER(report_Phillips, brood, type, year1, ci, r, at_age = FALSE)
 
 # Get individual values by MCMC simulation x year
-ER_list <- lapply(report_AdamPhillips, function(i) {
+ER_list <- lapply(report_Phillips, function(i) {
 
   esc <- apply(i$escyear, 1:2, sum)
   morts_PT <- apply(i$cyearPT, 1:2, sum)

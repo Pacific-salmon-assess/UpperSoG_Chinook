@@ -63,7 +63,7 @@ full_matrix <- expand.grid(
 ) %>%
   as.data.frame()
 
-full_year <- data.frame(RELEASE_YEAR = min(esc$year):max(rel$RELEASE_YEAR))
+full_year <- data.frame(RELEASE_YEAR = min(esc$year):(lastCWTreleaseYr + 4))#max(rel$RELEASE_YEAR))
 
 # Get tag codes for CWT releases, including smolt0+, seapen0+, excl. Fed Fry
 
