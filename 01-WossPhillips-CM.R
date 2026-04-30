@@ -65,6 +65,8 @@ cwt_rel <- rel %>%
             .by = c(RELEASE_YEAR)) %>%
    arrange(RELEASE_YEAR)
 
+#For shorter data set ending release year in 2016, recoveries in 2020
+# cwt_rel$n_CWT[which(cwt_rel$RELEASE_YEAR>2016)] <- 0
 
 lastCWTreleaseYr <- max(cwt_rel %>% filter(n_CWT>0) %>% pull(RELEASE_YEAR))
 
@@ -122,11 +124,11 @@ cwt_dat_subset <- inner_join(cwt_rel_tags, cwt_dat, by=c("tag_code"))
 # is not included
 
 full_matrix <- expand.grid(
-  RELEASE_YEAR = (min(cwt_dat_subset$RELEASE_YEAR) - 1): (lastCWTreleaseYr + 4),# max(cwt_dat_subset$RELEASE_YEAR)), # 2005 - 2023
+  RELEASE_YEAR = (min(cwt_dat_subset$RELEASE_YEAR) - 1): (lastCWTreleaseYr + 4),# 2020
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 )
-full_year <- data.frame(RELEASE_YEAR = (min(cwt_dat_subset$RELEASE_YEAR)-1):(lastCWTreleaseYr + 4))#max(cwt_dat_subset$RELEASE_YEAR))
+full_year <- data.frame(RELEASE_YEAR = (min(cwt_dat_subset$RELEASE_YEAR)-1):(lastCWTreleaseYr + 4))#2020
 
 
 cwt_esc <- cwt_dat_subset %>%
@@ -135,12 +137,18 @@ cwt_esc <- cwt_dat_subset %>%
   right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
   reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
 
+# Alternative time-frame with recoveries from release only prior to 2017
+# cwt_esc[8:11, 2:5] <- 0
+
 # Preterminal CWT
 cwt_pt <- cwt_dat_subset %>%
   filter(fishery_type == "pre-terminal", Age < 7) %>%
   summarise(n = sum(adjusted_estimated_number), .by = c(RELEASE_YEAR, Age)) %>%
   right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
   reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
+
+# Alternative time-frame with recoveries from release only prior to 2017
+# cwt_pt[8:11, 2:5] <- 0
 
 # cwt_t <- cwt_dat_subset %>%
 #   filter(fishery_type == "terminal") %>%
@@ -261,16 +269,16 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(2 * max(d$obsescape)))
+start <- list(log_so = log(1 * max(d$obsescape)))
 
 # Fit with sampling rate = 1
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/WossPhillips_CM_04.29.26.rds"))
+saveRDS(samp, file = paste0("CM/WossPhillips_CM_04.30.26.rds"))
 
-samp <- readRDS(file = "CM/WossPhillips_CM_04.29.26.rds")
+samp <- readRDS(file = "CM/WossPhillips_CM_04.30.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -279,7 +287,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "WossPhillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "WossPhillips_04.29"
+  dir = "CM", filename = "WossPhillips_04.30"
 )
 
 
