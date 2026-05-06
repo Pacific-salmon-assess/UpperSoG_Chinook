@@ -60,7 +60,9 @@ rel <-  readxl::read_excel(
 # Should I include 'Fed Fry' released in 2020? (now excluded)
 # 2020 is the only year Fed Fry are released.No smolt0+/seapen0+ released in 2020
 cwt_rel <- rel %>%
-  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>% #, "Fed Fry")) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+", "Fed Fry")) %>%
+  # Use only fed fry in Release Year 2020, as these are sized like smolts 0+
+  filter(!(RELEASE_STAGE_NAME == "Fed Fry" & RELEASE_YEAR<=2019)) %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum),
             .by = c(RELEASE_YEAR)) %>%
    arrange(RELEASE_YEAR)
@@ -82,7 +84,9 @@ g <- ggplot(cwt_rel, aes(RELEASE_YEAR - 1, n_CWT)) +
 # Get tag codes for CWT releases, including smolt0+, seapen0+, excl. Fed Fry
 
 cwt_rel_tags <- rel %>%
-  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>% #, "Fed Fry")) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+", "Fed Fry")) %>%
+  # Use only fed fry in Release Year 2020, as these are sized like smolts 0+
+  filter(!(RELEASE_STAGE_NAME == "Fed Fry" & RELEASE_YEAR<=2019)) %>%
   # filter(RELEASE_YEAR >= min(full_year) & RELEASE_YEAR <= max(full_year)) %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR, MRP_TAGCODE)) %>%
   filter(n_CWT > 0) %>%
@@ -252,9 +256,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/AdamPhillips_CM_04.29.26.rds"))
+saveRDS(samp, file = paste0("CM/AdamPhillips_CM_05.06.26.rds"))
 
-samp <- readRDS(file = "CM/AdamPhillips_CM_04.29.26.rds")
+samp <- readRDS(file = "CM/AdamPhillips_CM_05.06.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -263,7 +267,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "AdamPhillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "AdamPhillips_04.29"
+  dir = "CM", filename = "AdamPhillips_05.06"
 )
 
 

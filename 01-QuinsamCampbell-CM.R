@@ -212,7 +212,7 @@ d <- list(
   mobase = M_CTC,
   # covariate1 = covariate1,
   bmatt = mat,
-  hatchsurv = 0.8, #From M. Clarke life-cycle table. Walters and Korman (2024) used 0.5; 1 used for WCVI Chinook
+  hatchsurv = 0.9, #Increased from 0.8 for Salmon River (M. Clarke life-cycle table) due to shorter river migration
   pHOS_init = 0.75,
   spawn_init = 4000,
   gamma = 0.8,
@@ -257,9 +257,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_04.21.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_05.01.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_04.21.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_05.01.26.rds")
 
 
 #### Fit with log productivity = 1 ----
@@ -330,7 +330,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_04.21"
+    dir = "CM", filename = "QuinsamCampbell_05.01"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

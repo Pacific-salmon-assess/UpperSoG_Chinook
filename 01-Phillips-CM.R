@@ -20,7 +20,7 @@ esc <- readxl::read_excel(
     .by = c(year)
   ) %>%
   select (year, escapement, nat_spawners) %>%
-  filter(year>=2009)   %>%
+  filter(year>=2012)   %>% #changed from 2009
   mutate(p_spawn = nat_spawners/escapement)
 
 # Fill in NAs with the first value in the time-series
@@ -39,7 +39,9 @@ rel <-  readxl::read_excel(
 # Should I include 'Fed Fry' released in 2020? (now excluded)
 # 2020 is the only year Fed Fry are released.No smolt0+/seapen0+ released in 2020
 cwt_rel <- rel %>%
-  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>% #, "Fed Fry")) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+", "Fed Fry")) %>%
+  # Use only fed fry in Release Year 2020, as these are sized like smolts 0+
+  filter(!(RELEASE_STAGE_NAME == "Fed Fry" & RELEASE_YEAR<=2019)) %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum),
             .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
@@ -68,7 +70,9 @@ full_year <- data.frame(RELEASE_YEAR = min(esc$year):(lastCWTreleaseYr + 4))#max
 # Get tag codes for CWT releases, including smolt0+, seapen0+, excl. Fed Fry
 
 cwt_rel_tags <- rel %>%
-  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>% #, "Fed Fry")) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+", "Fed Fry")) %>%
+  # Use only fed fry in Release Year 2020, as these are sized like smolts 0+
+  filter(!(RELEASE_STAGE_NAME == "Fed Fry" & RELEASE_YEAR<=2019)) %>%
   filter(RELEASE_YEAR >= min(full_year) & RELEASE_YEAR <= max(full_year)) %>%
   summarise(n_CWT = sum(TaggedNum) - sum(ShedTagNum), .by = c(RELEASE_YEAR, MRP_TAGCODE)) %>%
   filter(n_CWT > 0) %>%
@@ -110,12 +114,12 @@ cwt_pt <- cwt_dat_subset %>%
   right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
   reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
 
-cwt_t <- cwt_dat_subset %>%
-  filter(fishery_type == "terminal") %>%
-  summarise(n = sum(adjusted_estimated_number), .by = c(RELEASE_YEAR, Age)) %>%
-  right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
-  reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
-
+# cwt_t <- cwt_dat_subset %>%
+#   filter(fishery_type == "terminal") %>%
+#   summarise(n = sum(adjusted_estimated_number), .by = c(RELEASE_YEAR, Age)) %>%
+#   right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
+#   reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
+#
 
 
 #### Process data ----
@@ -156,8 +160,8 @@ rel_total$n_rel[which(is.na(rel_total$n_rel))] <- 0
 if (FALSE) {
   cwt_plot <- rbind(
     cwt_esc %>% reshape2::melt() %>% mutate(type = "Escapement"),
-    cwt_pt %>% reshape2::melt() %>% mutate(type = "Preterminal catch"),
-    cwt_t %>% reshape2::melt() %>% mutate(type = "Terminal catch")
+    cwt_pt %>% reshape2::melt() %>% mutate(type = "Preterminal catch")#,
+    # cwt_t %>% reshape2::melt() %>% mutate(type = "Terminal catch")
   ) %>%
     rename(RelYear = Var1, Age = Var2, n = value) %>%
     mutate(p = n/sum(n, na.rm = TRUE), .by = c(RelYear, type))
@@ -218,9 +222,9 @@ d <- list(
   cwtrelease = cwt_rel$n_CWT,
   cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
   cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
-  cwtcatT = array(round(cwt_t/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
+  cwtcatT = NULL, #array(round(cwt_t/cwtExp), c(Ldyr, Nages, 1)), #Aligned by RY
   bvulPT = vulPT,
-  bvulT = vulT,
+  # bvulT = vulT,
   RelRegFPT = rep(1, Ldyr),
   RelRegFT = rep(1, Ldyr),
   bmatt = mat,
@@ -234,7 +238,7 @@ d <- list(
   hatchrelease = c(rel_total$n_rel, 0),
   s_enroute = 1,
   finitPT = 0.8,
-  finitT = 0.8,
+  finitT = 0,
   cwtExp = cwtExp
 )
 
@@ -267,9 +271,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Phillips_CM_04.29.26.rds"))
+saveRDS(samp, file = paste0("CM/Phillips_CM_05.06.26.rds"))
 
-samp <- readRDS(file = "CM/Phillips_CM_04.29.26.rds")
+samp <- readRDS(file = "CM/Phillips_CM_05.06.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -278,7 +282,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Phillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Phillips_04.29"
+  dir = "CM", filename = "Phillips_05.06"
 )
 
 
