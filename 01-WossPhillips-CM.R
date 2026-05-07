@@ -257,7 +257,7 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(1 * max(d$obsescape)))
+start <- list(log_so = log(1 * max(d$obsescape, na.rm = TRUE)))
 
 # Fit with sampling rate = 1
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
