@@ -26,26 +26,10 @@ esc_all <- readxl::read_excel(
   ) %>%
   select (year, escapement, nat_spawners)
 
-esc_2024 <-  readxl::read_excel(
-  file.path("data", "PereboomA_20260409_091124 - Salmon and Adam 2024.xlsx"),
-  sheet = "Data") %>%
-  filter(str_starts(Description, pop)) %>%
-  filter(Species == "Chinook") %>%
-  rename(year = "Analysis Year") %>%
-  # rename(escapement="Max Estimate") %>%
-  # select (year, escapement)
-  rename(esc.x = "Max Estimate") %>%
-  mutate(nat_spawners =
-           ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
-  summarise(
-    escapement = sum(esc.x),
-    nat_spawners = sum(nat_spawners),
-    .by = c(year)
-  ) %>%
-  select (year, escapement, nat_spawners)
+
 
 esc_2025 <- data.frame(year= 2025, escapement = 896, nat_spawners= 824) # From Matt Clarke, DFO 4 April 2026
-esc_all <- rbind(esc_all, esc_2024, esc_2025)
+esc_all <- rbind(esc_all, esc_2025)
 
 
 

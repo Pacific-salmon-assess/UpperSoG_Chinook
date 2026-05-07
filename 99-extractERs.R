@@ -54,37 +54,10 @@ ci <-  TRUE
 r <-  1
 
 # Make quantile figure time series
-salmonMSE:::CM_ER(report_SalmonPhillips, brood, type, year1, ci, r, at_age = FALSE)
+salmonMSE:::CM_ER(report_AdamPhillips, brood, type, year1, ci, r, at_age = FALSE)
 
-x_QC <- CM_ERv2(report_Adam, brood, type, year1, ci, r, at_age = FALSE)
-x_Phillips <- CM_ERv2(report_AdamPhillips, brood, type, year1, ci, r, at_age = FALSE)
-
-ts_QC <- sapply(x_QC, getElement, "ER") %>%
-  apply(1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
-  reshape2::melt() %>%
-  mutate(Year = Var2 + year1 - 1) %>%
-  reshape2::dcast(list("Year", "Var1"), value.var = "value")
-ts_QC$CWT <- "Q/C"
-
-ts_Phillips <- sapply(x_QC, getElement, "ER") %>%
-  apply(1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
-  reshape2::melt() %>%
-  mutate(Year = Var2 + year1 - 1) %>%
-  reshape2::dcast(list("Year", "Var1"), value.var = "value")
-ts_Phillips$CWT <- "Phillips"
-
-ts <- bind_rows(ts_QC, ts_Phillips)
-
-# THIS DOESNOT WORK YET
-g <- ggplot(ts, aes(.data$Year, .data$`50%`, fill=factor(CWT))) +
-  geom_line() +
-  labs(x = xlab, y = "AEQ pre-terminal ER") +
-  expand_limits(y = 0) +
-  geom_ribbon(aes(ymin = .data$`2.5%`, ymax = .data$`97.5%`), fill = alpha("grey", 0.5))
-g
-
-# Get individual values by MCMC simulation x year
-ER_list <- lapply(report_SalmonPhillips, function(i) {
+# Get individual AEQ ER values by MCMC simulation x year
+ER_list <- lapply(report_AdamPhillips, function(i) {
 
   esc <- apply(i$escyear, 1:2, sum)
   morts_PT <- apply(i$cyearPT, 1:2, sum)
@@ -137,9 +110,45 @@ quantile(as.matrix(df), probs = 0.5, na.rm=T)
 #0.47
 
 
+#----------------------------------------------------------------------
+# Plot comparing AEQ ERs for Adams River CM based on either Q/C or Phillips ERs
+# Get ER_list for each version of CM that includes AEQ ERs (see function below)
+
+# x_QC <- CM_ERv2(report_Adam, brood, type, 2002, ci, r, at_age = FALSE)
+# x_Phillips <- CM_ERv2(report_AdamPhillips, brood, type, 2010, ci, r, at_age = FALSE)
+x_QC <- CM_ERv2(report_Salmon, brood, type, 2002, ci, r, at_age = FALSE)
+x_Phillips <- CM_ERv2(report_SalmonPhillips, brood, type, 2010, ci, r, at_age = FALSE)
+
+ts_QC <- sapply(x_QC, getElement, "ER") %>%
+  apply(1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+  reshape2::melt() %>%
+  mutate(Year = Var2 + 2002 - 1) %>% #Time-series for Q/C starts in 2002
+  reshape2::dcast(list("Year", "Var1"), value.var = "value")
+ts_QC$CWT <- "Quinsam/Campbell"
+
+ts_Phillips <- sapply(x_Phillips, getElement, "ER") %>%
+  apply(1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+  reshape2::melt() %>%
+  mutate(Year = Var2 + 2010 - 1) %>%#Time-series for Q/C starts in 2010
+  reshape2::dcast(list("Year", "Var1"), value.var = "value")
+ts_Phillips$CWT <- "Phillips"
+
+ts <- bind_rows(ts_QC, ts_Phillips)
 
 
-#_________________________________________________\
+g <- ggplot(ts, aes(.data$Year, .data$`50%`, colour = factor(.data$CWT), fill=factor(.data$CWT))) +
+  geom_line(aes(colour=factor(.data$CWT))) +
+  labs(x = xlab, y = "AEQ pre-terminal ER") +
+  expand_limits(y = 0) +
+  geom_ribbon(aes(ymin = .data$`2.5%`, ymax = .data$`97.5%`), colour=NA, alpha=0.2) +
+  theme(legend.position = "bottom", legend.title = element_blank())
+g
+r <- cor(ts_QC$'50%'[9:22],ts_Phillips$'50%'[1:14], use="pairwise.complete.obs")
+r^2
+
+
+#_________________________________________________
+# Function to get ER_list as input to time-series plots of AEQ ERs
 
 CM_ERv2 <- function(report, brood = TRUE, type = c("PT", "T", "all"), year1 = 1, ci = TRUE, at_age = TRUE, r = 1) {
 
