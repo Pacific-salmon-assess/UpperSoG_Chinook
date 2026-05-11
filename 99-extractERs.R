@@ -3,29 +3,29 @@
 ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.01.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
-ERM_Adam <- readRDS("CM/Adam_04.24.26.rds")
+ERM_Adam <- readRDS("CM/Adam_05.09.26.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_05.06.26.rds")
+ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_05.09.26.rds")
 report_AdamPhillips <- salmonMSE:::get_report(ERM_AdamPhillips)
 
-ERM_SalmonPhillips <- readRDS("CM/SalmonPhillips_CM_05.06.26.rds")
+ERM_SalmonPhillips <- readRDS("CM/SalmonPhillips_CM_05.09.26.rds")
 report_SalmonPhillips <- salmonMSE:::get_report(ERM_SalmonPhillips)
 
-ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.06.26.rds")
+ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
-ERM_Salmon <- readRDS("CM/Salmon_04.24.26.rds")
+ERM_Salmon <- readRDS("CM/Salmon_05.09.26.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-ERM_Woss <- readRDS("CM/Woss_04.24.26.rds")
+ERM_Woss <- readRDS("CM/Woss_05.09.26.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
-ERM_Phillips <- readRDS("CM/Phillips_CM_05.06.26.rds")
+ERM_Phillips <- readRDS("CM/Phillips_CM_05.08.26.rds")
 report_Phillips <- salmonMSE:::get_report(ERM_Phillips)
 
 # ER by age class - array by MCMC simulation x year x age
-FPT <- sapply(report_Phillips, function(i) {
+FPT <- sapply(report_QC, function(i) {
   outer(i$FPT, i$vulPT)
 }, simplify = "array") %>%
   aperm(c(3, 1, 2))
@@ -54,10 +54,10 @@ ci <-  TRUE
 r <-  1
 
 # Make quantile figure time series
-salmonMSE:::CM_ER(report_AdamPhillips, brood, type, year1, ci, r, at_age = FALSE)
+salmonMSE:::CM_ER(report_WossPhillips, brood, type, year1, ci, r, at_age = FALSE)
 
 # Get individual AEQ ER values by MCMC simulation x year
-ER_list <- lapply(report_AdamPhillips, function(i) {
+ER_list <- lapply(report_WossPhillips, function(i) {
 
   esc <- apply(i$escyear, 1:2, sum)
   morts_PT <- apply(i$cyearPT, 1:2, sum)
@@ -114,10 +114,12 @@ quantile(as.matrix(df), probs = 0.5, na.rm=T)
 # Plot comparing AEQ ERs for Adams River CM based on either Q/C or Phillips ERs
 # Get ER_list for each version of CM that includes AEQ ERs (see function below)
 
-# x_QC <- CM_ERv2(report_Adam, brood, type, 2002, ci, r, at_age = FALSE)
-# x_Phillips <- CM_ERv2(report_AdamPhillips, brood, type, 2010, ci, r, at_age = FALSE)
-x_QC <- CM_ERv2(report_Salmon, brood, type, 2002, ci, r, at_age = FALSE)
-x_Phillips <- CM_ERv2(report_SalmonPhillips, brood, type, 2010, ci, r, at_age = FALSE)
+ # x_QC <- CM_ERv2(report_Adam, brood, type, 2002, ci, r, at_age = FALSE)
+ # x_Phillips <- CM_ERv2(report_AdamPhillips, brood, type, 2010, ci, r, at_age = FALSE)
+# x_QC <- CM_ERv2(report_Salmon, brood, type, 2002, ci, r, at_age = FALSE)
+# x_Phillips <- CM_ERv2(report_SalmonPhillips, brood, type, 2010, ci, r, at_age = FALSE)
+x_QC <- CM_ERv2(report_Woss, brood, type, 2002, ci, r, at_age = FALSE)
+x_Phillips <- CM_ERv2(report_WossPhillips, brood, type, 2010, ci, r, at_age = FALSE)
 
 ts_QC <- sapply(x_QC, getElement, "ER") %>%
   apply(1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%

@@ -237,7 +237,7 @@ d <- list(
   propwildspawn = round(esc$p_spawn, 2),
   hatchrelease = c(rel_total$n_rel, 0),
   s_enroute = 1,
-  finitPT = 0.8,
+  finitPT = 0.4,
   finitT = 0,
   cwtExp = cwtExp
 )
@@ -271,9 +271,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Phillips_CM_05.06.26.rds"))
+saveRDS(samp, file = paste0("CM/Phillips_CM_05.08.26.rds"))
 
-samp <- readRDS(file = "CM/Phillips_CM_05.06.26.rds")
+samp <- readRDS(file = "CM/Phillips_CM_05.08.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -282,7 +282,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Phillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Phillips_05.06"
+  dir = "CM", filename = "Phillips_05.08"
 )
 
 

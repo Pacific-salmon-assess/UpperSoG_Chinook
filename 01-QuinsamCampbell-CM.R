@@ -217,7 +217,7 @@ d <- list(
   spawn_init = 4000,
   gamma = 0.8,
   ssum = 1, # ppn female. Fecundity is eggs/total spawner, so this is set to 1.
-  fec = fec_Quinsam *0.95, # adjusting for pre-spawn mortality from M. Clarke life-cycle table
+  fec = fec_Quinsam *0.95, # adjusting for pre-spawn survival from M. Clarke life-cycle table
   obsescape = esc$escapement, #Algined by BY
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
   hatchrelease = rel_Quinsam$n_rel, #rep(0, Ldyr + 1),#Algined by RY

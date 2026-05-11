@@ -192,7 +192,7 @@ cwt_rel$n_CWT[which(is.na(cwt_rel$n_CWT))] <- 0
 Ldyr <- nrow(cwt_esc)
 Nages <- 5
 
-mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+mat <- c(0, 0.1, 0.4, 0.95, 1)# Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
 vulPT <- c(0, 0.075, 0.9, 0.9, 1)
 vulT <- vulPT
 
@@ -211,7 +211,7 @@ d <- list(
   Ldyr = Ldyr,
   lht = 1,
   n_r = 1,
-  s_enroute = 1, # For Upper SoG 0.855 = 10% return migration M followed by 5% terminal ER
+  s_enroute = 0.855, # For Upper SoG 0.855 = 10% return migration M followed by 5% terminal ER
   cwtrelease = cwt_rel$n_CWT,
   cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)),
@@ -226,11 +226,12 @@ d <- list(
   gamma = 0.8,
   ssum = 1,
   fec = fec_Quinsam*0.95,
-  obsescape = esc$escapement,
+  obsescape = esc$escapement/0.4,#Expanded to account for Woss:Nimpkish ratio, M. Clarke pers. comm. 21 Nov 2025
   propwildspawn = round(esc$p_spawn, 2),
+  pHOS_init = 0.16,# From SEP average over available time-series 2011-2020
   hatchrelease = c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
   s_enroute = 1,
-  finitPT = 0.8,
+  finitPT = 0.4,
   finitT = 0,#,0.8,
   cwtExp = cwtExp
 )
@@ -257,16 +258,18 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(1 * max(d$obsescape, na.rm = TRUE)))
+start <- list(log_so = log(1 * max(d$obsescape/0.4, na.rm = TRUE)))
+# lower <- list(log_cr = 0)
+# upper <- list(log_cr = 5)
 
 # Fit with sampling rate = 1
-fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
+fit <- fit_CM(d, start = start,  map = map, do_fit = TRUE)#lower = lower, upper = upper,
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/WossPhillips_CM_05.06.26.rds"))
+saveRDS(samp, file = paste0("CM/WossPhillips_CM_05.09.26.rds"))
 
-samp <- readRDS(file = "CM/WossPhillips_CM_05.06.26.rds")
+samp <- readRDS(file = "CM/WossPhillips_CM_05.09.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -275,7 +278,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "WossPhillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "WossPhillips_05.06"
+  dir = "CM", filename = "WossPhillips_05.09"
 )
 
 

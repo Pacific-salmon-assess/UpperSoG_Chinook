@@ -183,7 +183,7 @@ esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
 Ldyr <- dim(cwt_esc)[1]
 Nages <- 5#6
 
-mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+mat <- c(0, 0.1, 0.4, 0.95, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
 vulPT <- c(0, 0.075, 0.9, 0.9, 1) #  from WCVI = c(0, 0.075, 0.9, 0.9, 1)
 vulT <- rep(0, Nages)
 
@@ -226,8 +226,8 @@ d <- list(
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
   # propwildspawn = rep(1, Ldyr),
   hatchrelease = rel_total$n_rel, #rep(0, Ldyr + 1),
-  finitPT = 0.8, # Walters and Korman (2024)
-  finitT = 0,  # Walters and Korman (2024)
+  finitPT = 0.4,
+  finitT = 0,
   cwtExp = 1 # Sarita used 1 #Walters and Korman (2024) used 0.1
 )
 
@@ -252,16 +252,16 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(1 * max(d$obsescape, na.rm=TRUE)))
+start <- list(log_so = log(1 * max(d$obsescape/0.4, na.rm=TRUE)))
 
 # Fit with sampling rate = 1
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Woss_04.24.26.rds")
+saveRDS(samp, file = "CM/Woss_05.09.26.rds")
 
-samp <- readRDS(file = "CM/Woss_04.24.26.rds")
+samp <- readRDS(file = "CM/Woss_05.09.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -270,7 +270,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_table$RELEASE_YEAR),
-  dir = "CM", filename = "Woss_04.24"
+  dir = "CM", filename = "Woss_05.09"
 )
 
 SMSY <- salmonMSE:::.CM_SMSY(report, d)

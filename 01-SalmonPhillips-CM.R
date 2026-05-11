@@ -199,7 +199,7 @@ cwt_rel$n_CWT[which(is.na(cwt_rel$n_CWT))] <- 0
 Ldyr <- nrow(cwt_esc)
 Nages <- 5
 
-mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+mat <- c(0, 0.1, 0.4, 0.95, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
 vulPT <- c(0, 0.075, 0.9, 0.9, 1)
 vulT <- vulPT
 
@@ -235,9 +235,10 @@ d <- list(
   fec = fec_Quinsam*0.95,
   obsescape = esc$escapement,
   propwildspawn = round(esc$p_spawn, 2),
+  pHOS_init = 0.18, # From SEP average over available time-series 2007-2022
   hatchrelease = c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
   s_enroute = 1,
-  finitPT = 0.8,
+  finitPT = 0.4,
   finitT = 0,#,0.8,
   cwtExp = cwtExp
 )
@@ -271,9 +272,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/SalmonPhillips_CM_05.06.26.rds"))
+saveRDS(samp, file = paste0("CM/SalmonPhillips_CM_05.09.26.rds"))
 
-samp <- readRDS(file = "CM/SalmonPhillips_CM_05.06.26.rds")
+samp <- readRDS(file = "CM/SalmonPhillips_CM_05.09.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -282,7 +283,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "SalmonPhillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "SalmonPhillips_05.06"
+  dir = "CM", filename = "SalmonPhillips_05.09"
 )
 
 
@@ -321,3 +322,10 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   #shinystan::launch_shinystan(samp)
 
 }
+#calc_Umsy_Ricker(log(1.151))
+
+SMSY <- salmonMSE:::.CM_SMSY(report, d)
+Srep <- salmonMSE:::.CM_Srep(report, d)
+Sgen <- salmonMSE:::.CM_Sgen(report, d)
+range(Sgen/SMSY, na.rm = TRUE)
+range(SMSY/Srep, na.rm = TRUE)

@@ -198,7 +198,7 @@ esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
 Ldyr <- dim(cwt_esc)[1]
 Nages <- 5#6
 
-mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+mat <- c(0, 0.1, 0.4, 0.95, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
 vulPT <- c(0, 0.075, 0.9, 0.9, 1) #  from WCVI = c(0, 0.075, 0.9, 0.9, 1)
 vulT <- rep(0, Nages)
 
@@ -237,10 +237,11 @@ d <- list(
   fec = fec_Quinsam*0.95,
   obsescape = esc$escapement,
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
+  pHOS_init = 0.18, # From SEP average over available time-series 2007-2022
   # propwildspawn = rep(1, Ldyr),
   hatchrelease = c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]), #rep(0, Ldyr + 1),
-  finitPT = 0.8, # Walters and Korman (2024)
-  finitT = 0,  # Walters and Korman (2024)
+  finitPT = 0.4,
+  finitT = 0,
   cwtExp = 1 # Sarita used 1 #Walters and Korman (2024) used 0.1
 )
 
@@ -266,7 +267,7 @@ map <- list()
 map$lnE_sd <- factor(NA)
 
 # start <- list(log_so = log(3 * max(d$obsescape)))
-start <- list(log_so = log(1.5 * max(d$obsescape)))
+start <- list(log_so = log(1 * max(d$obsescape)))
 
 # Fit with sampling rate = 1
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
@@ -275,9 +276,9 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                                stepsize = 0.01,
                                max_treedepth = 20))
 
-saveRDS(samp, file = "CM/Salmon_04.24.26.rds")
+saveRDS(samp, file = "CM/Salmon_05.09.26.rds")
 
-samp <- readRDS(file = "CM/Salmon_04.24.26.rds")
+samp <- readRDS(file = "CM/Salmon_05.09.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -286,7 +287,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = unique(full_table$RELEASE_YEAR),
-  dir = "CM", filename = "Salmon_04.24"
+  dir = "CM", filename = "Salmon_05.09"
 )
 
 SMSY <- salmonMSE:::.CM_SMSY(report, d)

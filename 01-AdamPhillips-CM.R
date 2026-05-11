@@ -184,7 +184,7 @@ cwt_rel$n_CWT[which(is.na(cwt_rel$n_CWT))] <- 0
 Ldyr <- nrow(cwt_esc)
 Nages <- 5
 
-mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+mat <- c(0, 0.1, 0.4, 0.95, 1)#c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
 vulPT <- c(0, 0.075, 0.9, 0.9, 1)
 vulT <- vulPT
 
@@ -222,7 +222,7 @@ d <- list(
   propwildspawn = round(esc$p_spawn, 2),
   hatchrelease =  rep(0, Ldyr + 1),
   s_enroute = 1,
-  finitPT = 0.8,
+  finitPT = 0.4,
   finitT = 0,#,0.8,
   cwtExp = cwtExp
 )
@@ -256,9 +256,9 @@ fit <- fit_CM(d, start = start, map = map, do_fit = TRUE)
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/AdamPhillips_CM_05.06.26.rds"))
+saveRDS(samp, file = paste0("CM/AdamPhillips_CM_05.09.26.rds"))
 
-samp <- readRDS(file = "CM/AdamPhillips_CM_05.06.26.rds")
+samp <- readRDS(file = "CM/AdamPhillips_CM_05.09.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -267,7 +267,7 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "AdamPhillips", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "AdamPhillips_05.06"
+  dir = "CM", filename = "AdamPhillips_05.09"
 )
 
 
