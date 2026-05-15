@@ -239,3 +239,56 @@ CM_ERv2 <- function(report, brood = TRUE, type = c("PT", "T", "all"), year1 = 1,
 
   #g
 }
+
+
+#----------------------------------------------------------------
+# Extract maturity
+
+report <- report_SalmonPhillips#report_WossPhillips#report_QC
+year1 <- 2010#1981
+samp <- ERM_SalmonPhillips
+d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
+r <- d$r_matt
+brood <- TRUE
+rs_names <- "smolt0+"
+
+
+  n_r <- d$n_r
+  if (missing(rs_names)) rs_names <- seq(1, n_r)
+
+
+    bmatt <- data.frame(Age = 1:d$Nages, value = d$bmatt) %>%
+      dplyr::filter(Age > 1)
+
+      matt <- sapply(report, function(i) salmonMSE:::CY2BY(i[["matt"]][, , r]), simplify = 'array')
+    matt_q <- apply(matt, 1:2, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+      reshape2::melt() %>%
+      mutate(Year = Var2 + year1 - 1) %>%
+      rename(Age = Var3) %>%
+      reshape2::dcast(Age + Var2 + Year ~ Var1) %>%
+      filter(!is.na(`50%`))
+
+      matt_q$Year <- matt_q$Year - 1 # Release year offset by 1
+
+    g <- matt_q %>%
+      dplyr::filter(Age > 1) %>%
+      ggplot(aes(Year, .data$`50%`, fill = factor(.data$Age), colour = factor(.data$Age))) +
+      geom_line() +
+      geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.2) +
+      geom_hline(data = bmatt, linetype = 2, aes(yintercept = .data$value, colour = factor(.data$Age))) +
+      labs(x = ifelse(brood, "Brood Year", "Return Year"), y = "Proportion mature", colour = "Age", fill = "Age")
+  g
+
+
+  # For Q/C take >2010 values (approximately last 10 years)
+  matt_q <- rename(matt_q, median='50%')#|> filter(Year>2010)
+  out <- matt_q |> group_by(Age) |> summarise(mean_ppn = mean(median, na.rm=T))
+  matt_q
+  out
+  age3 <- out$mean_ppn[3]-out$mean_ppn[2]
+  age4 <- out$mean_ppn[4]-out$mean_ppn[3]
+  age5 <- out$mean_ppn[5]-out$mean_ppn[4]
+  age3
+  age4
+  age5
+

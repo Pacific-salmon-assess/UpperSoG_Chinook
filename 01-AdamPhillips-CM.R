@@ -305,4 +305,62 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   launch_shinystan2(samp)
   #shinystan::launch_shinystan(samp)
 
+  SMSY <- salmonMSE:::.CM_MSY(report, d, type = "spawner", ncores = 10) # year x simulation
+  # EMSY <- salmonMSE:::.CM_MSY(report, d, type = "egg", ncores = 10)
+  UMSY <- salmonMSE:::.CM_MSY(report, d, type = "u", ncores = 10)
+  Sgen <- salmonMSE:::.CM_Sgen(report, d, ncores = 10)
+
+  # g1 <- salmonMSE:::CM_MSY(report, d, type = "spawner", ncores = 7, year1=2010)
+  # g2 <- salmonMSE:::CM_Sgen(report, d, ncores = 7 , year1=2010)
+  # g3 <- salmonMSE:::CM_MSY(report, d, type = "u", ncores = 7 , year1=2010)
+
+  # Or
+  MSY <- SMSY
+  type <- "spawner"
+  na.rm <- FALSE
+  if (na.rm) MSY[MSY <= 0] <- NA_real_
+
+  MSY_q <- apply(MSY, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>%
+    reshape2::melt() %>%
+    mutate(Year = Var2 + year1 - 1) %>%
+    reshape2::dcast(list("Year", "Var1"))
+  ylab <- switch(
+    type,
+    "spawner" = expression(S[MSY]),
+    "egg" = expression(E[MSY]),
+    "u" = expression(U[MSY])
+  )
+
+  g <- MSY_q %>%
+    ggplot(aes(Year, .data$`50%`)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.2) +
+    labs(x = "Calendar Year", y = ylab)+
+    coord_cartesian(ylim = c(-500,50000))
+
+  g
+
+  alpha <- sapply(report, getElement, "alpha")
+  hist(alpha)
+  mean(alpha)
+  median(alpha)
+  # Replace negative SMSY values with NA
+  SMSY_good <- SMSY
+  SMSY_good[SMSY_good <= 0] <- NA_real_
+  year <- 2010:2024
+  median_posSMSY <- apply(SMSY_good, 1, median, na.rm = TRUE)
+  plot(year, median_posSMSY, type = 'o')
+  prop_bad <- apply(SMSY_good, 1, function(x) mean(is.na(x))) # Annual proportion of MCMC samples with SMSY < 0
+  plot(year, prop_bad) # Better-behaved SMSY values once we exclude the most recent brood years
+
+  mean(median_SMSY[1:11], na.rm = T)
+  mean(median_posSMSY[1:11], na.rm = T)
+
+  median_allSMSY <- apply(SMSY,1,median, na.rm = TRUE)
+  plot(year, median_allSMSY, type='o')
+  abline(h=0)
+
+  median_UMSY <- apply(UMSY, 1, median, na.rm = TRUE)
+  plot(year, median_UMSY, type='o')
+
 }
