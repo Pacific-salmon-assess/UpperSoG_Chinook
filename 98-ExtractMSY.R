@@ -14,8 +14,8 @@ ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
 # Set up population
-pop <- "Salmon"#"Adam"
-report <- report_SalmonPhillips#report_AdamPhillips
+pop <- "Adam"#"Woss"#"Salmon"#"Adam"
+report <- report_AdamPhillips#report_SalmonPhillips#report_AdamPhillips
 year1 <- 2010#1981
 samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -36,7 +36,7 @@ ggsave(paste("figures/", pop, "UMSY.png", sep=""), gUMSY, height = 3.5, width = 
 # mean(alpha)
 # median(alpha)
 
-
+#------------------------------------------------------------------------------
 # MSY calculated with Ricker (lambert) equations
 
 alpha_s <- salmonMSE:::.CM_prod(report, d) # Ricker alpha, per spawner
@@ -171,9 +171,29 @@ g5
 
 ggsave(paste("figures/", pop, "SMSY_calc_v5.png", sep=""), g5, height = 3.5, width = 6)
 
+#Remove negative UMSY from calcualted values (where prod<1)
+UMSY_s[UMSY_s <= 0] <- NA_real_
+UMSY_s_q <-  apply(t(UMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+  reshape2::melt() %>%
+  mutate(Year = Var2 + year1 - 1) %>%
+  reshape2::dcast(list("Year", "Var1")) %>%
+  rename(median='50%', lower='2.5%', upper='97.5%') %>%
+  mutate(label="UMSY")
+
+gUMSY <- UMSY_s_q %>%
+  ggplot(aes(Year, .data$median, colour= label, fill=label)) +
+  geom_line() +
+  scale_fill_manual(values = c("UMSY" = "black")) +
+  scale_colour_manual(values = c("UMSY" = "black")) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color= NA) +
+  labs(x = "Calendar Year", y = ylab)+
+  theme(legend.title = element_blank()) +
+  ylab("UMSY")
+gUMSY
+ggsave(paste("figures/", pop, "UMSY_calc.png", sep=""), gUMSY, height = 3.5, width = 6)
 
 
-
+#------------------------------------------------------------------------------
 # SMSY estimated numerically: Plots
 MSY <- SMSY
 type <- "spawner"
@@ -270,7 +290,7 @@ g4 <- Sgen_q %>%
   scale_fill_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = NA)) +
   scale_colour_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = "black")) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0, 22000)) + #c(0,4500)) +
+  coord_cartesian(ylim = c(0, 70000)) + #c(0, 22000)) + #c(0,4500)) +
   ylab("Spawners") +
   theme(legend.title = element_blank())
 
@@ -289,6 +309,8 @@ g5
 
 ggsave(paste("figures/", pop, "SMSY_v5.png", sep=""), g5, height = 3.5, width = 6)
 
+#------------------------------------------------------------------------------
+# Misc.
 EMSY_q <- apply(EMSY, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
