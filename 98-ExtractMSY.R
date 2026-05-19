@@ -15,7 +15,7 @@ report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
 # Set up population
 pop <- "Adam"#"Woss"#"Salmon"#"Adam"
-report <- report_AdamPhillips#report_SalmonPhillips#report_AdamPhillips
+report <- report_AdamPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
 year1 <- 2010#1981
 samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -31,13 +31,13 @@ Sgen <- salmonMSE:::.CM_Sgen(report, d, ncores = 10)
 gUMSY <- salmonMSE:::CM_MSY(report, d, type = "u", ncores = 7 , year1=2010)
 ggsave(paste("figures/", pop, "UMSY.png", sep=""), gUMSY, height = 3.5, width = 6)
 
-# alpha <- sapply(report, getElement, "alpha")# for egg-smolt rel
-# hist(alpha)
-# mean(alpha)
-# median(alpha)
 
 #------------------------------------------------------------------------------
 # MSY calculated with Ricker (lambert) equations
+alpha <- sapply(report, getElement, "alpha")# for egg-smolt rel
+# hist(alpha)
+# mean(alpha)
+# median(alpha)
 
 alpha_s <- salmonMSE:::.CM_prod(report, d) # Ricker alpha, per spawner
 epro <- t(alpha_s)/alpha # egg per smolt: s, y
@@ -83,6 +83,19 @@ g1 <- SMSY_s_q %>%
 g1
 ggsave(paste("figures/", pop, "SMSY_calc_v1.png", sep=""), g1, height = 3.5, width = 6)
 
+# Get spawner time-series and bind to SMSY data frame to plot SMSY with spawners
+
+# First get years from SMSY df
+MSY <- SMSY
+type <- "spawner"
+na.rm <- FALSE
+if (na.rm) MSY[MSY <= 0] <- NA_real_
+
+MSY_q <- apply(MSY, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>%
+  reshape2::melt() %>%
+  mutate(Year = Var2 + year1 - 1) %>%
+  reshape2::dcast(list("Year", "Var1"))
+# Create df for spawners
 Spanwers_q <- data.frame(Year=MSY_q$Year,
                          lower=rep(NA,length(MSY_q$Year)),
                          median=d$obsescape,
@@ -97,7 +110,7 @@ g2 <- SMSY_s_q %>%
   scale_colour_manual(values = c("SMSY" = "chartreuse4", "Spawners" = "black")) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.1, color= NA) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(-2500,3000))+#c(-6000,4500)) +
+  coord_cartesian(ylim = c(-6000,4500)) + #c(-2500,3000))+#
   theme(legend.title = element_blank()) +
   ylab("Spawners")
 
