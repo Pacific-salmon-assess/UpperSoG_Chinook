@@ -14,16 +14,16 @@ ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
 # Set up population
-pop <- "Adam"#"Woss"#"Salmon"#"Adam"
-report <- report_AdamPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
+pop <- "Salmon"#"Woss"#"Salmon"#"Adam"
+report <- report_SalmonPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
 year1 <- 2010#1981
 samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 
-
+# Get numerical estimates of MSY values
 SMSY <- salmonMSE:::.CM_MSY(report, d, type = "spawner", ncores = 10) # year x simulation
 #EMSY <- salmonMSE:::.CM_MSY(report, d, type = "egg", ncores = 10)
-UMSY <- salmonMSE:::.CM_MSY(report, d, type = "u", ncores = 10)
+#UMSY <- salmonMSE:::.CM_MSY(report, d, type = "u", ncores = 10)
 Sgen <- salmonMSE:::.CM_Sgen(report, d, ncores = 10)
 
 # gSMSY <- salmonMSE:::CM_MSY(report, d, type = "spawner", ncores = 7, year1=2010)
@@ -35,6 +35,7 @@ ggsave(paste("figures/", pop, "UMSY.png", sep=""), gUMSY, height = 3.5, width = 
 #------------------------------------------------------------------------------
 # MSY calculated with Ricker (lambert) equations
 alpha <- sapply(report, getElement, "alpha")# for egg-smolt rel
+beta <- sapply(report, getElement, "beta")# for egg-smolt rel
 # hist(alpha)
 # mean(alpha)
 # median(alpha)
@@ -96,7 +97,7 @@ MSY_q <- apply(MSY, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>
   mutate(Year = Var2 + year1 - 1) %>%
   reshape2::dcast(list("Year", "Var1"))
 # Create df for spawners
-Spanwers_q <- data.frame(Year=MSY_q$Year,
+Spawners_q <- data.frame(Year=MSY_q$Year,
                          lower=rep(NA,length(MSY_q$Year)),
                          median=d$obsescape,
                          upper=rep(NA, length(MSY_q$Year)),
@@ -110,7 +111,7 @@ g2 <- SMSY_s_q %>%
   scale_colour_manual(values = c("SMSY" = "chartreuse4", "Spawners" = "black")) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.1, color= NA) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(-6000,4500)) + #c(-2500,3000))+#
+  coord_cartesian(ylim = c(-4000,4000)) + #c(-50000,50000)) + #c(-6000,4500)) + #c(-2500,3000))+#
   theme(legend.title = element_blank()) +
   ylab("Spawners")
 
@@ -138,7 +139,7 @@ g3 <- SMSY_s_q %>%
   scale_colour_manual(values = c("SMSY" = "chartreuse4", "Spawners" = "black")) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.1, color= NA) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0, 3500)) +# c(0,4500)) +
+  coord_cartesian(ylim = c(0, 15000)) + #c(0,3500)) + #c(0, 100000))  + #c(0,3500)) + #c(0, 50000)) +#c(0, 3500)) +# c(0,4500)) +
   theme(legend.title = element_blank()) +
   ylab("Spawners")
 
@@ -167,7 +168,7 @@ g4 <- Sgen_s_q %>%
   scale_fill_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = NA)) +
   scale_colour_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = "black")) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0, 3500)) + #c(0,4500)) +
+  coord_cartesian(ylim = c(0,100000)) + #c(0,6000)) + #c(0, 50000)) + #c(0, 3500)) + #c(0,4500)) +
   ylab("Spawners") +
   theme(legend.title = element_blank())
 
@@ -235,7 +236,7 @@ g1 <- MSY_q %>%
 g1
 ggsave(paste("figures/", pop, "SMSY_v1.png", sep=""), g1, height = 3.5, width = 6)
 
-Spanwers_q <- data.frame(Year=MSY_q$Year,
+Spawners_q <- data.frame(Year=MSY_q$Year,
                          lower=rep(NA,length(MSY_q$Year)),
                          median=d$obsescape,
                          upper=rep(NA, length(MSY_q$Year)),
@@ -303,7 +304,7 @@ g4 <- Sgen_q %>%
   scale_fill_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = NA)) +
   scale_colour_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = "black")) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0, 70000)) + #c(0, 22000)) + #c(0,4500)) +
+  coord_cartesian(ylim = c(0, 100000)) + #c(0, 22000)) + #c(0,4500)) +
   ylab("Spawners") +
   theme(legend.title = element_blank())
 
