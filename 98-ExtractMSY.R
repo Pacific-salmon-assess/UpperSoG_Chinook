@@ -14,8 +14,8 @@ ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
 # Set up population
-pop <- "Salmon"#"Woss"#"Salmon"#"Adam"
-report <- report_SalmonPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
+pop <- "Woss"#"Woss"#"Salmon"#"Adam"
+report <- report_WossPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
 year1 <- 2010#1981
 samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -111,7 +111,7 @@ g2 <- SMSY_s_q %>%
   scale_colour_manual(values = c("SMSY" = "chartreuse4", "Spawners" = "black")) +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.1, color= NA) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(-4000,4000)) + #c(-50000,50000)) + #c(-6000,4500)) + #c(-2500,3000))+#
+  coord_cartesian(ylim = c(-30000,50000)) + #c(-3000,3000))+#c(-8000,14000)) + #c(-50000,50000)) + #c(-6000,4500)) + #c(-2500,3000))+#
   theme(legend.title = element_blank()) +
   ylab("Spawners")
 
