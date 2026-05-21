@@ -63,6 +63,37 @@ calc_Sgen_Ricker <- function(loga, b){
 }
 Sgen_s <- calc_Sgen_Ricker(log(t(alpha_s)), beta_s)
 
+
+# Plot Vulnerability and maturity in a single year, histograms of numerical vs. Lambert SMSY and UMSY
+if (FALSE) {
+  par(mfrow = c(3, 2))
+
+  vulPT <- sapply(report, getElement, "vulPT")
+  matplot(vulPT, type = 'l', xlab = "Age", ylab = "Preterminal vulnerability")
+
+  matt <- sapply(report, getElement, "matt", simplify = "array")
+  y <- 10 # Select year
+  matplot(matt[y, , , ], type = "l", xlab = "Age", ylab = "Proportion mature",
+          main = paste("Year", year1 + y - 1))
+
+  SMSY_y <- SMSY[y, ]
+  UMSY_y <- UMSY[y, ]
+  hist(SMSY_y[SMSY_y < 1e5], main = paste("Median =", median(SMSY_y) |> round()),
+       xlab = paste("Numerical SMSY", year1 + y - 1))
+  median(SMSY[y, ])
+  hist(SMSY_s[SMSY_s < 1e5 & SMSY_s > 0],
+       main = paste("Median =", median(SMSY_s[SMSY_s > 0], na.rm = TRUE) |> round()),
+       xlab = "Lambert SMSY")
+
+  hist(UMSY[y, ], main = paste("Median =", median(UMSY_y) |> round(2)),
+       xlab = paste("Numerical UMSY", year1 + y - 1))
+  median(UMSY[y, ])
+  hist(UMSY_s[UMSY_s > 0],
+       main = paste("Median =", median(UMSY_s[UMSY_s], na.rm = TRUE) |> round(2)),
+       xlab = "Lambert UMSY")
+}
+
+
 SMSY_s_q <-  apply(t(SMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
