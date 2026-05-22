@@ -14,8 +14,8 @@ ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
 # Set up population
-pop <- "Woss"#"Woss"#"Salmon"#"Adam"
-report <- report_WossPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
+pop <- "Adam"#"Woss"#"Salmon"#"Adam"
+report <- report_AdamPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
 year1 <- 2010#1981
 samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -23,7 +23,7 @@ d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 # Get numerical estimates of MSY values
 SMSY <- salmonMSE:::.CM_MSY(report, d, type = "spawner", ncores = 10) # year x simulation
 #EMSY <- salmonMSE:::.CM_MSY(report, d, type = "egg", ncores = 10)
-#UMSY <- salmonMSE:::.CM_MSY(report, d, type = "u", ncores = 10)
+UMSY <- salmonMSE:::.CM_MSY(report, d, type = "u", ncores = 10)
 Sgen <- salmonMSE:::.CM_Sgen(report, d, ncores = 10)
 
 # gSMSY <- salmonMSE:::CM_MSY(report, d, type = "spawner", ncores = 7, year1=2010)
@@ -41,8 +41,8 @@ beta <- sapply(report, getElement, "beta")# for egg-smolt rel
 # median(alpha)
 
 alpha_s <- salmonMSE:::.CM_prod(report, d) # Ricker alpha, per spawner
-epro <- t(alpha_s)/alpha # egg per smolt: s, y
-spro <- sapply(1:d$Ldyr, function(y) {
+epro <- t(alpha_s)/alpha # egg per smolt: s, y, phi parameter
+spro <- sapply(1:d$Ldyr, function(y) {  # tau parameter
   sapply(1:length(report), function(x) {
     mo <- report[[x]]$mo[y, ]
     matt <- report[[x]]$matt[y, , d$r_matt]
@@ -199,7 +199,7 @@ g4 <- Sgen_s_q %>%
   scale_fill_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = NA)) +
   scale_colour_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = "black")) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0,100000)) + #c(0,6000)) + #c(0, 50000)) + #c(0, 3500)) + #c(0,4500)) +
+  coord_cartesian(ylim = c(0, 6000)) +#c(0,100000)) + #c(0,6000)) + #c(0, 50000)) + #c(0, 3500)) + #c(0,4500)) +
   ylab("Spawners") +
   theme(legend.title = element_blank())
 
@@ -335,7 +335,7 @@ g4 <- Sgen_q %>%
   scale_fill_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = NA)) +
   scale_colour_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = "black")) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0, 100000)) + #c(0, 22000)) + #c(0,4500)) +
+  coord_cartesian(ylim = c(0,6000)) + #c(0, 100000)) + #c(0, 22000)) + #c(0,4500)) +
   ylab("Spawners") +
   theme(legend.title = element_blank())
 
