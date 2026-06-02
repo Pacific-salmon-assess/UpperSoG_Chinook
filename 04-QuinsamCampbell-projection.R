@@ -7,17 +7,13 @@ f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
   HOB_marked <- HOB_unmarked <- array(0, dim(HO))
   HOB_stray <- array(0, dim(stray))
 
-  # This function will take the maximum amount of brood (70% of escapement) indiscriminately of brood origin
+  # This function will take the maximum amount of brood (pmax_esc = 0.7, 0.8, etc of escapement)
+  # of age 4 and 5, not selective for brood origin
   # However, salmonMSE will return brood that exceeds release target
-  # Brood - assume there are no strays in the system
-
-  max_brood <- pmax_esc * sum(NO, HO)
-
-  ptake <- max_brood/sum(NO, HO) # ptake <- pmax_esc
+  # Assume there are no strays in the system
+  ptake <- c(0, 0, 0, rep(pmax_esc, 2))
 
   NOB[] <- ptake * NO
-  HOB_unmarked[] <- ptake * HO
-  HOB_marked[] <- 0
   HOB_unmarked[] <- ptake * (1 - m) * HO
   HOB_marked[] <- ptake * m * HO
 
