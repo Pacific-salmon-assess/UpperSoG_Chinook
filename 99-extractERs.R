@@ -1,9 +1,9 @@
 # Extract ERs
 
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.01.26.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.29.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
-ERM_Adam <- readRDS("CM/Adam_05.09.26.rds")
+ERM_Adam <- readRDS("CM/Adam_06.01.26.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
 ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_05.09.26.rds")
@@ -15,17 +15,17 @@ report_SalmonPhillips <- salmonMSE:::get_report(ERM_SalmonPhillips)
 ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
-ERM_Salmon <- readRDS("CM/Salmon_05.09.26.rds")
+ERM_Salmon <- readRDS("CM/Salmon_06.03.26.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-ERM_Woss <- readRDS("CM/Woss_05.09.26.rds")
+ERM_Woss <- readRDS("CM/Woss_CM_06.02.26.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
 ERM_Phillips <- readRDS("CM/Phillips_CM_05.08.26.rds")
 report_Phillips <- salmonMSE:::get_report(ERM_Phillips)
 
 # ER by age class - array by MCMC simulation x year x age
-FPT <- sapply(report_QC, function(i) {
+FPT <- sapply(report_Salmon, function(i) { # Change to Adam, Salmon, Woss
   outer(i$FPT, i$vulPT)
 }, simplify = "array") %>%
   aperm(c(3, 1, 2))
@@ -48,67 +48,87 @@ apply(UPT, 3, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T)
 
 
 brood <- FALSE
-type <- "PT"
-year1 <-  2010 # get this for each pop: min(full_matrix$RELEASE_YEAR) or min(full_table$RELEASE_YEAR)
+type <- "PT"# "T" #
+year1 <-  2002#2001#1984#2010 # get this for each pop: min(full_matrix$RELEASE_YEAR) or min(full_table$RELEASE_YEAR)
 ci <-  TRUE
 r <-  1
+report <- report_Adam
 
 # Make quantile figure time series
-salmonMSE:::CM_ER(report_WossPhillips, brood, type, year1, ci, r, at_age = FALSE)
+salmonMSE:::CM_ER(report, brood, type, year1, ci, r, at_age = FALSE)
 
 # Get individual AEQ ER values by MCMC simulation x year
-ER_list <- lapply(report_WossPhillips, function(i) {
+getER <- function(report, type, year1){
+  ER_list <- lapply(report, function(i) {
 
-  esc <- apply(i$escyear, 1:2, sum)
-  morts_PT <- apply(i$cyearPT, 1:2, sum)
-  morts_T <- apply(i$cyearT, 1:2, sum)
+    esc <- apply(i$escyear, 1:2, sum)
+    morts_PT <- apply(i$cyearPT, 1:2, sum)
+    morts_T <- apply(i$cyearT, 1:2, sum)
 
-  AEQ_PT <- salmonMSE:::calc_AEQ(i)[, , r] # Always by release year
-  AEQ_T <- array(1, dim(esc))
+    AEQ_PT <- salmonMSE:::calc_AEQ(i)[, , r] # Always by release year
+    AEQ_T <- array(1, dim(esc))
 
-  if (brood) {
-    esc <- CY2BY(esc)
-    morts_PT <- CY2BY(morts_PT)
-    morts_T <- CY2BY(morts_T)
+    if (brood) {
+      esc <- CY2BY(esc)
+      morts_PT <- CY2BY(morts_PT)
+      morts_T <- CY2BY(morts_T)
 
-    denom <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T + esc)
+      denom <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T + esc)
 
-  } else {
-    AEQ_PT2 <- array(NA_real_, dim(esc)) # Re-index to align with calendar year
-    nt <- nrow(AEQ_PT2)
-    na <- ncol(AEQ_PT2)
-    for (t in 1:nt) {
-      for (a in 1:na) if (t-a+1>0) AEQ_PT2[t, a] <- AEQ_PT[t-a+1, a]
+    } else {
+      AEQ_PT2 <- array(NA_real_, dim(esc)) # Re-index to align with calendar year
+      nt <- nrow(AEQ_PT2)
+      na <- ncol(AEQ_PT2)
+      for (t in 1:nt) {
+        for (a in 1:na) if (t-a+1>0) AEQ_PT2[t, a] <- AEQ_PT[t-a+1, a]
+      }
+      denom <- rowSums(morts_PT * AEQ_PT2 + morts_T * AEQ_T + esc)
     }
-    denom <- rowSums(morts_PT * AEQ_PT2 + morts_T * AEQ_T + esc)
-  }
 
-  if (type == "PT") {
-    num <- rowSums(morts_PT * AEQ_PT)
-  } else if (type == "T") {
-    num <- rowSums(morts_T * AEQ_T)
-  } else {
-    num <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T)
-  }
+    if (type == "PT") {
+      num <- rowSums(morts_PT * AEQ_PT)
+    } else if (type == "T") {
+      num <- rowSums(morts_T * AEQ_T)
+    } else {
+      num <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T)
+    }
 
-  list(ER = num/denom)
-})
+    list(ER = num/denom)
+  })
 
-# Pull elements out of ER_list and put in a data frame
-df <- as.data.frame(do.call(
-  rbind,
-  lapply(ER_list, function(x) x[["ER"]])#[35:40])# could look at just the last 6 years
-))
+  # Pull elements out of ER_list and put in a data frame
+  df <- as.data.frame(do.call(
+    rbind,
+    lapply(ER_list, function(x) x[["ER"]])#[35:40])# could look at just the last 6 years
+  ))
+  return(df)
+}
 
+df.PT <- getER(report=report, type="PT", year1=year1)
+df.T <- getER(report=report, type="T", year1=year1)
+df.all<- getER(report=report, type="all", year1=year1)
 
-# Plot all simulations
-as.matrix(df) |> t() |> matplot(typ = 'l')
+# # Plot all simulations
+# as.matrix(df) |> t() |> matplot(typ = 'l')
 
 # Take the mean/quantiles over all years and posterior draws
-quantile(as.matrix(df), probs = c(0.025, 0.5, 0.975), na.rm=T)
-quantile(as.matrix(df), probs = 0.5, na.rm=T)
-#0.47
+quantile(as.matrix(df.PT), probs = c(0.025, 0.5, 0.975), na.rm=T)
+quantile(as.matrix(df.T), probs = c(0.025, 0.5, 0.975), na.rm=T)
+quantile(as.matrix(df.all), probs = c(0.025, 0.5, 0.975), na.rm=T)
 
+# Get time-series of ERs
+ER.pt <- apply(df.PT, 2, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
+ER.t <- apply(df.T, 2, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
+ER.all <- apply(df.all, 2, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
+
+# ER <- as.data.frame(t(1-(1-ER.pt)*(1-ER.t)))
+ER <- as.data.frame(t(ER.all))
+ER <- ER %>% rename("lower"="2.5%", "median"="50%" ,"upper"="97.5%") %>%
+  mutate (label="ER", Year = seq(from = year1, length.out = length(ER[,1])))
+
+
+
+# Compare to UMSY (see file 98-ExtractMSY.R)
 
 #----------------------------------------------------------------------
 # Plot comparing AEQ ERs for Adams River CM based on either Q/C or Phillips ERs
@@ -292,3 +312,22 @@ rs_names <- "smolt0+"
   age4
   age5
 
+#----------------------------------------------------------------------\
+# plot prod
+   samp <- ERM_Salmon
+
+  d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
+  prod <- salmonMSE:::.CM_prod(report_Salmon, d)
+
+  prod_q <- apply(prod, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+    reshape2::melt() %>%
+    mutate(Year = Var2 + year1 - 1) %>%
+    reshape2::dcast(list("Year", "Var1"))
+
+  g <- prod_q %>%
+    ggplot(aes(Year, .data$`50%`)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.2) +
+    labs(x = "Calendar Year", y = "Productivity") +
+    geom_hline(yintercept=1)
+  g

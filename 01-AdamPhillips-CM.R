@@ -57,7 +57,7 @@ rel <-  readxl::read_excel(
 )
 
 # Phillips - CWT releases of smolt0+ and seapen0+ 1989-2019
-# Should I include 'Fed Fry' released in 2020? (now excluded)
+# Should I include 'Fed Fry' released in 2020? (now included)
 # 2020 is the only year Fed Fry are released.No smolt0+/seapen0+ released in 2020
 cwt_rel <- rel %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+", "Fed Fry")) %>%
@@ -81,7 +81,7 @@ g <- ggplot(cwt_rel, aes(RELEASE_YEAR - 1, n_CWT)) +
 
 
 
-# Get tag codes for CWT releases, including smolt0+, seapen0+, excl. Fed Fry
+# Get tag codes for CWT releases, including smolt0+, seapen0+, incl. Fed Fry
 
 cwt_rel_tags <- rel %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+", "Fed Fry")) %>%
@@ -107,7 +107,7 @@ cwt_dat <- readr::read_csv("data/Phillips/PHI_camp_recovery_wfisheries.csv") %>%
 # Only recoveries from release type smolt 0+ and seapen 0+ included by matching
 # tage code in the recoveries with tagcodes from releases for smolts0+ and
 # seapen 0+ (~300 recoveries removed)
-# In release year 2020, only fed fry are released and are excluded for now
+# In release year 2020, only fed fry are released and are included here
 
 # Used RELEASE_YEAR from release file (cwt_rel_tags) instead of
 # RELEASE_YEAR = runyear - age + 1 in recoveries (cwt_dat), as there are some

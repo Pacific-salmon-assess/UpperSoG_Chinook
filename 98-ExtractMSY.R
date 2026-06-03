@@ -1,8 +1,11 @@
 # Extract MSY values from CM
 
 # Input results
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.01.26.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.29.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
+
+ERM_Adam <- readRDS("CM/Adam_06.01.26.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
+report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
 ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_05.09.26.rds")
 report_AdamPhillips <- salmonMSE:::get_report(ERM_AdamPhillips)
@@ -10,14 +13,22 @@ report_AdamPhillips <- salmonMSE:::get_report(ERM_AdamPhillips)
 ERM_SalmonPhillips <- readRDS("CM/SalmonPhillips_CM_05.09.26.rds")
 report_SalmonPhillips <- salmonMSE:::get_report(ERM_SalmonPhillips)
 
+ERM_Salmon <- readRDS("CM/Salmon_06.03.26.rds")
+report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
+
 ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
+ERM_Woss <- readRDS("CM/Woss_CM_06.02.26.rds")
+report_Woss <- salmonMSE:::get_report(ERM_Woss)
+
 # Set up population
-pop <- "Adam"#"Woss"#"Salmon"#"Adam"
-report <- report_AdamPhillips#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
-year1 <- 2010#1981
-samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
+pop <- "Adam"#"Woss"#"Salmon"#"Adam"#QC"
+report <- report_Adam#report_QC#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
+year1 <- 2002#2001#1984#2010#1984
+# samp <- readRDS(paste("CM/QuinsamCampbell_05.29.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
+# samp <- readRDS(paste("CM/",pop,"Phillips_CM_05.09.26.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
+samp <- ERM_Adam#readRDS(paste("CM/",pop,"_06.01.26.JSpt.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 
 # Get numerical estimates of MSY values
@@ -113,25 +124,17 @@ g1 <- SMSY_s_q %>%
   ylab("Spawners")
 
 g1
-ggsave(paste("figures/", pop, "SMSY_calc_v1.png", sep=""), g1, height = 3.5, width = 6)
+# ggsave(paste("figures/", pop, "SMSY_calc_v1.png", sep=""), g1, height = 3.5, width = 6)
 
 # Get spawner time-series and bind to SMSY data frame to plot SMSY with spawners
 
-# First get years from SMSY df
-MSY <- SMSY
-type <- "spawner"
-na.rm <- FALSE
-if (na.rm) MSY[MSY <= 0] <- NA_real_
-
-MSY_q <- apply(MSY, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>%
-  reshape2::melt() %>%
-  mutate(Year = Var2 + year1 - 1) %>%
-  reshape2::dcast(list("Year", "Var1"))
+# First get years
+years <- seq(from = year1,length.out = length(d$obsescape), by = 1)
 # Create df for spawners
-Spawners_q <- data.frame(Year=MSY_q$Year,
-                         lower=rep(NA,length(MSY_q$Year)),
+Spawners_q <- data.frame(Year=years,
+                         lower=rep(NA,length(years)),
                          median=d$obsescape,
-                         upper=rep(NA, length(MSY_q$Year)),
+                         upper=rep(NA, length(years)),
                          label="Spawners")
 SMSY_s_q <- rbind(SMSY_s_q, Spawners_q)
 
@@ -147,11 +150,11 @@ g2 <- SMSY_s_q %>%
   ylab("Spawners")
 
 g2
-ggsave(paste("figures/", pop, "SMSY_calc_v2.png", sep=""), g2, height = 3.5, width = 6)
+# ggsave(paste("figures/", pop, "SMSY_calc_v2.png", sep=""), g2, height = 3.5, width = 6)
 
 # SMSY: removing negative values
 na.rm <- TRUE
-if (na.rm) SMSY_s[SMSY_s <= 0] <- NA_real_
+if (na.rm) SMSY_s[SMSY_s <= 0] <- 0#NA_real_
 
 SMSY_s_q <- apply(t(SMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>%
   reshape2::melt() %>%
@@ -175,13 +178,13 @@ g3 <- SMSY_s_q %>%
   ylab("Spawners")
 
 g3
-ggsave(paste("figures/", pop, "SMSY_calc_v3.png", sep=""), g3, height = 3.5, width = 6)
+# ggsave(paste("figures/", pop, "SMSY_calc_v3.png", sep=""), g3, height = 3.5, width = 6)
 
 
 
 # Adding Sgen, and removing negative values from calculated Sgen values
 na.rm <- TRUE
-if (na.rm) Sgen_s[Sgen_s <= 0] <- NA_real_
+if (na.rm) Sgen_s[Sgen_s <= 0] <- 0#NA_real_
 
 Sgen_s_q <- apply(t(Sgen_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
   reshape2::melt() %>%
@@ -199,12 +202,12 @@ g4 <- Sgen_s_q %>%
   scale_fill_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = NA)) +
   scale_colour_manual(values = c("Sgen" = "darkorange", "SMSY" = "chartreuse4", "Spawners" = "black")) +
   labs(x = "Calendar Year", y = ylab)+
-  coord_cartesian(ylim = c(0, 6000)) +#c(0,100000)) + #c(0,6000)) + #c(0, 50000)) + #c(0, 3500)) + #c(0,4500)) +
+  coord_cartesian(ylim = c(0,800)) +#c(0,8000)) +#c(0,3000)) +# c(0,800)) + # c(0, 6000)) +#c(0,100000)) + #c(0,6000)) + #c(0, 50000)) + #c(0, 3500)) + #c(0,4500)) +
   ylab("Spawners") +
   theme(legend.title = element_blank())
 
 g4
-ggsave(paste("figures/", pop, "SMSY_calc_v4.png", sep=""), g4, height = 3.5, width = 6)
+# ggsave(paste("figures/", pop, "SMSY_calc_v4.png", sep=""), g4, height = 3.5, width = 6)
 
 meanSMSY <- SMSY_s_q %>% filter(label== "SMSY") %>% summarize(mean=mean(median)) %>% pull(mean)
 meanSgen <- Sgen_s_q %>% filter(label== "Sgen") %>% summarize(mean=mean(median)) %>% pull(mean)
@@ -214,10 +217,12 @@ g5 <- g4 +
   geom_hline(yintercept = meanSgen, lty="dashed", colour = "darkorange")
 g5
 
-ggsave(paste("figures/", pop, "SMSY_calc_v5.png", sep=""), g5, height = 3.5, width = 6)
+ggsave(paste("figures/", pop, "QC_SMSY_calc_v5.png", sep=""), g5, height = 3.5, width = 6)
 
 #Remove negative UMSY from calcualted values (where prod<1)
-UMSY_s[UMSY_s <= 0] <- NA_real_
+UMSY_s[UMSY_s <= 0] <- 0#NA_real_
+# Set to zero instead
+
 UMSY_s_q <-  apply(t(UMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
@@ -234,8 +239,20 @@ gUMSY <- UMSY_s_q %>%
   labs(x = "Calendar Year", y = ylab)+
   theme(legend.title = element_blank()) +
   ylab("UMSY")
+
+
+# See file 98-ExtractERs.R for ER dataframe
+gUMSY <- rbind(UMSY_s_q, ER) %>%
+  ggplot(aes(Year, .data$median, colour= label, fill=label)) +
+  geom_line() +
+  scale_fill_manual(values = c("UMSY" = "black", "ER" = "maroon")) +
+  scale_colour_manual(values = c("UMSY" = "black", "ER" = "maroon")) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2, color= NA) +
+  labs(x = "Calendar Year", y = ylab)+
+  theme(legend.title = element_blank()) +
+  ylab("UMSY")
 gUMSY
-ggsave(paste("figures/", pop, "UMSY_calc.png", sep=""), gUMSY, height = 3.5, width = 6)
+ggsave(paste("figures/", pop, "QC_UMSY_calc.png", sep=""), gUMSY, height = 3.5, width = 6)
 
 
 #------------------------------------------------------------------------------

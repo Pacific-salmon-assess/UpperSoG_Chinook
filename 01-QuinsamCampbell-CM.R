@@ -257,7 +257,7 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_05.01.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_05.01.26_test.rds")
 
 samp <- readRDS(file = "CM/QuinsamCampbell_05.01.26.rds")
 
