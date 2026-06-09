@@ -52,28 +52,21 @@ beta <- sapply(report, getElement, "beta")# for egg-smolt rel
 # median(alpha)
 
 alpha_s <- salmonMSE:::.CM_prod(report, d) # Ricker alpha, per spawner
-epro <- t(alpha_s)/alpha # egg per smolt: s, y, phi parameter
-spro <- sapply(1:d$Ldyr, function(y) {  # tau parameter
-  sapply(1:length(report), function(x) {
-    mo <- report[[x]]$mo[y, ]
-    matt <- report[[x]]$matt[y, , d$r_matt]
-    lo <- salmonMSE:::calc_survival(mo, matt) # smolt survival at replacement
-    spro <- sum(lo * d$ssum * matt)
-    return(spro)
-  })
-})
-beta_s <- beta * epro/spro # Ricker beta, per spawner
-SMSY_s <-  (1 - gsl:::lambert_W0(exp(1 - log(t(alpha_s)))))/beta_s
-UMSY_s <-  (1 - gsl::lambert_W0(exp(1 - log(t(alpha_s)))))
 
-calc_Sgen_Ricker <- function(loga, b){
-  sMSY <- ( 1 - gsl::lambert_W0 (exp ( 1 - loga) ) ) / b
-  a <- exp(loga)
+Sgen_s <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, type = "Sgen")
+SMSY_s <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, type = "spawner")
+UMSY_s <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, type = "u")
 
-  return(-1/b*gsl::lambert_W0(-b*sMSY/a))
-}
-Sgen_s <- calc_Sgen_Ricker(log(t(alpha_s)), beta_s)
+# MSY reference points where natural mortality and maturity are averaged across a range of years (2017-2021)
+year <- year1 + seq(1, d$Ldyr) - 1
 
+Sgen_avg <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, index = match(2017:2021, year), mean_bio = TRUE, type = "Sgen")
+SMSY_avg <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, index = match(2017:2021, year), mean_bio = TRUE, type = "spawner")
+UMSY_avg <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, index = match(2017:2021, year), mean_bio = TRUE, type = "u")
+
+# Corresponding figure - unfortunately SMSY has some very skewed values
+g <- CM_MSY(report, d, simple = TRUE, index = match(2017:2021, year), mean_bio = TRUE, type = "spawner")
+quantile(SMSY_avg)
 
 # Plot Vulnerability and maturity in a single year, histograms of numerical vs. Lambert SMSY and UMSY
 if (FALSE) {
@@ -105,7 +98,7 @@ if (FALSE) {
 }
 
 
-SMSY_s_q <-  apply(t(SMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE) %>%
+SMSY_s_q <-  apply(SMSY_s, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = FALSE) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
   reshape2::dcast(list("Year", "Var1")) %>%
@@ -156,7 +149,7 @@ g2
 na.rm <- TRUE
 if (na.rm) SMSY_s[SMSY_s <= 0] <- 0#NA_real_
 
-SMSY_s_q <- apply(t(SMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>%
+SMSY_s_q <- apply(SMSY_s, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = na.rm) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
   reshape2::dcast(list("Year", "Var1")) %>%
@@ -186,7 +179,7 @@ g3
 na.rm <- TRUE
 if (na.rm) Sgen_s[Sgen_s <= 0] <- 0#NA_real_
 
-Sgen_s_q <- apply(t(Sgen_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+Sgen_s_q <- apply(Sgen_s, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
   reshape2::dcast(list("Year", "Var1")) %>%
@@ -223,7 +216,7 @@ ggsave(paste("figures/", pop, "QC_SMSY_calc_v5.png", sep=""), g5, height = 3.5, 
 UMSY_s[UMSY_s <= 0] <- 0#NA_real_
 # Set to zero instead
 
-UMSY_s_q <-  apply(t(UMSY_s), 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
+UMSY_s_q <-  apply(UMSY_s, 1, quantile, probs = c(0.025, 0.5, 0.975), na.rm = TRUE) %>%
   reshape2::melt() %>%
   mutate(Year = Var2 + year1 - 1) %>%
   reshape2::dcast(list("Year", "Var1")) %>%
