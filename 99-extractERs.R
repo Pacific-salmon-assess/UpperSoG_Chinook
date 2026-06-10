@@ -55,71 +55,38 @@ r <-  1
 report <- report_Adam
 
 # Make quantile figure time series
-salmonMSE:::CM_ER(report, brood, type, year1, ci, r, at_age = FALSE)
+CM_ER(report, brood, type, year1, ci, r, at_age = FALSE)
 
-# Get individual AEQ ER values by MCMC simulation x year
-getER <- function(report, type, year1){
-  ER_list <- lapply(report, function(i) {
+# Repeat to fill in AEQs for incomplete brood years
+year <- year1 + seq(1, d$Ldyr) - 1
+year_borrow <- seq(max(year) - 9, max(year) - 5)
+g <- CM_ER(report, brood, type, year1, ci, r, at_age = FALSE, index_AEQ = match(year_borrow, year))
 
-    esc <- apply(i$escyear, 1:2, sum)
-    morts_PT <- apply(i$cyearPT, 1:2, sum)
-    morts_T <- apply(i$cyearT, 1:2, sum)
-
-    AEQ_PT <- salmonMSE:::calc_AEQ(i)[, , r] # Always by release year
-    AEQ_T <- array(1, dim(esc))
-
-    if (brood) {
-      esc <- CY2BY(esc)
-      morts_PT <- CY2BY(morts_PT)
-      morts_T <- CY2BY(morts_T)
-
-      denom <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T + esc)
-
-    } else {
-      AEQ_PT2 <- array(NA_real_, dim(esc)) # Re-index to align with calendar year
-      nt <- nrow(AEQ_PT2)
-      na <- ncol(AEQ_PT2)
-      for (t in 1:nt) {
-        for (a in 1:na) if (t-a+1>0) AEQ_PT2[t, a] <- AEQ_PT[t-a+1, a]
-      }
-      denom <- rowSums(morts_PT * AEQ_PT2 + morts_T * AEQ_T + esc)
-    }
-
-    if (type == "PT") {
-      num <- rowSums(morts_PT * AEQ_PT)
-    } else if (type == "T") {
-      num <- rowSums(morts_T * AEQ_T)
-    } else {
-      num <- rowSums(morts_PT * AEQ_PT + morts_T * AEQ_T)
-    }
-
-    list(ER = num/denom)
-  })
-
-  # Pull elements out of ER_list and put in a data frame
-  df <- as.data.frame(do.call(
-    rbind,
-    lapply(ER_list, function(x) x[["ER"]])#[35:40])# could look at just the last 6 years
-  ))
-  return(df)
+# Get the quantiles of what we just plotted
+if (packageVersion("ggplot2") >= "4.0") {
+  g@data
+} else {
+  g$data
 }
 
-df.PT <- getER(report=report, type="PT", year1=year1)
-df.T <- getER(report=report, type="T", year1=year1)
-df.all<- getER(report=report, type="all", year1=year1)
+# Get matrices of individual AEQ ER values by year x MCMC simulation
+# See ?.CM_ER
+df.PT <- salmonMSE:::.CM_ER(report, type = "PT", r, brood, index_AEQ = match(year_borrow, year))
+df.T <- salmonMSE:::.CM_ER(report, type = "T", r, brood, index_AEQ = match(year_borrow, year))
+df.all <- salmonMSE:::.CM_ER(report, type = "all", r, brood, index_AEQ = match(year_borrow, year))
 
 # # Plot all simulations
 # as.matrix(df) |> t() |> matplot(typ = 'l')
 
 # Take the mean/quantiles over all years and posterior draws
-quantile(as.matrix(df.PT), probs = c(0.025, 0.5, 0.975), na.rm=T)
-quantile(as.matrix(df.T), probs = c(0.025, 0.5, 0.975), na.rm=T)
-quantile(as.matrix(df.all), probs = c(0.025, 0.5, 0.975), na.rm=T)
+quantile(df.PT, probs = c(0.025, 0.5, 0.975), na.rm=T)
+quantile(df.T, probs = c(0.025, 0.5, 0.975), na.rm=T)
+quantile(df.all, probs = c(0.025, 0.5, 0.975), na.rm=T)
 
 # Get time-series of ERs
-ER.pt <- apply(df.PT, 2, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
-ER.t <- apply(df.T, 2, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
-ER.all <- apply(df.all, 2, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
+ER.pt <- apply(df.PT, 1, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
+ER.t <- apply(df.T, 1, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
+ER.all <- apply(df.all, 1, function(row) quantile(row, probs = c(0.025, 0.5, 0.975), na.rm=T))
 
 # ER <- as.data.frame(t(1-(1-ER.pt)*(1-ER.t)))
 ER <- as.data.frame(t(ER.all))
