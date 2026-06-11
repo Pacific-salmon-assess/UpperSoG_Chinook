@@ -218,7 +218,7 @@ d <- list(
   RelRegFT = rep(1, Ldyr),
   bmatt = mat,
   mobase = M_CTC,
-  hatchsurv =  0.6758, #Twice mortality experienced by Salmon 16.21% (estimated 2017-2024 B. Zoehner pers. comm.)
+  hatchsurv =  0.8, #M. Clarke and B. Zoehner, DFO pers. comm., 10x Q/C (20% vs 2%) given migration distance ~10x  (69km vs 7km)
   gamma = 0.8,
   ssum = 1,
   fec = fec_Quinsam*0.95,
@@ -263,9 +263,9 @@ fit <- fit_CM(d, start = start,  map = map, do_fit = TRUE)#lower = lower, upper 
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Woss_CM_06.02.26.rds"))
+saveRDS(samp, file = paste0("CM/Woss_CM_06.10.26.rds"))
 
-samp <- readRDS(file = "CM/Woss_CM_06.02.26.rds")
+samp <- readRDS(file = "CM/Woss_CM_06.10.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -274,5 +274,5 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Woss_06.02"
+  dir = "CM", filename = "Woss_06.10"
 )

@@ -1,6 +1,6 @@
 # Extract ERs
 
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.29.26.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_06.10.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
 ERM_Adam <- readRDS("CM/Adam_06.01.26.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
@@ -48,11 +48,11 @@ apply(UPT, 3, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T)
 
 
 brood <- FALSE
-type <- "PT"# "T" #
-year1 <-  2002#2001#1984#2010 # get this for each pop: min(full_matrix$RELEASE_YEAR) or min(full_table$RELEASE_YEAR)
+type <- "T"#"PT"# "T" #
+year1 <-  1984#2002#2001#1984#2010 # get this for each pop: min(full_matrix$RELEASE_YEAR) or min(full_table$RELEASE_YEAR)
 ci <-  TRUE
 r <-  1
-report <- report_Adam
+report <- report_QC
 
 # Make quantile figure time series
 salmonMSE:::CM_ER(report, brood, type, year1, ci, r, at_age = FALSE)

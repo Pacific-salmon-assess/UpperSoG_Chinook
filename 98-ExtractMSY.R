@@ -1,7 +1,7 @@
 # Extract MSY values from CM
 
 # Input results
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_05.29.26.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_06.10.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
 ERM_Adam <- readRDS("CM/Adam_06.01.26.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")

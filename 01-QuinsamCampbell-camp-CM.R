@@ -248,7 +248,7 @@ d <- list(
   mobase = M_CTC,
   # covariate1 = covariate1,
   bmatt = mat,
-  hatchsurv = 0.9, #Increased from 0.8 for Salmon River (M. Clarke life-cycle table) due to shorter river migration
+  hatchsurv = 0.98, #Based on WCVI Sarita estimate Brown et al. 2026
   pHOS_init = 0.75,
   spawn_init = 4000,
   gamma = 0.8,
@@ -294,16 +294,16 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_05.29.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_06.10.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_05.29.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_06.10.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-  dir = "CM", filename = "QuinsamCampbell_05.29"
+  dir = "CM", filename = "QuinsamCampbell_06.10"
 )
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
@@ -351,7 +351,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_05.29"
+    dir = "CM", filename = "QuinsamCampbell_06.10"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

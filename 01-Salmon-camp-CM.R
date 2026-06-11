@@ -128,7 +128,9 @@ full_year <- data.frame(RELEASE_YEAR =
 cwt_esc <- cwt_dat_subset %>%
   filter( (fishery_type == "escapement" &
              Coarse_description %in% c("Escapement", "Subsistence")) |
-            fishery_era_name %in% c("TGS FS", "TGEO ST TERM S")) %>%
+            fishery_era_name %in% c("TGS FS",
+                                    "TGEO ST TERM S"))%>%
+                                   # "TJNST TERM S")) %>%
   summarise(n = sum(adjusted_estimated_number), .by = c(RELEASE_YEAR, Age)) %>%
   right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
   reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
@@ -165,6 +167,7 @@ cwt_t <- cwt_dat_subset %>%
                                      "TWCVI TERM N",
                                      "TNORTH FS",
                                      "TGS FS",
+                                     #"TJNST TERM S")) %>%
                                      "TGEO ST TERM S")) %>%
   summarise(n = sum(adjusted_estimated_number), .by = c(RELEASE_YEAR, Age)) %>%
   right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
@@ -172,6 +175,7 @@ cwt_t <- cwt_dat_subset %>%
 
 # Note terminal fishery is:
 # "TJNST TERM S" Johnstone Strait Terminal Sport (246 tags)
+
 
 # Total hatchery releases from Salmon
 rel_total.x <- readxl::read_excel(
@@ -236,7 +240,7 @@ d <- list(
   RelRegFT = rep(1, Ldyr),
   bmatt = mat,
   mobase = M_CTC,
-  hatchsurv =  0.8379,#B. Zoehner, DFO pers. comm., estimated 2017-2024
+  hatchsurv =  0.9,#M. Clarke and B. Zoehner, DFO pers. comm., 5x Q/C (10% vs 2%) given migration distance ~5x  (37km vs 7km)
   gamma = 0.8,
   ssum = 1,
   fec = fec_Salmon*0.95,
@@ -278,15 +282,15 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Salmon_06.03.26.rds")
+saveRDS(samp, file = "CM/Salmon_06.11.26.rds")
 
-samp <- readRDS(file = "CM/Salmon_06.03.26.rds")
+samp <- readRDS(file = "CM/Salmon_06.11.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
-  dir = "CM", filename = "Salmon_06.03"
+  dir = "CM", filename = "Salmon_06.11"
 )
 

@@ -268,7 +268,7 @@ Hatchery <- new(
   n_yearling = hatch_rel, # Quinsam traditionals
   n_subyearling = 0,
   s_prespawn = 0.95,  # M. Clarke DFO Science pers. comm.
-  s_egg_smolt = 0.68, #Assumed 20% M shortly after release to match CM and life-cycle table (0.8). Could lower to account for incubation mortality = 0.68
+  s_egg_smolt = 0.882, # Brown et al. (2026) & B. Zoehner pers. comm. 2% mortality release-smolt x 10% mortality release-smolt   (1 - 0.98 x 0.9)=11.8% or 88.2%surv
   s_egg_subyearling = 1,
   Mjuv_HOS = Mjuv_HOS,
   p_mature_HOS = p_mature_RS,
