@@ -1,9 +1,9 @@
 # Extract ERs
 
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_06.10.26.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_06.15.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 
-ERM_Adam <- readRDS("CM/Adam_06.01.26.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
+ERM_Adam <- readRDS("CM/Adam_06.15.26.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
 ERM_AdamPhillips <- readRDS("CM/AdamPhillips_CM_05.09.26.rds")
@@ -15,10 +15,10 @@ report_SalmonPhillips <- salmonMSE:::get_report(ERM_SalmonPhillips)
 ERM_WossPhillips <- readRDS("CM/WossPhillips_CM_05.09.26.rds")
 report_WossPhillips <- salmonMSE:::get_report(ERM_WossPhillips)
 
-ERM_Salmon <- readRDS("CM/Salmon_06.03.26.rds")
+ERM_Salmon <- readRDS("CM/Salmon_06.15.26.x2esc.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-ERM_Woss <- readRDS("CM/Woss_CM_06.02.26.rds")
+ERM_Woss <- readRDS("CM/Woss_06.15.26.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
 ERM_Phillips <- readRDS("CM/Phillips_CM_05.08.26.rds")
@@ -47,20 +47,22 @@ apply(UPT, 3, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T)
 # denominator, i.e., if it is escapement before or after enroute mortality?
 
 
+samp <- ERM_Salmon#readRDS(paste("CM/",pop,"_06.01.26.JSpt.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
+d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 brood <- FALSE
-type <- "T"#"PT"# "T" #
-year1 <-  1984#2002#2001#1984#2010 # get this for each pop: min(full_matrix$RELEASE_YEAR) or min(full_table$RELEASE_YEAR)
+type <- "PT"# "T" #
+year1 <-  2002#2002#2001#1984#2010 # get this for each pop: min(full_matrix$RELEASE_YEAR) or min(full_table$RELEASE_YEAR)
 ci <-  TRUE
 r <-  1
-report <- report_QC
+report <- report_Salmon
 
-# Make quantile figure time series
-CM_ER(report, brood, type, year1, ci, r, at_age = FALSE)
+
 
 # Repeat to fill in AEQs for incomplete brood years
 year <- year1 + seq(1, d$Ldyr) - 1
 year_borrow <- seq(max(year) - 9, max(year) - 5)
 g <- CM_ER(report, brood, type, year1, ci, r, at_age = FALSE, index_AEQ = match(year_borrow, year))
+g
 
 # Get the quantiles of what we just plotted
 if (packageVersion("ggplot2") >= "4.0") {
@@ -68,6 +70,9 @@ if (packageVersion("ggplot2") >= "4.0") {
 } else {
   g$data
 }
+# Make quantile figure time series
+CM_ER(report, brood, type="PT", year1, ci, r, at_age = FALSE, index_AEQ = match(year_borrow, year))
+CM_ER(report, brood, type="T", year1, ci, r, at_age = FALSE, index_AEQ = match(year_borrow, year))
 
 # Get matrices of individual AEQ ER values by year x MCMC simulation
 # See ?.CM_ER

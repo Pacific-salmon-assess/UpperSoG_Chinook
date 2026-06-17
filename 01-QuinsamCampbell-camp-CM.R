@@ -110,12 +110,12 @@ cwt_dat_subset <- inner_join(cwt_rel_tags, cwt_dat, by=c("tag_code"))
 # Full matrix of ages (1-5) and years 1984 (earliest escapement) - 2025
 
 full_matrix <- expand.grid(
-  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2025, #max(cwt_dat_subset$RELEASE_YEAR),# 1980 - 2025
+  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2024, #max(cwt_dat_subset$RELEASE_YEAR),# 1980 - 2025
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 )
 full_year <- data.frame(RELEASE_YEAR =
-                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2025)
+                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2024)
 
 # Shortened full_matrix to 1984 (min esc year)-2025, to cover only time-period with good escapement (unlike Walters and Korman 2024)
 
@@ -193,8 +193,14 @@ rel_Quinsam <- rel_Quinsam.x %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
-rel_Quinsam <- left_join(full_year, rel_Quinsam, by = "RELEASE_YEAR")
+# Add another year to total hatchery releases
+rel_Quinsam <- left_join(rbind(full_year,full_year[ dim(full_year)[1], ] + 1),
+                         rel_Quinsam, by = "RELEASE_YEAR")
 rel_Quinsam$n_rel[is.na(rel_Quinsam$n_rel)] <- 0
+
+
+cwt_rel <- left_join(full_year, cwt_rel,by = "RELEASE_YEAR")
+
 
 # Data object for model
 Ldyr <- dim(cwt_esc)[1]
@@ -256,7 +262,7 @@ d <- list(
   fec = fec_Quinsam *0.95, # adjusting for pre-spawn survival from M. Clarke life-cycle table
   obsescape = esc$escapement, #Algined by BY
   propwildspawn = esc$p_spawn, # This is the proportion of the natural spawners/return to river
-  hatchrelease = c(rel_Quinsam$n_rel, rel_Quinsam$n_rel[length(rel_Quinsam$n_rel)]), #rep(0, Ldyr + 1),#Algined by RY
+  hatchrelease = rel_Quinsam$n_rel,# c(rel_Quinsam$n_rel, rel_Quinsam$n_rel[length(rel_Quinsam$n_rel)]), #Aligned by RY
   # obs_pHOS = pHOS_df$pHOS[1:Ldyr], # By brood year!
   # pHOS_sd = 0.5,
   finitPT = 0.8, # Walters and Korman (2024)
@@ -294,16 +300,16 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_06.10.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_06.15.26.rds")
 
-samp <- readRDS(file = "CM/QuinsamCampbell_06.10.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_06.15.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-  dir = "CM", filename = "QuinsamCampbell_06.10"
+  dir = "CM", filename = "QuinsamCampbell_06.15"
 )
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file

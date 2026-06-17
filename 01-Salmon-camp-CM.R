@@ -111,12 +111,12 @@ cwt_dat_subset <- inner_join(cwt_rel_tags, cwt_dat, by=c("tag_code"))
 
 
 full_matrix <- expand.grid(
-  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2025,
+  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2024,
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 )
 full_year <- data.frame(RELEASE_YEAR =
-                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2025)
+                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2024)
 
 
 # Escapement CWT
@@ -189,10 +189,12 @@ rel_total <- rel_total.x %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
-rel_total <- left_join(full_year, rel_total, by = "RELEASE_YEAR")
+# Add another year to total hatchery releases
+rel_total <- left_join(rbind(full_year,full_year[ dim(full_year)[1], ] + 1),
+                       rel_total, by = "RELEASE_YEAR")
 rel_total$n_rel[is.na(rel_total$n_rel)] <- 0
-
-
+# rel_total <- left_join(full_year, rel_total, by = "RELEASE_YEAR")
+# rel_total$n_rel[is.na(rel_total$n_rel)] <- 0
 
 esc <- esc_all %>%
   right_join(
@@ -203,6 +205,7 @@ esc <- esc_all %>%
   mutate(p_spawn = nat_spawners/escapement)
 esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
 
+cwt_rel <- left_join(full_year, cwt_rel,by = "RELEASE_YEAR")
 
 # Data object for model
 Ldyr <- nrow(cwt_esc)
@@ -216,7 +219,7 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation 
 M_CTC[1] <- 4 # Need to tune this value for initial abundance
 
 # Fecundity eggs/adult spawner
-fec_Salmon <- c(0, 0, 1174, 2936, 3669) # B. Zoehner, DFO, pers. comm. eggs/female = 5871, ppnal reductions by age from W&K (2024) and 50% female for age 4
+fec_Salmon <- c(0, 0, 939, 2348, 2936)#c(0, 0, 1174, 2936, 3669) # B. Zoehner, DFO, pers. comm. eggs/female = 5871, ppnal reductions by age from W&K (2024) and 50% female for age 4
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 
 
@@ -244,10 +247,10 @@ d <- list(
   gamma = 0.8,
   ssum = 1,
   fec = fec_Salmon*0.95,
-  obsescape = esc$escapement,
+  obsescape = esc$escapement/0.5,
   propwildspawn = round(esc$p_spawn, 2),
   pHOS_init = 0.18, # From SEP average over available time-series 2007-2022
-  hatchrelease = c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
+  hatchrelease = rel_total$n_rel,#c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
   finitPT = 0.4,
   finitT = 0.1,#,0.8,
   cwtExp = cwtExp
@@ -274,7 +277,7 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(1 * max(d$obsescape, na.rm = TRUE)))
+start <- list(log_so = log(1 * max(d$obsescape/0.5, na.rm = TRUE)))
 
 #### Fit with estimated productivity parameter (log_cr)
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
@@ -282,15 +285,15 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Salmon_06.11.26.rds")
+saveRDS(samp, file = "CM/Salmon_06.15.26.x2esc.rds")
 
-samp <- readRDS(file = "CM/Salmon_06.11.26.rds")
+samp <- readRDS(file = "CM/Salmon_06.15.26.x2esc.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
-  dir = "CM", filename = "Salmon_06.11"
+  dir = "CM", filename = "Salmon_06.15.x2esc"
 )
 

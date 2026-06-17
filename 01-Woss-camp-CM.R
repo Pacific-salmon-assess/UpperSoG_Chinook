@@ -94,12 +94,12 @@ cwt_dat_subset <- inner_join(cwt_rel_tags, cwt_dat, by=c("tag_code"))
 
 
 full_matrix <- expand.grid(
-  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2025,
+  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2024,
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 )
 full_year <- data.frame(RELEASE_YEAR =
-                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2025)
+                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2024)
 
 
 # Escapement CWT
@@ -169,9 +169,13 @@ rel_total <- rel_total.x %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
-rel_total <- left_join(full_year, rel_total, by = "RELEASE_YEAR")
+# Add another year to total hatchery releases
+rel_total <- left_join(rbind(full_year,full_year[ dim(full_year)[1], ] + 1),
+                         rel_total, by = "RELEASE_YEAR")
 rel_total$n_rel[is.na(rel_total$n_rel)] <- 0
 
+# rel_total <- left_join(full_year, rel_total, by = "RELEASE_YEAR")
+# rel_total$n_rel[is.na(rel_total$n_rel)] <- 0
 
 esc <- esc_all %>%
   right_join(
@@ -181,6 +185,9 @@ esc <- esc_all %>%
   arrange(year) %>%
   mutate(p_spawn = nat_spawners/escapement)
 esc$p_spawn[is.na(esc$p_spawn)] <- na.omit(esc$p_spawn)[1]
+
+
+cwt_rel <- left_join(full_year, cwt_rel,by = "RELEASE_YEAR")
 
 
 # Data object for model
@@ -225,7 +232,7 @@ d <- list(
   obsescape = esc$escapement/0.4,#Expanded to account for Woss:Nimpkish ratio, M. Clarke pers. comm. 21 Nov 2025,
   propwildspawn = round(esc$p_spawn, 2),
   pHOS_init = 0.16,# From SEP average over available time-series 2011-2020
-  hatchrelease = c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
+  hatchrelease = rel_total$n_rel,#c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
   finitPT = 0.4,
   finitT = 0.1,#,0.8,
   cwtExp = cwtExp
@@ -263,9 +270,9 @@ fit <- fit_CM(d, start = start,  map = map, do_fit = TRUE)#lower = lower, upper 
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Woss_CM_06.10.26.rds"))
+saveRDS(samp, file = paste0("CM/Woss_06.15.26.rds"))
 
-samp <- readRDS(file = "CM/Woss_CM_06.10.26.rds")
+samp <- readRDS(file = "CM/Woss_06.15.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -274,5 +281,5 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Woss_06.10"
+  dir = "CM", filename = "Woss_06.15"
 )
