@@ -2,6 +2,10 @@ library(tidyverse)
 library(readxl)
 library(salmonMSE)
 
+RunRetro_QC <- function(Ryears){
+  for (i in 1:length(Ryears)){
+
+
 
 #### Data ----
 # Escapement time-series 1984-2025
@@ -110,12 +114,12 @@ cwt_dat_subset <- inner_join(cwt_rel_tags, cwt_dat, by=c("tag_code"))
 # Full matrix of ages (1-5) and years 1984 (earliest escapement) - 2025
 
 full_matrix <- expand.grid(
-  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): 2024, #max(cwt_dat_subset$RELEASE_YEAR),# 1980 - 2025
+  RELEASE_YEAR = (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ): Ryears[i],#2024,
   Age = seq(1, 5)#6)
   # RS = c( "Seapen/Smolt 0+")
 )
 full_year <- data.frame(RELEASE_YEAR =
-                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):2024)
+                          (max(min(cwt_dat_subset$RELEASE_YEAR), min(esc_all$year)) ):Ryears[i])#2024)
 
 # Shortened full_matrix to 1984 (min esc year)-2025, to cover only time-period with good escapement (unlike Walters and Korman 2024)
 
@@ -300,7 +304,12 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/QuinsamCampbell_06.15.26.rds")
+
+# saveRDS(samp, file = "CM/QuinsamCampbell_06.15.26.rds")
+
+saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
+  } # end of for i in 1:length(Ryears)
+} # end of RunRetro(years)
 
 samp <- readRDS(file = "CM/QuinsamCampbell_06.15.26.rds")
 
