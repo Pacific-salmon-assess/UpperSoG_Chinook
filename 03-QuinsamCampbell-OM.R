@@ -1,17 +1,21 @@
 
 # Make OM
+
+# Libraries
 library(tidyverse)
 library(salmonMSE)
 
+# OM specificiations
 maxage <- 5
 nsim <- 3 #100
-# nyears <- 2
 proyears <- 50
 n_g <- 1
 
-# Load exploitation rate model - Quinsam/Campbell (with low fecundity)
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_02.27.26.rds")
+# Load exploitation rate model - Quinsam/Campbell
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_06.15.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
+set.seed(24)
+sim_samp <- sample(seq(1, length(report_QC)), nsim)
 
 # Take maturity average from the 6 most recent brood years (2018-2024)
 # Consider changing to earlier/longer period if recent ppns are less reliable
@@ -20,22 +24,20 @@ matt <- sapply(report_QC, getElement, "matt", simplify = "array") %>%
 matt_avg <-   apply(matt[seq(14, 19), , ,1], c(2,3), mean)
 # apply (matt_avg,1,mean)
 
-# Sarita code for refernce:
+# Sarita code for reference:
 # matt_dev <- readRDS("CM/Sarita_maturity.rds")
 # matt_avg <- sapply(matt_dev, function(x) {
 #   apply(x$matt[seq(9, 14), , ], 2:3, mean)
 # }, simplify = "array")
 ##apply(matt_avg, 1:2, mean)
 
-set.seed(24)
-sim_samp <- sample(seq(1, length(report_QC)), nsim)
 
 
 ### Natural mortality - NOS ----
 Mjuv_NOS <- array(0, c(nsim, maxage-1, proyears, n_g))
 
-# Survival from CTC 23-06 p. 9 for ages 2+
-M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1))
+# Marine survival from CTC 23-06 p. 9
+M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
 
 # Age 1 value of Marine survival
 # Option1 for natural populations:
@@ -45,29 +47,29 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1))
 
 # surv1 <- 1 - 0.991
 # Mjuv_NOS[, 1, , 1] <- -log(surv1)
-Mjuv_NOS[, 1, , 1] <- -log(0.009)#
+# Mjuv_NOS[, 1, , 1] <- -log(0.009)#
 
 
 # Option2 for QC:
 # Draw random values
-#
-# df <- sapply(report_QC, getElement, "mo", simplify = "array") %>%
-#   apply(1:2, quantile, probs = c(0.025, 0.5, 0.975)) %>%
-#   reshape2::melt() %>%
-#   mutate(Year = Var2) %>%
-#   mutate(Age = paste("Age", Var3)) %>%
-#   reshape2::dcast(Year + Age ~ Var1, value.var = "value") %>%
-#   filter(Age=='Age 1')
-#
-# s1_mu <- mean(qlogis(exp(-df$'50')))
-# s1_sd <- sd(qlogis(exp(-df$'50%')))
-#
+
+df <- sapply(report_QC, getElement, "mo", simplify = "array") %>%
+  apply(1:2, quantile, probs = c(0.025, 0.5, 0.975)) %>%
+  reshape2::melt() %>%
+  mutate(Year = Var2) %>%
+  mutate(Age = paste("Age", Var3)) %>%
+  reshape2::dcast(Year + Age ~ Var1, value.var = "value") %>%
+  filter(Age=='Age 1')
+
+s1_mu <- mean(qlogis(exp(-df$'50')))
+s1_sd <- sd(qlogis(exp(-df$'50%')))
+
 # set.seed(234)
-# s1_sim  <- matrix(rnorm(nsim * proyears, s1_mu, s1_sd), nsim, proyears)
-# s1_sim_trans <- plogis(s1_sim)
-# m1_sim <- -log(s1_sim_trans)
-#
-# Mjuv_NOS[, 1, , 1] <- m1_sim
+s1_sim  <- matrix(rnorm(nsim * proyears, s1_mu, s1_sd), nsim, proyears)
+s1_sim_trans <- plogis(s1_sim)
+m1_sim <- -log(s1_sim_trans)
+
+Mjuv_NOS[, 1, , 1] <- m1_sim
 
 
 # Age 2-5

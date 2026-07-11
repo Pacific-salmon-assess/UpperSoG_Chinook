@@ -227,13 +227,23 @@ fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age
 # Use alternative values to change data weighting of CWT (re-adjust numbers accordingly)
 cwtExp <- 1
 
+
+# Smax prior
+data_Smax_prior <- as.data.frame( read.csv(
+  ("data/UpperSoGChinook_out_posteriorpredictive.csv"))
+  )
+Smax_prior <- data_Smax_prior %>% filter(Stock==pop) %>% pull(SREP_median)
+logSmax_prior_sd <- data_Smax_prior %>% filter(Stock==pop) %>%
+  mutate(sigma=(log(SREP_upr95)-log(SREP_median))/2) %>%
+  pull(sigma)
+
 d <- list(
   Nages = Nages,
   Ldyr = Ldyr,
   lht = 1,
   n_r = 1,
   s_enroute = 0.9,
-  cwtrelease = as.vector(cwt_rel$n_CWT),
+  cwtrelease = 0.7*as.vector(cwt_rel$n_CWT),
   cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatT = array(round(cwt_t/cwtExp), c(Ldyr, Nages, 1)),
@@ -247,13 +257,15 @@ d <- list(
   gamma = 0.8,
   ssum = 1,
   fec = fec_Salmon*0.95,
-  obsescape = esc$escapement/0.5,
+  obsescape = esc$escapement,
   propwildspawn = round(esc$p_spawn, 2),
   pHOS_init = 0.18, # From SEP average over available time-series 2007-2022
   hatchrelease = rel_total$n_rel,#c(rel_total$n_rel, rel_total$n_rel[length(rel_total$n_rel)]),
   finitPT = 0.4,
   finitT = 0.1,#,0.8,
-  cwtExp = cwtExp
+  cwtExp = cwtExp,
+  so_mu =  log(Smax_prior),#log(3 * max(esc$escapement, na.rm = TRUE)), #prior on S0, reduce from default 3x to 1.5x
+  so_sd = round(logSmax_prior_sd, 2)# #SD of prior on S0, reduce from default 0.5 to 0.2. Change to uncertainty in logSmax from IWAM
 )
 
 # Fix these parameters
@@ -277,7 +289,7 @@ map <- list()
 # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
 map$lnE_sd <- factor(NA)
 
-start <- list(log_so = log(1 * max(d$obsescape/0.5, na.rm = TRUE)))
+start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
 
 #### Fit with estimated productivity parameter (log_cr)
 fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf))
@@ -285,15 +297,15 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Salmon_06.15.26.x2esc.rds")
+saveRDS(samp, file = "CM/Salmon_06.24.26.prior.70cwtrel.rds")
 
-samp <- readRDS(file = "CM/Salmon_06.15.26.x2esc.rds")
+samp <- readRDS(file = "CM/Salmon_06.24.26.prior.70cwtrel.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
-  dir = "CM", filename = "Salmon_06.15.x2esc"
+  dir = "CM", filename = "Salmon_06.24.prior.70cwtrel"
 )
 

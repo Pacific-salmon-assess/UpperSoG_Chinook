@@ -22,18 +22,18 @@ options(scipen = 999)
 
 # Get data
 
-ERM_Woss <- readRDS("CM/Woss_CM_06.15.26.rds")
+ERM_Woss <- readRDS("CM/Woss_06.22.26.prior.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
-ERM_Adam <- readRDS("CM/Adam_06.15.26.rds")
+ERM_Adam <- readRDS("CM/Adam_06.22.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
-ERM_Salmon <- readRDS("CM/Salmon_06.15.26.rds")
+ERM_Salmon <- readRDS("CM/Salmon_06.22.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 # Define functions for calculating Umsy, Srep, and Heq, and extracting alpha
 # and beta values from conditioning model output ----------------------------
 
 
-# Umsy using Scheuerell (2016) explicit solution
+# Umsy using Scheuerell (2016) explicit solution, where alpha=loga
 Umsy <- function(alpha) {
 
   Umsy = 1 - gsl::lambert_W0(exp(1-alpha))
@@ -60,6 +60,26 @@ Heq <- function(alpha, beta, U) {
 
   return(Heq)
 }
+
+# Sgen using Scheuerell (2016) explicit solution for SMSY, where alpha = loga
+# Taken from salmonMSE R package
+Sgen <- function(alpha, beta){
+
+  sMSY <- ( 1 - gsl::lambert_W0 (exp ( 1 - alpha) ) ) / beta
+
+  a <- exp(alpha)
+
+  return( -1 / beta * gsl::lambert_W0( -beta * sMSY / a ) )
+}
+
+# Ugen,  where alpha = loga
+Ugen <- function(alpha, beta){
+  sgen <- Sgen(alpha, beta)
+  fgen <-  alpha - beta * sgen # slope of diagnoal line intersecting curve at sgen
+  ugen <- 1 - exp(-fgen)
+}
+
+
 # Extract full life cycle alpha and beta values from conditioning model output
 get_alpha_s <- function(report, samp){
   d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -124,6 +144,7 @@ pop_params <-
         mutate(
           Seq = Seq(alpha = log_a, beta = beta, U = U),
           Heq = Heq(alpha = log_a, beta = beta, U = U),
+          Sgen = Sgen(alpha = log_a, beta =beta)
         )
     )
   )
@@ -134,11 +155,15 @@ umsy_vals <- pop_params |>
   unnest(data) |>
   distinct(pop, log_a, beta) |>
   mutate(umsy = Umsy(log_a)) |>
+  mutate(ugen = Ugen(log_a, beta))|>
   summarise(
     .by = pop,
     umsy_mid = median(umsy),
     umsy_lwr = quantile(umsy, 0.25),
-    umsy_upr = quantile(umsy, 0.75)
+    umsy_upr = quantile(umsy, 0.75),
+    ugen_mid = median(ugen),
+    ugen_lwr = quantile(ugen, 0.25),
+    ugen_upr = quantile(ugen, 0.75)
   )
 
 
@@ -177,12 +202,30 @@ eq_sum_data <- pop_params |>
         unlist(),
       .names = "num_pop_exceed_{.col}"
     )
+  ) |>
+  mutate(
+    ugen_mid = list(umsy_vals$ugen_mid),
+    ugen_lwr = list(umsy_vals$ugen_lwr),
+    ugen_upr = list(umsy_vals$ugen_upr),
+    across(
+      contains("ugen"),
+      ~map2(
+        .x = U,
+        .y = .,
+        ~ifelse(.x > .y, 1, 0)
+      ) |>
+        map(sum) |>
+        unlist(),
+      .names = "num_pop_exceed_{.col}"
+    )
   )
+
 
 
 
 # Calculate secondary y-axis transformation
 ratio <- max(eq_sum_data$Heq_upr)*1.05/max(eq_sum_data$num_pop_exceed_umsy_upr)
+ratio2 <- max(eq_sum_data$Heq_upr)*1.05/max(eq_sum_data$num_pop_exceed_ugen_upr)
 
 
 # Calculate Smsy median, upper, and lower values
@@ -236,7 +279,13 @@ U_lab <- eq_sum_data |>
       colour = "red",
       linewidth = 1.25
     ) +
-    # Add stepped CI corresponding to the stepped line
+    # # Add stepped line showing # CUs where agg ER exceeds Ugen
+    # geom_step(
+    #   aes(y = num_pop_exceed_ugen_mid*ratio),
+    #   colour = "darkgreen",
+    #   linewidth = 1.25
+    # )+
+    # Add stepped CI corresponding to the stepped line for UMSY
     geom_rect(
       aes(
         xmin = Seq,
@@ -247,6 +296,17 @@ U_lab <- eq_sum_data |>
       fill = "red",
       alpha = 0.2
     ) +
+    # # Add stepped CI corresponding to the stepped line, for Ugen
+    # geom_rect(
+    #   aes(
+    #     xmin = Seq,
+    #     xmax = lead(Seq),
+    #     ymin = num_pop_exceed_ugen_lwr*ratio,
+    #     ymax = num_pop_exceed_ugen_upr*ratio
+    #   ),
+    #   fill = "darkgreen",
+    #   alpha = 0.2
+    # ) +
     geom_line(
       colour = "blue",
       linewidth = 1
@@ -306,7 +366,18 @@ U_lab <- eq_sum_data |>
     theme(
       axis.title.y.left = element_text(colour = "blue"),
       axis.title.y.right = element_text(colour = "red"),
-    )
+    ) +
+    #Hard coded order of populations
+    annotate(geom="text", x=5000, y=0.92*ratio,
+             label="Adam",
+             colour="red", size=3) +
+    annotate(geom="text", x=5000, y=1.92*ratio,
+             label="Salmon", colour="red",
+             size=3) +
+    annotate(geom="text", x=3000, y=2.92*ratio,
+             label="Nimpkish", colour="red",
+             size=3)
+
 )
 
 
@@ -363,7 +434,7 @@ eq_outputs <- smsy_lab |>
 write.csv(
   eq_outputs,
   here(
-    "3. R outputs",
+    "data",
     "Equilibrium trade-off analysis",
     "R-OUT_SMU_ref-pt_values_eq-trade-off.csv"
   ),

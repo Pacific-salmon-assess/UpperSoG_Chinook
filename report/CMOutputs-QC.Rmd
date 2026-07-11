@@ -1,7 +1,7 @@
 ---
 title: "Appendix B: Outputs for conditioning model - Quinsam/Campbell"
 output: word_document
-date: "2026-06-17"
+date: "2026-07-09"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 
@@ -13,6 +13,7 @@ library(knitr)
 library(ggplot2)
 library(salmonMSE)
 library(tidyverse)
+library(here)
 
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE,
@@ -29,17 +30,18 @@ if(pop=="Q/C") {
   year1 <- 1984
 }
 if(pop=="Adam") {
-  ERM <- readRDS(here::here("CM/Adam_06.15.26.rds"))
+  ERM <- readRDS(here::here("CM/Adam_06.22.26.prior.rds"))
   year1 <- 2002
 }
 if(pop=="Salmon") {
-  ERM <- readRDS(here::here("CM/Salmon_06.15.26.rds"))
+  ERM <- readRDS(here::here("CM/Salmon_06.22.26.prior.rds"))
   year1 <- 2002
 }
 if(pop=="Woss") {
-  ERM <- readRDS(here::here("CM/Woss_06.15.26.rds"))
+  ERM <- readRDS(here::here("CM/Woss_06.22.26.prior.rds"))
   year1 <- 2001
 }
+
 
 report <- salmonMSE:::get_report(ERM)
 d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
