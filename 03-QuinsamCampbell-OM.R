@@ -16,12 +16,14 @@ ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_06.15.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 set.seed(24)
 sim_samp <- sample(seq(1, length(report_QC)), nsim)
+d <- salmonMSE:::get_CMdata(ERM_QuinsamCampbell@.MISC$CMfit)
+
 
 # Take maturity average from the 6 most recent brood years (2018-2024)
 # Consider changing to earlier/longer period if recent ppns are less reliable
 matt <- sapply(report_QC, getElement, "matt", simplify = "array") %>%
   aperm(c(1, 2, 4, 3))
-matt_avg <-   apply(matt[seq(14, 19), , ,1], c(2,3), mean)
+matt_avg <-   apply(matt[seq((d$Ldyr-5), d$Ldyr), , ,1], c(2,3), mean)
 # apply (matt_avg,1,mean)
 
 # Sarita code for reference:
