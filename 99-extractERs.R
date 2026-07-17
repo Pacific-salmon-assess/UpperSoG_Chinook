@@ -33,16 +33,16 @@ ci <-  TRUE
 r <-  1
 theme_set(theme_bw())
 
-# Get ER by age class - array by MCMC simulation x year x age
-FPT <- sapply(report, function(i) { # Change to Adam, Salmon, Woss
-  outer(i$FPT, i$vulPT)
-}, simplify = "array") %>%
-  aperm(c(3, 1, 2))
-UPT <- 1 - exp(-FPT)
-# dim(UPT)
-
-# Summarize by age, over draws and years
-apply(UPT, 3, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T)
+# # Get ER by age class - array by MCMC simulation x year x age
+# FPT <- sapply(report, function(i) { # Change to Adam, Salmon, Woss
+#   outer(i$FPT, i$vulPT)
+# }, simplify = "array") %>%
+#   aperm(c(3, 1, 2))
+# UPT <- 1 - exp(-FPT)
+# # dim(UPT)
+#
+# # Summarize by age, over draws and years
+# apply(UPT, 3, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T)
 
 
 # Plot Exploitation Rates, borrowing information to fill in AEQs for incomplete brood years
@@ -54,7 +54,10 @@ CM_ER(report, brood = FALSE, type = "PT", year1, ci = TRUE, r = 1,
 CM_ER(report, brood = FALSE, type = "T", year1, ci = TRUE, r = 1,
       at_age = FALSE, index_AEQ = match(year_borrow, year))
 
-
+UPT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "PT",  r = 1,
+      index_AEQ = match(year_borrow, year))
+UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
+      index_AEQ = match(year_borrow, year))
 
 # Get matrices of individual AEQ ER values by year x MCMC simulation
 # See ?.CM_ER
