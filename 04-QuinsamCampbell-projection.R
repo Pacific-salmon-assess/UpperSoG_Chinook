@@ -118,7 +118,7 @@ if(plot.base.case == TRUE){
     list(NOB = NOB, HOB_marked = HOB_marked, HOB_unmarked = HOB_unmarked, HOB_stray = HOB_stray)
   }
 
-  sfExport(f_brood)
+  sfExport(list = "f_brood")
   tictoc::tic()
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
