@@ -11,6 +11,10 @@ nsim <- 500
 proyears <- 30
 n_g <- 1
 year1 <- 2002 # from conditioning model
+msurv <- "base" #"low" #"high"
+# for estimated value or 0.001 or 0.1 for lower and upper sens. anal.
+# also used for file name of SOM
+som_name <- "Nimpkish base" #"low msurv" # "high msurv" # for internal naming
 
 # Load exploitation rate model - Woss River
 ERM <- readRDS("CM/Woss_07.22.26.prior.rds")
@@ -47,25 +51,27 @@ m1_sample <- df[sim_samp_long]
 #exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
 
 
-# # Alternative approach: making a parametric distribution from all years
-# df <- sapply(report, getElement, "mo", simplify = "array") %>%
-#   apply(1:2, quantile, probs = c(0.025, 0.5, 0.975)) %>%
-#   reshape2::melt() %>%
-#   mutate(Year = Var2) %>%
-#   mutate(Age = paste("Age", Var3)) %>%
-#   reshape2::dcast(Year + Age ~ Var1, value.var = "value") %>%
-#   filter(Age=='Age 1')
-#
-# # Transform percentage ER to logistic distribution before sampling
-#
-# s1_mu <- mean(qlogis(exp(-df$'50')))
-# s1_sd <- sd(qlogis(exp(-df$'50%')))
-#
-# set.seed(234)
-# s1_sim  <- matrix(rnorm(nsim * proyears, s1_mu, s1_sd), nsim, proyears)
-# # Back transform ERs to % and then to instantaneous mortality
-# s1_sim_trans <- plogis(s1_sim)
-# m1_sim <- -log(s1_sim_trans)
+# Alternative approach: making a parametric distribution from all years
+if(msurv %in% c("low", "high")){
+  df <- sapply(report, getElement, "mo", simplify = "array") %>%
+  apply(1:2, quantile, probs = c(0.025, 0.5, 0.975)) %>%
+  reshape2::melt() %>%
+  mutate(Year = Var2) %>%
+  mutate(Age = paste("Age", Var3)) %>%
+  reshape2::dcast(Year + Age ~ Var1, value.var = "value") %>%
+  filter(Age=='Age 1')
+
+  # Transform percentage ER to logistic distribution before sampling
+  if(msurv == "low") s1_mu <- mean(qlogis(0.001))
+  if(msurv == "high") s1_mu <- mean(qlogis(0.01))
+  s1_sd <- sd(qlogis(exp(-df$'50%')))
+
+  set.seed(234)
+  s1_sim  <- matrix(rnorm(nsim * proyears, s1_mu, s1_sd), nsim, proyears)
+  # Back transform ERs to % and then to instantaneous mortality
+  s1_sim_trans <- plogis(s1_sim)
+  m1_sample <- -log(s1_sim_trans)
+}
 
 Mjuv_NOS[, 1, , 1] <- m1_sample
 
@@ -331,7 +337,7 @@ Habitat <- new(
 
 
 SOM <- new("SOM",
-           Name = "Nimpkish base",
+           Name = som_name,
            nsim = nsim,
            proyears = proyears,
            seed = 1,
@@ -340,5 +346,5 @@ SOM <- new("SOM",
            Hatchery = Hatchery,
            Harvest = Harvest,
            Historical = Historical)
-saveRDS(SOM, "SOM/SOM_Nimpkish.rds")
+saveRDS(SOM, paste0("SOM/SOM_Nimpkish_", msurv,".rds"))
 

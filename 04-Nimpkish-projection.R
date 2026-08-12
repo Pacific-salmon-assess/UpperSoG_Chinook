@@ -73,14 +73,14 @@ if (!dir.exists(here::here(folder_path))) {
 
     list(NOB = NOB, HOB_marked = HOB_marked, HOB_unmarked = HOB_unmarked, HOB_stray = HOB_stray)
   }
-  sfExport(f_brood)
+  sfExport("f_brood")
 
 
   tictoc::tic()
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_base.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
