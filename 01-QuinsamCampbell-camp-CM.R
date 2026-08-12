@@ -193,7 +193,10 @@ rel_Quinsam <- rel_Quinsam.x %>%
            str_starts(RELEASE_SITE_NAME, "Elk") |
            str_starts(RELEASE_SITE_NAME, "Second") |
            str_starts(RELEASE_SITE_NAME, "Discovery") |
-           str_starts(RELEASE_SITE_NAME, "Orange")) %>%
+           str_starts(RELEASE_SITE_NAME, "Orange") |
+           str_starts(RELEASE_SITE_NAME, "Deepwater") |
+           str_starts(RELEASE_SITE_NAME, "Drew") |
+           str_starts(RELEASE_SITE_NAME, "Taku") ) %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
@@ -305,20 +308,20 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                                stepsize = 0.01,
                                max_treedepth = 20))
 
-saveRDS(samp, file = "CM/QuinsamCampbell_06.15.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_07.29.26.rds")
 
 # saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
 #   } # end of for i in 1:length(Ryears)
 # } # end of RunRetro(years)
 
-samp <- readRDS(file = "CM/QuinsamCampbell_06.15.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_07.29.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-  dir = "CM", filename = "QuinsamCampbell_06.15"
+  dir = "CM", filename = "QuinsamCampbell_07.29"
 )
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
@@ -366,7 +369,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_06.10"
+    dir = "CM", filename = "QuinsamCampbell_08.06"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

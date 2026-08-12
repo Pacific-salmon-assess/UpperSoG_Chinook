@@ -1,0 +1,110 @@
+---
+title: "Benchmarks"
+output:
+  html_document: default
+  pdf_document: default
+date: "2026-08-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(salmonMSE)
+library(here)
+library(kableExtra)
+
+# Get SR benchmarks (this file must be sourced to create csv file)
+
+# source(here("98-ExtractMSY.R"))
+```
+
+## Benchmarks
+
+
+```{r benchmarks, echo=FALSE}
+BenchFull <- read.csv(file = here("data", "BenchmarksFull_NatPops.csv"))
+
+kable(BenchFull, 
+      caption = "Table 1. Populaton-level benchmarks, with SMAX estimated from the conditioning model", booktabs = TRUE) %>% 
+  collapse_rows(columns = 1, valign = "top") %>% 
+  kable_styling(full_width = FALSE)
+
+# Alternative
+BenchSimple <- read.csv(file = here("data", "BenchmarksSimple_NatPops.csv"))
+
+kable(BenchSimple, 
+      caption = "Table 1. Populaton-level benchmarks", booktabs = TRUE) %>% 
+  collapse_rows(columns = 1, valign = "top") %>% 
+  kable_styling(full_width = FALSE)
+
+```
+
+```{r habitatCapacity, echo=FALSE}
+# Smax_hab <- as.data.frame(
+#   read.csv(
+#     here("data", "UpperSoGChinook_out_posteriorpredictive.csv"))
+#   ) %>% 
+#   pivot_longer (
+#   cols = starts_with("SMAX_"),
+#   names_to = "Benchmark",
+#   names_prefix = "SMAX_",
+#   values_to = "Value") %>% 
+#   select("Stock", "WA", "Benchmark", "Value")
+
+
+
+Srep_hab <- as.data.frame(
+  read.csv(
+    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
+)  %>%  select("Stock", "WA", "SREP_median", "SREP_lwr5", "SREP_upr95") %>% 
+  rename(Population = "Stock", WatershedArea = "WA", SREP = "SREP_median", 
+         lwr = "SREP_lwr5", upr = "SREP_upr95")
+
+colnames(Srep_hab) <- c("Population", "Watershed area (km2)", "SREP", "lower CI", "upper CI")
+
+kable(Srep_hab, 
+      caption = "Table 2. Integrated accesible watershed-area model estimates of SREP",
+      booktabs = TRUE,
+      escape = FALSE) %>% 
+  collapse_rows(columns = 1, valign = "top") %>% 
+  kable_styling(full_width = FALSE)
+
+```
+
+
+```{r smax, echo=FALSE}
+
+Smax_hab <- as.data.frame(
+  read.csv(
+    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
+) %>% select("Stock", "WA", "SMAX_median", "SMAX_lwr5", "SMAX_upr95") %>% 
+  rename(Population = "Stock", WatershedArea = "WA", SMAX = "SMAX_median", 
+         lwr = "SMAX_lwr5", upr = "SMAX_upr95")
+
+colnames(Smax_hab) <- c("Population", "Watershed area (km2)", "SMAX", "lower CI", "upper CI")
+
+kable(Smax_hab,
+      caption = "Table 2. Integrated accesible watershed-area model estimates of SMAX", 
+      booktabs = TRUE) %>% 
+  collapse_rows(columns = 1, valign = "top") %>% 
+  kable_styling(full_width = FALSE)
+
+
+```
+
+```{r RPs, echo=FALSE}
+
+USR <- as.data.frame(read.csv( here(
+  "data",
+  "USR.csv")))
+
+kable(USR,
+      caption = "Table 3. Alternative Upper Stock References, USRs", 
+      booktabs = TRUE) %>% 
+  collapse_rows(columns = 1, valign = "top") %>% 
+  kable_styling(full_width = FALSE)
+
+```
+

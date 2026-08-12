@@ -22,11 +22,11 @@ options(scipen = 999)
 
 # Get data
 
-ERM_Woss <- readRDS("CM/Woss_06.22.26.prior.rds")
+ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
-ERM_Adam <- readRDS("CM/Adam_06.22.26.prior.rds")
+ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
-ERM_Salmon <- readRDS("CM/Salmon_06.22.26.prior.rds")
+ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 # Define functions for calculating Umsy, Srep, and Heq, and extracting alpha
@@ -108,12 +108,12 @@ get_beta_s <- function(report, samp){
   return(as.vector(beta_s))
 }
 
-report <- report_Woss
-samp <- ERM_Woss
-salmonMSE:::get_CMdata(samp@.MISC$CMfit)
-
-summary(as.vector(salmonMSE:::.CM_SMSY(report,d, mean_bio=TRUE, type="spawner")))
-summary(as.vector(calc_Smsy_Ricker(log(salmonMSE:::.CM_prod(report, d, mean_bio = TRUE)), get_beta_s(report,samp))))
+# report <- report_Woss
+# samp <- ERM_Woss
+# salmonMSE:::get_CMdata(samp@.MISC$CMfit)
+#
+# summary(as.vector(salmonMSE:::.CM_SMSY(report,d, mean_bio=TRUE, type="spawner")))
+# summary(as.vector(calc_Smsy_Ricker(log(salmonMSE:::.CM_prod(report, d, mean_bio = TRUE)), get_beta_s(report,samp))))
 
 # Calculate equilibrium harvest curves -------------------------------------
 

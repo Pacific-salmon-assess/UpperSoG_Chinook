@@ -185,7 +185,8 @@ rel_total.x <- readxl::read_excel(
 
 rel_total <- rel_total.x %>%
   filter(str_starts(RELEASE_SITE_NAME, "Salmon R/JNST") |
-           str_starts(RELEASE_SITE_NAME, "Salmon R Up/JNST")) %>%
+           str_starts(RELEASE_SITE_NAME, "Salmon R Up/JNST") |
+           str_starts(RELEASE_SITE_NAME, "Pallans Cr")) %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
@@ -230,7 +231,7 @@ cwtExp <- 1
 
 # Smax prior
 data_Smax_prior <- as.data.frame( read.csv(
-  ("data/UpperSoGChinook_out_posteriorpredictive.csv"))
+  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
   )
 Smax_prior <- data_Smax_prior %>% filter(Stock==pop) %>% pull(SREP_median)
 logSmax_prior_sd <- data_Smax_prior %>% filter(Stock==pop) %>%
@@ -243,7 +244,7 @@ d <- list(
   lht = 1,
   n_r = 1,
   s_enroute = 0.9,
-  cwtrelease = 0.7*as.vector(cwt_rel$n_CWT),
+  cwtrelease = as.vector(cwt_rel$n_CWT),
   cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)),
   cwtcatT = array(round(cwt_t/cwtExp), c(Ldyr, Nages, 1)),
@@ -297,15 +298,15 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Salmon_06.24.26.prior.70cwtrel.rds")
+saveRDS(samp, file = "CM/Salmon_08.06.26.prior.rds")
 
-samp <- readRDS(file = "CM/Salmon_06.24.26.prior.70cwtrel.rds")
+samp <- readRDS(file = "CM/Salmon_08.06.26.prior.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
-  dir = "CM", filename = "Salmon_06.24.prior.70cwtrel"
+  dir = "CM", filename = "Salmon_08.06.prior"
 )
 

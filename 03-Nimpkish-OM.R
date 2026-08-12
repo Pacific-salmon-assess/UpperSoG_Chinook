@@ -5,20 +5,21 @@
 library(tidyverse)
 library(salmonMSE)
 
-# OM specifications
+# OM specificiations
 maxage <- 5
 nsim <- 500
 proyears <- 30
 n_g <- 1
-year1 <- 1984 # from conditioning model
+year1 <- 2002 # from conditioning model
 
-# Load exploitation rate model - Quinsam/Campbell
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
-report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
+# Load exploitation rate model - Woss River
+ERM <- readRDS("CM/Woss_07.22.26.prior.rds")
+
+report <- salmonMSE:::get_report(ERM)
 set.seed(24)
 sim_samp <- sample(seq(1, length(report)), nsim)
-d <- salmonMSE:::get_CMdata(ERM_QuinsamCampbell@.MISC$CMfit)
-pars <- rstan::extract(ERM_QuinsamCampbell)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+pars <- rstan::extract(ERM)
 
 # Take maturity average from the 5 most recent brood years (2020-2024)
 # Consider changing to earlier/longer period if recent ppns are less reliable
@@ -37,23 +38,14 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
 # Age 1 value of Marine survival
 # Draw random values
 
-# Last year mortality
-df <- sapply(report, getElement, "mo", simplify = "array")[,1,d$Ldyr] # year x age x sim, only age 1
-exp(-quantile(df, prob = c(0.25, 0.5, 0.75)))
-
-# Mean of all years mortality
-df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
-df.mean <- apply(df, 2, mean)[sim_samp]
-#exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
-
-
 # Sampling from all years mortality
 df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
 #exp(-range(apply(df, 1, median, na.rm=T)))
 set.seed(23)
 sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
 m1_sample <- df[sim_samp_long]
-exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
+#exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
+
 
 # # Alternative approach: making a parametric distribution from all years
 # df <- sapply(report, getElement, "mo", simplify = "array") %>%
@@ -96,7 +88,7 @@ p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
 # matt_ppn[3] <- matt.x[3]-matt.x[2]
 # matt_ppn[4] <- matt.x[4]-matt.x[3]
 # matt_ppn[5] <- matt.x[5]-matt.x[4]
-#
+
 # Eggs/total spawner: Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 fec_QC <- c(0, 0, 800, 2000, 2500)
 # This is assumed to already account for ppn female as age-3 fecundity is so low
@@ -154,8 +146,7 @@ UPTmed <- UPTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>%
 UTrange <-  UT %>%
   apply(2, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T) %>%
   t()
-UTmed <- UTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>%
-  mean()
+UTmed <- UTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>% mean()
 
 u_preterminal <- matrix(UPTmed, nrow=nsim, ncol=proyears) #No random variability included
 u_terminal <- matrix(UTmed, nrow=nsim, ncol=proyears) #No random variability included
@@ -163,7 +154,7 @@ u_terminal <- matrix(UTmed, nrow=nsim, ncol=proyears) #No random variability inc
 vulPT <- sapply(report[sim_samp], getElement, "vulPT")
 vulT <- sapply(report[sim_samp], getElement, "vulT")
 
-## Median over MC samples
+# Median over MC samples
 # sapply(report, getElement, "vulPT") %>% apply(1, median)
 # sapply(report, getElement, "vulT") %>% apply(1, median)
 
@@ -199,32 +190,31 @@ Mjuv_HOS[, 3, , ] <- M_CTC[3]
 Mjuv_HOS[, 4, , ] <- M_CTC[4]
 
 # Total hatchery releases from Quinsam and Campbell release sites, all release types
-rel_Quinsam.x <- readxl::read_excel(
-  file.path("data", "Quinsam", "2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx"),
+rel.x <- readxl::read_excel(
+  file.path("data", "Quinsam", "2025-07-23-NimpkishWoss_Chinook_Releases_1970-2024.xlsx"),
   sheet = "Actual Release"
 )
 
-# Suggestion from Brendan Zoehner, SEP, to include all Quinsam sites and Cold
-# Creek (for Quinsam River) and Campbell sites, Elk R Chanel sites and Second Is
-# (for Campbell River). Discovery Pass and Orange Pt are seapen releases, likely
-# impacting both Quinsam and Campbell (8 Oct 2025)
-rel_Quinsam <- rel_Quinsam.x %>%
-  filter(str_starts(RELEASE_SITE_NAME, "Quinsam") |
-           str_starts(RELEASE_SITE_NAME, "Cold") |
-           str_starts(RELEASE_SITE_NAME, "Campbell") |
-           str_starts(RELEASE_SITE_NAME, "Elk") |
-           str_starts(RELEASE_SITE_NAME, "Second") |
-           str_starts(RELEASE_SITE_NAME, "Discovery") |
-           str_starts(RELEASE_SITE_NAME, "Orange") |
-           str_starts(RELEASE_SITE_NAME, "Deepwater") |
-           str_starts(RELEASE_SITE_NAME, "Drew") |
-           str_starts(RELEASE_SITE_NAME, "Taku") ) %>%
+# Suggestion from Brendan Zoehner, SEP and Matt Clarke, StAD to include these
+# July 2026
+rel_NimpkishWoss <- rel.x %>%
+  filter(str_starts(RELEASE_SITE_NAME, "Woss R") |
+           str_starts(RELEASE_SITE_NAME, "Woss Lk") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish R") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish R Up") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish Lk") |
+           str_starts(RELEASE_SITE_NAME, "Sebalhall Cr") |
+           str_starts(RELEASE_SITE_NAME, "Vernon Lk") |
+           str_starts(RELEASE_SITE_NAME, "Anutz Lk") |
+           str_starts(RELEASE_SITE_NAME, "Wagidis Ch") |
+           str_starts(RELEASE_SITE_NAME, "Rough Bay Cr") |
+           str_starts(RELEASE_SITE_NAME, "Alert Bay") ) %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
 # Average hatchery releases from Q/C over last 5 years
-hatch_rel <- rel_Quinsam %>%
+hatch_rel <- rel_NimpkishWoss %>%
   filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(4, 0))) %>%
   pull(n_rel) %>%
   mean()
@@ -240,86 +230,7 @@ hatch_rel <- rel_Quinsam %>%
 # By default, an identity matrix is used (no straying).
 
 
-# Removals for other purposes (p_remove), e.g., CWT sampling
-# Non-brood removals are primarily HO fish. Assume 100% HOS
-# Non-brood removals are also selective for older male fish, but this is not accounted for
-rem_Quinsam.x <- readxl::read_excel(
-  file.path("data", "Quinsam", "2026-02-11-QuinsamRiverChinook-RiverReturns-1981-2023.xlsx"),
-  sheet = "River Returns"
-)
-names(rem_Quinsam.x)[names(rem_Quinsam.x)=="Sex/Maturity"] <- "SexMaturity"
-
-# Sum removals for non-brood purposes (Brendan Zoehner pers. comm. 12 Feb 26)
-rem_Quinsam <- rem_Quinsam.x %>%
-  filter(SexMaturity == "Male"| SexMaturity == "Female") %>%
-  mutate(OtherRemovals = rowSums(across(c("04Excess To Spawning Req (ESSR)",
-                                          "05Sold",
-                                          "06Holding Mortalities",
-                                          "07Used For Other Purposes/Other Mortalities")),
-                                 na.rm=TRUE)) %>%
-  rename("year" = "Recovery Year") %>%
-  group_by(year) %>% summarise(OtherRemovals_Sum= sum(OtherRemovals, na.rm=T))
-
-# # What ppn are non-brood removals to natural spawners?
-# # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)
-# # First get total escapement (used in CM), and 'natural spawners' which account for all removals
-# pop <- c("Quinsam", "Campbell")
-# pop.cap <- str_to_upper(pop)
-# esc_all <- readxl::read_excel(
-#   file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds_2025.xlsx"),
-#   sheet = "Data") %>%
-#   filter(StAD_Use == 1) %>%
-#   rename(WaterbodyName = "Waterbody Name") %>%
-#   filter(str_starts(WaterbodyName, pop.cap[1]) |
-#            str_starts(WaterbodyName, pop.cap[2])) %>%
-#   rename(year = "Analysis Year") %>%
-#   rename(esc.x = "Max Estimate") %>%
-#   mutate(nat_spawners =
-#            ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
-#   summarise(
-#     escapement = sum(esc.x),
-#     nat_spawners = sum(nat_spawners),
-#     .by = c(year)
-#   ) %>%
-#   select (year, escapement, nat_spawners)
-
-## Calculate the ppn removed from the total natural spawners
-# esc_rem <- left_join(rem_Quinsam, esc_all) %>%
-#   mutate(nat_spawners_wOR = OtherRemovals_Sum + nat_spawners) %>%
-#   mutate(ppnOR = OtherRemovals_Sum/nat_spawners_wOR)
-# ppnRemove <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
-# 0.102
-# However, removals should be applied to HOS, not total spawners
-
-
-# What ppn are non-brood removals to hatchery-origin spawners?
-# (these removals are selectively taken from marked fish for CWT purposes)
-# Get HOS from syear[,,2]: Array slice 1 = natural origin fish, 2 = hatchery fish
-syear <- sapply(report, getElement, "syear")
-splitrow <- function(x){array(x, dim=c(d$Ldyr, d$Nages, 2))}
-
-hos <- seq_len(ncol(syear)) %>%
-  map(~ splitrow(syear[,.x])) %>%
-  # map (~ .x[,,1] + .x[,,2]) %>% # Sum HO and NO
-  map(~ .x[,1,] + .x[,2,] + .x[,3,] + .x[,4,] + .x[,5,] )  %>% # Sum over ages
-  map(~ .x[,2]) %>% # Take only hatchery-origin fish
-  simplify2array() %>%
-  apply(FUN = quantile, MARGIN = 1, probs = c(0.025, 0.5, 0.975)) %>% # Extract quantiles
-  t() %>% as.data.frame() %>% select("50%") %>%
-  mutate(year=seq(year1, year1+d$Ldyr-1)) %>%
-  rename(HOS = '50%')
-
-
-## Calculate the ppn removed from the hatchery-origin natural spawners from the
-## last 6 years, assuming mark selectivity for removals
-esc_rem <- left_join(rem_Quinsam, hos) %>%
-  mutate(HOS_wOR = OtherRemovals_Sum + HOS) %>%
-  mutate(ppnOR = OtherRemovals_Sum/HOS_wOR)
-ppnRemove_HOS <-
-  mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
-# 0.137
-# Apply ppnRemove_HOS value to  hatchery object below, or in a
-# premove_HOS function in script 4
+# No Removals for other purposes (p_remove), e.g., No CWT sampling
 
 h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
 Hatchery <- new(
@@ -328,7 +239,7 @@ Hatchery <- new(
   n_yearling = hatch_rel, # Quinsam traditionals
   n_subyearling = 0,
   s_prespawn = 1, # Fecundity already adjusted for pre-spawn survival from M. Clarke life-cycle table, both hatchery and natural origin (M. Clarke DFO Science pers. comm.)
-  s_egg_smolt = 0.882, # Brown et al. (2026) & B. Zoehner pers. comm. 2% mortality release-smolt x 10% mortality release-smolt   (1 - 0.98 x 0.9)=11.8% or 88.2%surv
+  s_egg_smolt = 0.67032, # B. Zoehner pers. comm. 16.21% mortality release-smolt x 20% mortality release-smolt: (1-0.1621)*(1 - 0.1) = 0.67032 surv
   s_egg_subyearling = 1,
   Mjuv_HOS = Mjuv_HOS,
   p_mature_HOS = p_mature, # Assume same maturity at NOS
@@ -341,7 +252,7 @@ Hatchery <- new(
   ptarget_NOB = NA_real_,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  premove_HOS = ppnRemove_HOS, #0, Fish removed for non-brood purposes, e.g. CWT. Alternative option in a function described in script 4.
+  premove_HOS = 0, #Fish removed for non-brood purposes, e.g. CWT. Alternative option in a function described in script 4.
   premove_NOS = 0,
   fec_brood = fec, #Assume the same age-specific fecundity in brood as in escapement
   fitness_type = c("Ford", "none"),
@@ -420,7 +331,7 @@ Habitat <- new(
 
 
 SOM <- new("SOM",
-           Name = "QC base",
+           Name = "Nimpkish base",
            nsim = nsim,
            proyears = proyears,
            seed = 1,
@@ -429,5 +340,5 @@ SOM <- new("SOM",
            Hatchery = Hatchery,
            Harvest = Harvest,
            Historical = Historical)
-saveRDS(SOM, "SOM/SOM_QC.rds")
+saveRDS(SOM, "SOM/SOM_Nimpkish.rds")
 

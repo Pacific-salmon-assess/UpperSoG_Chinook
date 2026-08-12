@@ -1,15 +1,27 @@
 ---
-title: "Table of Parameters for Quinsam/Campbell Projections"
-output: html_document
-date: "2026-02-17"
+title: ""
+output:
+  html_document: default
+  word_document: default
+date: ""
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE, show_col_types = FALSE)
+knitr::opts_chunk$set(echo = FALSE, show_col_types = FALSE, warning = FALSE)
 
 library(readr)
 library(knitr)
+library(ggplot2)
+library(salmonMSE)
+library(tidyverse)
+library(here)
+library(flextable)
+library(officer)
 
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  fig.width = 6, fig.height = 4#, out.width = "650px", comment = "#>"
+)
 
 
 ```
@@ -20,13 +32,91 @@ library(knitr)
 df <- read_csv(here::here("tables/qc-om.csv"),
                col_types = cols(
                  Parameter = col_character(),
+                 Symbol = col_character(),
                  Values = col_character(),
                  Type = col_character(),
                  Source = col_character()
-               ))
+               )) %>% rename(Value = Values)
 
-kable(df) 
+# df$newSymbol <- c("fa", "ra", "κ", "Smax", "sprespawn", "M(vector by age)", 
+#                   "M(vector by age)", "ϕ", "τ", "senroute", "νPTa", "νTa",  
+#                   "uT", "smoltrel", "syearling", "γ", "m", "pescmax", "pNOBmax", 
+#                   "pHOSremoval", "θ","sigma2", "omega2",  "h2")
 
+subs <- list(
+  fa = as_paragraph("f", as_sub("a")),
+  ra = as_paragraph("r", as_sub("a")),
+  kappa = as_paragraph("κ"),
+  Smax = as_paragraph("S", as_sub("max")),
+  sprespawn = as_paragraph("s", as_sub("prespawn")),
+  M = as_paragraph("M (vector at age)"),
+  M = as_paragraph("M (vector at age)"),
+  phi = as_paragraph("\u03C6"),
+  tau = as_paragraph("\u03C4"),
+  senroute = as_paragraph("s", as_sub("enroute")),
+  vPT = as_paragraph("ν", as_sup("PT"), as_sub("a")),
+  vT = as_paragraph("ν", as_sup("T"), as_sub("a")),
+  uT = as_paragraph("u", as_sup("T")),
+  smoltrel = as_paragraph("smolt", as_sub("rel")),
+  syearling = as_paragraph("s", as_sub("yearling")),
+  gamma = as_paragraph("\u03B3"),
+  m = as_paragraph("m"),
+  pescmax = as_paragraph("p", as_sup("esc"), as_sub("max")),
+  pNOBmax = as_paragraph("p", as_sup("NOB"), as_sub("max")),
+  pHOSremoval = as_paragraph("p", as_sup("HOS"), as_sub("removal")),
+  theta = as_paragraph("\u03B8"),
+  sigma2 = as_paragraph("\u03C3", as_sup("2")),
+  omega2 = as_paragraph("\u03C9", as_sup("2")),
+  h2 = as_paragraph("h", as_sup("2"))
+)
+
+df <- df[, c("Parameter", "Symbol", "Value", "Class", "Source")]
+# df <- df %>% rename(Symbol = newSymbol)
+
+
+
+ft <- flextable(df) |>
+  fontsize(size = 10, part = "all") |>
+  font(fontname = "Arial", part = "all") |>
+  set_caption(
+    align_with_table = FALSE, 
+    word_stylename = "Normal") |>
+  # autofit() #|>
+  width(j = 1:ncol(df), width = c(1.5,0.75,1.5,1,2))
+
+ft <- set_table_properties(
+  ft,
+  opts_word = list(keep_with_next = TRUE,
+                   split = FALSE)
+)
+
+for(i in seq_len(nrow(df))) {
+  ft <- compose(
+    ft,
+    i = i,
+    j = "Symbol",
+    value = subs[[df$Symbol[i]]]
+  )
+  }
+
+ft <- italic(ft,
+             j = "Symbol",
+             italic = TRUE, 
+             part = "body")
+
+ft <- set_caption(
+  ft,
+  caption = flextable::as_paragraph(
+    as_chunk("Table X. Table of input parameters for the projection model for Quinsam and Campbell Rivers, specifying the class where they are applied (Biological = Bio, Hatchery, or Harvest) and the parameter source. When parameters are drawn the posterior of the conditioning model, median values and interquartile range are provided here for reference, but the full posterior distributions are used in the projections. For time-varying paratmeters, the time-period over which the paratmeter is averaged is specified. See conditioning model results for uncertainty distributions of parameters at-age, and more details on posterior distributions.", 
+             props = fp_text(italic = FALSE)
+             )
+    ),
+  align_with_table = FALSE
+)
+
+ft
+
+# save_as_html(ft, path = "tables/QC_table.html")
 
 ```
 

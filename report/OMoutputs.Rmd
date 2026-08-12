@@ -1,0 +1,148 @@
+---
+title: "Upper Strait of Georgia Chinook Salmon Projections"
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 3
+    toc_float: true
+date: "2026-08-09"
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(here)
+library(readr)
+library(knitr)
+library(htmltools)
+library(flextable)
+source(here("report", "OMinputs.R"))
+
+knitr::opts_chunk$set(
+  echo = FALSE, show_col_types = FALSE, warning = FALSE,
+  collapse = TRUE, message = FALSE,
+  fig.width = 6, fig.height = 4#, out.width = "650px", comment = "#>"
+)
+
+```
+
+## Projection parameters
+
+```{r projtable}
+
+
+df <- data.frame(nsims = 500, years = 30)
+
+ft <- flextable(df) |>
+    fontsize(size = 10, part = "all") |>
+    font(fontname = "Arial", part = "all") |>
+    set_caption(
+      align_with_table = FALSE,
+      word_stylename = "Normal") |>
+    width(j = 1:ncol(df), width = c(1, 1))
+
+ft <- set_caption(
+    ft,
+    caption = flextable::as_paragraph(
+      as_chunk("Table 1. Projection parameters",
+               props = fp_text(italic = FALSE)
+      )
+    ),
+    align_with_table = FALSE
+  )
+
+ft
+
+```
+
+## Quinsam/Cambpell
+
+
+### Input parameters
+
+```{r QCtable}
+
+get_OMtable(pop = "qc", caption = "Table 2. Input parameters for the projection model for Quinsam and Campbell Rivers, specifying the class where they are applied (Biological = Bio, Hatchery, or Harvest) and the parameter source. When parameters are drawn the posterior of the conditioning model, median values and interquartile range are provided here for reference, but the full posterior distributions are used in the projections. For time-varying paratmeters, the time-period over which the paratmeter is averaged is specified. See conditioning model results for uncertainty distributions of parameters at-age, and more details on posterior distributions.") 
+
+```
+
+### Outputs
+
+Contour plots of performance metrics for Quinsam/Cambbell on PNI, abundances, recruitment, and catches along gradients in pre-terminal exploitation rates (X-axis) and hatchery releases (Y-axis), specified as a proportion of recent hatchery releases averaged 2021-2025. Projections assume constant terminal exploitation rate, averaged over recent 5 years, 2020-2024. Dashed horizontal and vertical lines depict recent 5-year average of pre-terminal exploitation rates (2020-2024) and hatchery releases (2021-2025). Solid vertical lines depicts the pre-terminal exploitation rate, which when combined with recent average terminal exploitation rate results in *U<sub>MSY</sub>*, labeled, *U<sub>MSY</sub> (proxy)*. 
+
+```{r QCfig, fig.cap = "Fig. 1. Contour plots of peformance metrics from projections of Quinsam/Campbell Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: proportionate natural influence (PNI), total catch, abundance of natural spawners, abundance of returns, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+
+knitr::include_graphics(here("figures", "SMSE", "QC", "gic1_QC.png"))
+knitr::include_graphics(here("figures", "SMSE", "QC", "gic2_QC.png"))
+
+```
+
+
+## Nimpkish
+
+
+### Input parameters
+
+```{r Nimpkishtable}
+
+get_OMtable(pop = "nimpkish", caption = "Table 3. Input parameters for the projection model for Nimpkish River, specifying the class where they are applied (Biological = Bio, Hatchery, or Harvest) and the parameter source. When parameters are drawn the posterior of the conditioning model, median values and interquartile range are provided here for reference, but the full posterior distributions are used in the projections. For time-varying paratmeters, the time-period over which the paratmeter is averaged is specified. See conditioning model results for uncertainty distributions of parameters at-age, and more details on posterior distributions.") 
+
+```
+
+
+### Outputs
+
+```{r Nimpkishfig, fig.cap = "Fig. 2. Contour plots of peformance metrics from projections of Nimpkish Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than Sgen, probability that natural spawners are greater than 85% SMSY, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+
+knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic1_Nimpkish.png"))
+knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic2_Nimpkish.png"))
+knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic3_Nimpkish.png"))
+
+```
+
+
+## Salmon
+
+
+### Input parameters
+
+```{r Salmontable}
+
+get_OMtable(pop = "Salmon", caption = "Table 4. Input parameters for the projection model for Salmon River, specifying the class where they are applied (Biological = Bio, Hatchery, or Harvest) and the parameter source. When parameters are drawn the posterior of the conditioning model, median values and interquartile range are provided here for reference, but the full posterior distributions are used in the projections. For time-varying paratmeters, the time-period over which the paratmeter is averaged is specified. See conditioning model results for uncertainty distributions of parameters at-age, and more details on posterior distributions.") 
+
+```
+
+
+### Outputs
+
+```{r Salmonfig, fig.cap = "Fig. 3. Contour plots of peformance metrics from projections of Salmon River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than Sgen, probability that natural spawners are greater than 85% SMSY, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+
+knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic1_Salmon.png"))
+knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic2_Salmon.png"))
+knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic3_Salmon.png"))
+
+```
+
+
+## Adam
+
+
+### Input parameters
+
+```{r Adamtable}
+
+get_OMtable(pop = "Adam", caption = "Table 5. Input parameters for the projection model for Salmon River, specifying the class where they are applied (Biological = Bio, Hatchery, or Harvest) and the parameter source. When parameters are drawn the posterior of the conditioning model, median values and interquartile range are provided here for reference, but the full posterior distributions are used in the projections. For time-varying paratmeters, the time-period over which the paratmeter is averaged is specified. See conditioning model results for uncertainty distributions of parameters at-age, and more details on posterior distributions.") 
+
+```
+
+
+### Outputs
+
+```{r Adamfig, fig.cap = "Fig. 4. Contour plots of peformance metrics from projections of Adam River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than Sgen, probability that natural spawners are greater than 85% SMSY,  total catch, pre-terminal catch, and terminal catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+
+knitr::include_graphics(here("figures", "SMSE", "Adam", "gic1_Adam.png"))
+knitr::include_graphics(here("figures", "SMSE", "Adam", "gic2_Adam.png"))
+
+```
+
+

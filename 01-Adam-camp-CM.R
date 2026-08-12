@@ -209,7 +209,7 @@ cwtExp <- 1
 
 # Smax prior
 data_Smax_prior <- as.data.frame( read.csv(
-  ("data/UpperSoGChinook_out_posteriorpredictive.csv"))
+  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
 )
 Smax_prior <- data_Smax_prior %>% filter(Stock=="Adam/Eve") %>% pull(SREP_median)
 logSmax_prior_sd <- data_Smax_prior %>% filter(Stock=="Adam/Eve") %>%
@@ -275,16 +275,16 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Adam_06.22.26.prior.rds")
+saveRDS(samp, file = "CM/Adam_08.06.26.prior.rds")
 
-samp <- readRDS(file = "CM/Adam_06.22.26.prior.rds")
+samp <- readRDS(file = "CM/Adam_08.06.26.prior.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Adam", year = year,
-  dir = "CM", filename = "Adam_06.22.prior"
+  dir = "CM", filename = "Adam_08.06.prior"
 )
 
 

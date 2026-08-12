@@ -5,26 +5,32 @@
 library(tidyverse)
 library(salmonMSE)
 
-# OM specifications
+# OM specificiations
 maxage <- 5
 nsim <- 500
 proyears <- 30
 n_g <- 1
-year1 <- 1984 # from conditioning model
+year1 <- 2002 # from conditioning model
 
-# Load exploitation rate model - Quinsam/Campbell
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
-report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
+# Load exploitation rate model - Adam
+ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
+
+report <- salmonMSE:::get_report(ERM)
 set.seed(24)
 sim_samp <- sample(seq(1, length(report)), nsim)
-d <- salmonMSE:::get_CMdata(ERM_QuinsamCampbell@.MISC$CMfit)
-pars <- rstan::extract(ERM_QuinsamCampbell)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+pars <- rstan::extract(ERM)
+
+# For Adam, use ERs from Salmon CM
+ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
+report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
+
 
 # Take maturity average from the 5 most recent brood years (2020-2024)
 # Consider changing to earlier/longer period if recent ppns are less reliable
 matt <- sapply(report, getElement, "matt", simplify = "array") %>%
   aperm(c(1, 2, 4, 3))
-matt_avg <- apply(matt[seq((d$Ldyr-4), d$Ldyr), , ,1], c(2,3), mean)
+matt_avg <- apply(matt[seq((d$Ldyr - 4), d$Ldyr), , ,1], c(2,3), mean)
 # apply (matt_avg,1,median)
 
 
@@ -36,24 +42,13 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
 
 # Age 1 value of Marine survival
 # Draw random values
-
-# Last year mortality
-df <- sapply(report, getElement, "mo", simplify = "array")[,1,d$Ldyr] # year x age x sim, only age 1
-exp(-quantile(df, prob = c(0.25, 0.5, 0.75)))
-
-# Mean of all years mortality
-df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
-df.mean <- apply(df, 2, mean)[sim_samp]
-#exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
-
-
-# Sampling from all years mortality
 df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
 #exp(-range(apply(df, 1, median, na.rm=T)))
 set.seed(23)
 sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
 m1_sample <- df[sim_samp_long]
 exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
+
 
 # # Alternative approach: making a parametric distribution from all years
 # df <- sapply(report, getElement, "mo", simplify = "array") %>%
@@ -96,7 +91,7 @@ p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
 # matt_ppn[3] <- matt.x[3]-matt.x[2]
 # matt_ppn[4] <- matt.x[4]-matt.x[3]
 # matt_ppn[5] <- matt.x[5]-matt.x[4]
-#
+
 # Eggs/total spawner: Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 fec_QC <- c(0, 0, 800, 2000, 2500)
 # This is assumed to already account for ppn female as age-3 fecundity is so low
@@ -134,15 +129,17 @@ Bio <- new(
 )
 
 ### Harvest, fishery vulnerability ----
+# Get these from Salmon River
+
 # To estimate AEQ ERs, borrow information on population parameters
 # for the last generation
 year <- year1 + seq(1, d$Ldyr) - 1
 year_borrow <- seq(max(year) - 9, max(year) - 5)
 
 # AEQ ERs (matrix of dimensions Mcdraws x years)
-UPT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "PT",  r = 1,
+UPT <- salmonMSE:::.CM_ER(report_Salmon, brood = FALSE, type = "PT",  r = 1,
                           index_AEQ = match(year_borrow, year)) %>% t()
-UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
+UT <- salmonMSE:::.CM_ER(report_Salmon, brood = FALSE, type = "T",  r = 1,
                          index_AEQ = match(year_borrow, year)) %>% t()
 
 # Take median AEQ UPT and UT in the last 5 years, and take the average of those values to project forward
@@ -160,12 +157,12 @@ UTmed <- UTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>%
 u_preterminal <- matrix(UPTmed, nrow=nsim, ncol=proyears) #No random variability included
 u_terminal <- matrix(UTmed, nrow=nsim, ncol=proyears) #No random variability included
 
-vulPT <- sapply(report[sim_samp], getElement, "vulPT")
-vulT <- sapply(report[sim_samp], getElement, "vulT")
+vulPT <- sapply(report_Salmon[sim_samp], getElement, "vulPT")
+vulT <- sapply(report_Salmon[sim_samp], getElement, "vulT")
 
-## Median over MC samples
-# sapply(report, getElement, "vulPT") %>% apply(1, median)
-# sapply(report, getElement, "vulT") %>% apply(1, median)
+# Mean over MC samples
+# sapply(report_Salmon, getElement, "vulPT") %>% apply(1, mean)
+# sapply(report_Salmon, getElement, "vulT") %>% apply(1, mean)
 
 
 Harvest <- new(
@@ -181,6 +178,8 @@ Harvest <- new(
   vulT = t(vulT)
 )
 
+
+### No Hatchery ----
 
 ### Hatchery ----
 # Number of release groups
@@ -215,17 +214,14 @@ rel_Quinsam <- rel_Quinsam.x %>%
            str_starts(RELEASE_SITE_NAME, "Elk") |
            str_starts(RELEASE_SITE_NAME, "Second") |
            str_starts(RELEASE_SITE_NAME, "Discovery") |
-           str_starts(RELEASE_SITE_NAME, "Orange") |
-           str_starts(RELEASE_SITE_NAME, "Deepwater") |
-           str_starts(RELEASE_SITE_NAME, "Drew") |
-           str_starts(RELEASE_SITE_NAME, "Taku") ) %>%
+           str_starts(RELEASE_SITE_NAME, "Orange")) %>%
   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
-# Average hatchery releases from Q/C over last 5 years
+# Average hatchery releases from Q/C over last 6 years
 hatch_rel <- rel_Quinsam %>%
-  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(4, 0))) %>%
+  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(5, 0))) %>%
   pull(n_rel) %>%
   mean()
 
@@ -325,7 +321,7 @@ h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
 Hatchery <- new(
   "Hatchery",
   n_r = n_r,
-  n_yearling = hatch_rel, # Quinsam traditionals
+  n_yearling = 0, # Quinsam traditionals
   n_subyearling = 0,
   s_prespawn = 1, # Fecundity already adjusted for pre-spawn survival from M. Clarke life-cycle table, both hatchery and natural origin (M. Clarke DFO Science pers. comm.)
   s_egg_smolt = 0.882, # Brown et al. (2026) & B. Zoehner pers. comm. 2% mortality release-smolt x 10% mortality release-smolt   (1 - 0.98 x 0.9)=11.8% or 88.2%surv
@@ -353,6 +349,7 @@ Hatchery <- new(
   heritability = h2,
   fitness_floor = 0.01
 )
+
 
 ### Historical object ----
 
@@ -419,15 +416,16 @@ Habitat <- new(
 )
 
 
+
 SOM <- new("SOM",
-           Name = "QC base",
+           Name = "Adam base",
            nsim = nsim,
            proyears = proyears,
            seed = 1,
            Bio = Bio,
            Habitat = Habitat,
-           Hatchery = Hatchery,
            Harvest = Harvest,
+           Hatchery = Hatchery,
            Historical = Historical)
-saveRDS(SOM, "SOM/SOM_QC.rds")
+saveRDS(SOM, "SOM/SOM_Adam.rds")
 

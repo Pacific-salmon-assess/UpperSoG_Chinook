@@ -165,7 +165,14 @@ rel_total <- rel_total.x %>%
   filter(str_starts(RELEASE_SITE_NAME, "Woss R") |
            str_starts(RELEASE_SITE_NAME, "Woss Lk") |
            str_starts(RELEASE_SITE_NAME, "Nimpkish R") |
-           str_starts(RELEASE_SITE_NAME, "Nimpkish R Up")) %>%
+           str_starts(RELEASE_SITE_NAME, "Nimpkish R Up") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish Lk") |
+           str_starts(RELEASE_SITE_NAME, "Sebalhall Cr") |
+           str_starts(RELEASE_SITE_NAME, "Vernon Lk") |
+           str_starts(RELEASE_SITE_NAME, "Anutz Lk") |
+           str_starts(RELEASE_SITE_NAME, "Wagidis Ch") |
+           str_starts(RELEASE_SITE_NAME, "Rough Bay Cr") |
+           str_starts(RELEASE_SITE_NAME, "Alert Bay") ) %>%
   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
   arrange(RELEASE_YEAR)
 
@@ -212,7 +219,7 @@ cwtExp <- 1
 
 # Smax prior
 data_Smax_prior <- as.data.frame( read.csv(
-  ("data/UpperSoGChinook_out_posteriorpredictive.csv"))
+  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
 )
 Smax_prior <- data_Smax_prior %>% filter(Stock==pop) %>% pull(SREP_median)
 logSmax_prior_sd <- data_Smax_prior %>% filter(Stock==pop) %>%
@@ -283,9 +290,9 @@ fit <- fit_CM(d, start = start,  map = map, do_fit = TRUE)#lower = lower, upper 
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Woss_06.22.26.prior.rds"))
+saveRDS(samp, file = paste0("CM/Woss_07.22.26.prior.rds"))
 
-samp <- readRDS(file = "CM/Woss_06.22.26.prior.rds")
+samp <- readRDS(file = "CM/Woss_07.22.26.prior.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -294,5 +301,5 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Woss_06.22.prior"
+  dir = "CM", filename = "Woss_07.22.prior"
 )

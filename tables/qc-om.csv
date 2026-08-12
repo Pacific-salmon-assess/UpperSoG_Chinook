@@ -1,27 +1,25 @@
-﻿Parameter,Values,Type,Source
-Fecundity,"Age 2: 0, Age 3: 800, Age 4: 2000, Age 5: 2500",Bio/ Hatchery,Walters and Korman (2024)
-Proportion female spawners,"Age 2: 0.01, Age 3: 0.10, Age 4: 0.55, Age 5: 0.80",Bio/ Hatchery,"Brown et al. (in press), from WCVI Chinook"
-Egg-smolt survival,0.2,Bio/ Habitat ,"Estimated from Quinsam CWT exploitation rate model (1981-2023 average), with interannual variability"
-First-year marine natural survival,0.005,Bio,"Estimated from Quinsam CWT exploitation rate model (1981-2023), with interannual variability"
-Natural survival (age 2+),"Age 2: 70%, Age 3: 80%, Age 4+: 90%",Bio,CTC (2023)
-Annual preterminal (juvenile) exploitation rate,0.45,Harvest,Estimated from Quinsam CWT exploitation rate model (1981-2023 average)
-Preterminal vulnerability,"Stochastic with means at Age 2: 0.029, Age 3: 0.234, Age 4: 0.767, Age 5: 1.00",Harvest,Estimated from Quinsam CWT exploitation rate model (1981-2023 average)
-Maturity of natural origin component,"Stochastic with means at Age 2: 0.007, Age 3: 0.16, Age 4: 0.78, Age 5: 1.00",Bio,Estimated from Quinsam CWT exploitation rate model (2018-2023 average)
-Annual terminal (mature) exploitation rate,0.1,Harvest,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
-En-route survival of escapement to spawning ground,0.95,Bio,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
-"Relative reproductive success, hatchery spawners",0.8,Hatch.,Withler et al. (2018)
-Release strategy,2092894,Hatch.,Average releases (traditionals) to Quinsam and Cambpell 2018-2023
-pNOB target,0,Hatch.,no pNOB targets for Quinsam/Campbell
-Maximum natural brood-escapement ratio,0.7,Hatch.,"Near maximum oberved ratio of brood to escapement, after enroute mortality"
-Prespawn mortailty in hatchery,0.95,Hatch.,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
-Brood survival in hatchery,0.85,Hatch.,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
-Mark rate,0,Hatch.,Assumed zero for purposes of brood take
-Outmigration survival of hatchery releases to smolt stage,0.8,Hatch.,"Life-cycle table (M. Clarke, DFO Science, pers. comm.)"
-First-year marine hatchery survival (identical to NO),0.005,Hatch.,"Estimated from Quinsam CWT exploitation rate model (1981-2023), with interannual variability"
-Hatchery survival (age 2+) (identical to NO),"Age 2: 70%, Age 3: 80%, Age 4+: 90%",Hatch.,CTC (2023)
-"Maturity, hatchery origin component (identical to NO)","Stochastic with means at Age 2: 0.007, Age 3: 0.16, Age 4: 0.78, Age 5: 1.00",Hatch.,Estimated from Quinsam CWT exploitation rate model (2018-2023 average)
-Annual strays,"45 (Age-2:0, Age 3: 7, Age 4: 28, Age 5: 17)",Hatch.,Weil et al. 2025; Proportions mean age-at-maturity Quinsam/Campbell 2018-2023. CURRENTLY NOT INCLUDED IN PROJECTIONS
-Phenotype optimum,"100 in natural environmental, 80 in hatchery",Fitness,Withler et al. (2018)
-Phenotype variance,10,Fitness,Withler et al. (2018)
-Fitness variance,100,Fitness,Withler et al. (2018)
-Heritability,"Stochastic, Gaussian with mean 0.25, SD = 0.15, bounded 0-0.5",Fitness,Withler et al. (2018)
+﻿Parameter,Symbol,Values,Class,Source
+Fecundity at age,fa,"Age 2: 0, Age 3: 800, Age 4: 2000, Age 5: 2500","Bio, Hatchery",Walters and Korman (2024)
+Proportion-at-age mature,ra,"Age 2: 0.015, Age 3: 0.17, Age 4: 0.82, Age 5: 1.00","Bio, Hatchery",Estimated from Quinsam/Campbell conditioning model (average 2020-2024)
+Productivity over the life-cycle (recruits/spawner),kappa,6.92 (5.86-7.99),Bio,Estimated from Quinsam/Campbell  conditioning model 
+Spawner abundances at maximum recruitment,Smax,"20,075 (13,398 - 31,764)",Bio,Estimated from Quinsam/Campbell  conditioning model 
+Prespawn survival,sprespawn,0.05,"Bio, Hatchery","M. Clarke pers. comm. (DFO Area Stock Assessment), B. Zoehner pers. comm. (DFO Salmonid Enhancement Program)"
+First-year marine natural survival,M,Age 1: 0.0035 (0.0020-0.0058),"Bio, Hatchery",Estimated from Quinsam/Campbell  conditioning model (sampled 1984-2024)
+Natural survival (age 2+),M,"Age 2: 0.7, Age 3:0.8, Age 4+:0. 9","Bio, Hatchery",CTC (2023) 
+Unfished per capita egg production rate (eggs/smolt),phi ,20.64,Bio,Calculated in Quinsam/Campbell  conditioning model assuming base marine mortality and maturity
+Unfished per capita spawners (spawners/smolt),tau,0.00969,Bio,Calculated in Quinsam/Campbell  conditioning model assuming assuming base marine mortality and maturity
+Enroute survival,senroute,0.9,"Bio, Hatchery",M. Clarke pers. comm. (DFO Area Stock Assessment)
+Relative vulnerabilit by age to the pre-terminal fishery,vPT,"Age 1: 0, Age 2: 0.025, Age 3: 0.20, Age 4: 0.86. Age 5: 1.0 ",Harvest,Estimated from Quinsam/Campbell conditioning model 
+Relative vulnerabilit by age to the terminal fishery,vT,"Age 1: 0, Age 2: 0.29, Age 3: 0.96, Age 4: 0.99. Age 5: 1.0 ",Harvest,Estimated from Quinsam/Campbell  conditioning model 
+Terminal exploitation rate,uT,0.097,Harvest,Estimated from Quinsam/Campbell  conditioning model  (average 2020-2024)
+Number of hatchery smolt releases,smoltrel,"2,445,747",Hatchery,B. Zoehner pers. comm. (DFO Salmonid Enhancement Program) (average 2021-2025)
+Survival of hatchery eggs to yearling life stage,syearling,0.882,Hatchery ,B. Zoehner pers. comm. (DFO Salmonid Enhancement Program) and Brown et al. (2026) 
+"Relative reproductive success, hatchery spawners",gamma,0.8,Hatchery,Withler et al. (2018)
+Mark rate of hatchery-origin fish,m,1,Hatchery,"For the purposes of removing fish for CWT sampling, mark rate is assumed to be 1. For the purposes of brood removal, mark rate is assumed to be zero as brood is non-selective."
+Maximum natural brood-escapement ratio,pescmax,0.7,Hatchery,"Near maximum oberved ratio of brood to escapement, after enroute mortality"
+Maximum proportion of the natural-origin broodtak from the escapement,pNOBmax,1,Hatchery,Assume no limitation on natural-origin brood from available natural-origin spawners
+"Proportion of hatchery-origin fish removed from spawning grounds, not available for broodtake",pHOSremoval,0.14,Hatchery,"Calculated from average proportion of fish removed for purposes other than brood (data from B. Zoehner, DFO SEP) to hatchery-origin spawners (estimated from conditioning model) (1984-2024) "
+Phenotype optimum,theta,"100 in natural environmental, 80 in hatchery",Hatchery,Withler et al. (2018)
+Phenotype variance,sigma2,10,Hatchery,Withler et al. (2018)
+Fitness variance,omega2,100,Hatchery,Withler et al. (2018)
+Heritability,h2,mean = 0.25 (sd=0.15),Hatchery,"Withler et al. (2018), sampled from a normal distribution"

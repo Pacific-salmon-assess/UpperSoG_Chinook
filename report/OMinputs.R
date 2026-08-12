@@ -1,0 +1,95 @@
+# Create tables of OM input parameters
+
+library(readr)
+library(knitr)
+library(ggplot2)
+library(salmonMSE)
+library(tidyverse)
+library(here)
+library(flextable)
+library(officer)
+
+# pop <- "qc"
+# caption <- "Table 1. Table of input parameters for the projection model for Quinsam and Campbell Rivers, specifying the class where they are applied (Biological = Bio, Hatchery, or Harvest) and the parameter source. When parameters are drawn the posterior of the conditioning model, median values and interquartile range are provided here for reference, but the full posterior distributions are used in the projections. For time-varying paratmeters, the time-period over which the paratmeter is averaged is specified. See conditioning model results for uncertainty distributions of parameters at-age, and more details on posterior distributions."
+
+get_OMtable <- function(pop, caption){
+  df <- read_csv(here::here("tables", paste0(pop,"-om.csv")),
+                 col_types = cols(
+                   Parameter = col_character(),
+                   Symbol = col_character(),
+                   Values = col_character(),
+                   Class = col_character(),
+                   Source = col_character()
+                 )) %>% rename(Value = Values)
+
+
+    subs <- list(
+      fa = as_paragraph("f", as_sub("a")),
+      ra = as_paragraph("r", as_sub("a")),
+      kappa = as_paragraph("κ"),
+      Smax = as_paragraph("S", as_sub("max")),
+      sprespawn = as_paragraph("s", as_sub("prespawn")),
+      M = as_paragraph("M (vector at age)"),
+      M = as_paragraph("M (vector at age)"),
+      phi = as_paragraph("\u03C6"),
+      tau = as_paragraph("\u03C4"),
+      senroute = as_paragraph("s", as_sub("enroute")),
+      vPT = as_paragraph("ν", as_sup("PT"), as_sub("a")),
+      vT = as_paragraph("ν", as_sup("T"), as_sub("a")),
+      uT = as_paragraph("u", as_sup("T")),
+      smoltrel = as_paragraph("smolt", as_sub("rel")),
+      syearling = as_paragraph("s", as_sub("yearling")),
+      gamma = as_paragraph("\u03B3"),
+      m = as_paragraph("m"),
+      pescmax = as_paragraph("p", as_sup("esc"), as_sub("max")),
+      pNOBmax = as_paragraph("p", as_sup("NOB"), as_sub("max")),
+      pHOSremoval = as_paragraph("p", as_sup("HOS"), as_sub("removal")),
+      theta = as_paragraph("\u03B8"),
+      sigma2 = as_paragraph("\u03C3", as_sup("2")),
+      omega2 = as_paragraph("\u03C9", as_sup("2")),
+      h2 = as_paragraph("h", as_sup("2"))
+    )
+
+
+  ft <- flextable(df) |>
+    fontsize(size = 10, part = "all") |>
+    font(fontname = "Arial", part = "all") |>
+    set_caption(
+      align_with_table = FALSE,
+      word_stylename = "Normal") |>
+    # autofit() #|>
+    width(j = 1:ncol(df), width = c(1.5,0.75,1.5,1,2))
+
+  ft <- set_table_properties(
+    ft,
+    opts_word = list(keep_with_next = TRUE,
+                     split = FALSE)
+  )
+
+  for(i in seq_len(nrow(df))) {
+    ft <- compose(
+      ft,
+      i = i,
+      j = "Symbol",
+      value = subs[[df$Symbol[i]]]
+    )
+  }
+
+  ft <- italic(ft,
+               j = "Symbol",
+               italic = TRUE,
+               part = "body")
+
+  ft <- set_caption(
+    ft,
+    caption = flextable::as_paragraph(
+      as_chunk(caption,
+               props = fp_text(italic = FALSE)
+      )
+    ),
+    align_with_table = FALSE
+  )
+
+  return(ft)
+
+}

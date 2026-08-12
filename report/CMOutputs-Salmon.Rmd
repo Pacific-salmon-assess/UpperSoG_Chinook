@@ -1,7 +1,7 @@
 ---
-title: "Appendix D: Outputs for conditioning model - Salmon"
+title: "Appendix D: Outputs for conditioning model - Salmon River"
 output: word_document
-date: "2026-07-09"
+date: "2026-08-10"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 
@@ -20,28 +20,16 @@ knitr::opts_chunk$set(
   fig.width = 6, fig.height = 4#, out.width = "650px", comment = "#>"
 )
 
+theme_set(theme_bw())
 ```
 
 
 ```{r}
 pop <- "Salmon"
-if(pop=="Q/C") {
-  ERM <- readRDS(here::here("CM/QuinsamCampbell_06.15.26.rds"))
-  year1 <- 1984
-}
-if(pop=="Adam") {
-  ERM <- readRDS(here::here("CM/Adam_06.22.26.prior.rds"))
-  year1 <- 2002
-}
 if(pop=="Salmon") {
-  ERM <- readRDS(here::here("CM/Salmon_06.22.26.prior.rds"))
+  ERM <- readRDS(here("CM/Salmon_08.06.26.prior.rds"))
   year1 <- 2002
 }
-if(pop=="Woss") {
-  ERM <- readRDS(here::here("CM/Woss_06.22.26.prior.rds"))
-  year1 <- 2001
-}
-
 report <- salmonMSE:::get_report(ERM)
 d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
 
@@ -50,7 +38,7 @@ d1 <- data.frame(
   Parameter = c("Historical years", "Age classes", "MCMC iterations"),
   Value = c(d$Ldyr, d$Nages, length(report))
 )
-kable(d1, caption = "")
+kable(d1, caption = "Table D1. Projection parameters")
 
 df_pars <- rstan::summary(ERM)$summary %>%
   round(3) %>%
@@ -61,7 +49,7 @@ df_pars <- rstan::summary(ERM)$summary %>%
 df_summary <- df_pars[c("log_cr", "log_so", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"),
         c("mean", "sd", "2.5%", "50%", "97.5%", "n_eff", "Rhat")]
 row.names(df_summary) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*", "*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
-kable(df_summary, escape=FALSE, caption = "Table D1. Parameter estimates from the conditioning model: mean, standard deviation, 2.5th percentile, 50th percentil, 97.5th percentile, effective sample size and Rhat values")
+kable(df_summary, escape=FALSE, caption = "Table D2. Parameter estimates from the conditioning model: mean, standard deviation, 2.5th percentile, 50th percentil, 97.5th percentile, effective sample size and Rhat values")
 
 # Replace parameter names with greek symbols
 
@@ -76,7 +64,7 @@ df_legend <- data.frame(Names= c("log_cr", "log_so", "moadd", "logit_vulPT[1]", 
 
 row.names(df_legend) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*","*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
 
-kable(df_legend, caption = "Table D2. Legend for names of parameter values used in code, for reference for output figures")
+kable(df_legend, caption = "Table D3. Legend for names of parameter values used in code, for reference for output figures")
 ```
 
 # MCMC Outputs
@@ -154,7 +142,7 @@ salmonMSE:::CM_fit_CWTcatch(report, d, PT = TRUE, year1, rs_names)
 salmonMSE:::CM_fit_CWTesc(report, d, year1, rs_names)
 ```
 
-# Model ouputs
+# Model outputs
 
 
 ```{r SRR, fig.cap="Figure D14. Estimated stock-recruit relationship (medians and 95% prediction interval). Numbers correspond to years of egg production (predicts juvenile production for the following calendar year). Points show annual smolt production (medians).", warning=FALSE}
@@ -175,23 +163,53 @@ knitr::include_graphics(here(
 
 ```
 
-```{r Megg, fig.cap="Figure D16. Estimated egg-smolt instantaneous mortality rate (medians and 95% prediction interval)."}
+
+
+```{r SmaxPriorPost, fig.cap="Figure D16. Habitat-based estimates of Smax with posterior estimates of Smax, spawner abundances at maximum recruitment."}
+# (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
+file <-  paste0(pop, "_Smax_IWAM-post.png")
+
+knitr::include_graphics(here(
+  "figures", file
+ )
+ )
+
+
+
+```
+
+```{r prod, fig.cap="Figure D17. Estimate of life-cycle productivity, recuits/spawner."}
+# (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
+file <-  paste0(pop, "_prod.png")
+
+knitr::include_graphics(here(
+  "figures", file
+ )
+ )
+
+
+
+```
+
+
+
+```{r Megg, fig.cap="Figure D18. Estimated egg-smolt instantaneous mortality rate (medians and 95% prediction interval)."}
 salmonMSE:::CM_Megg(report, year1, ci = TRUE, surv = FALSE)
 ```
 
 
 
-```{r vulPT, fig.cap="Figure D17. Posterior estimates of preterminal vulnerability at age (medians and 95% prediction interval)."}
+```{r vulPT, fig.cap="Figure D19. Posterior estimates of preterminal vulnerability at age (medians and 95% prediction interval)."}
 FPT <- sapply(report, getElement, "FPT")
 if (sum(FPT)) salmonMSE:::CM_vul(report, type = "vulPT")
 ```
 
-```{r CYER-PT, fig.cap="Figure D18. Return year preterminal exploitation rate at age (medians and 95% prediction interval)."}
+```{r CYER-PT, fig.cap="Figure D20. Return year preterminal exploitation rate at age (medians and 95% prediction interval)."}
 if (sum(FPT)) salmonMSE:::CM_ER(report, brood = FALSE, type = "PT", year1, r = d$r_matt)
 ```
 
 
-```{r matt-RY, fig.cap="Figure D19. Posterior estimates of maturity by age and return year (medians and 95% prediction interval). Dashed, horizontal lines represent prior means."}
+```{r matt-RY, fig.cap="Figure D21. Posterior estimates of maturity by age and return year (medians and 95% prediction interval). Dashed, horizontal lines represent prior means."}
 salmonMSE:::CM_maturity(report, d, year1, r = d$r_matt, brood = FALSE, rs_names = rs_names)
 ```
 

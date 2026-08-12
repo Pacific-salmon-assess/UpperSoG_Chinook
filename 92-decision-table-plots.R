@@ -1,0 +1,344 @@
+
+
+.ts_fn <- function(SMSE, name, var, all_sims = FALSE) {
+  require(salmonMSE)
+
+  if (all_sims) {
+    s <- 1
+
+    if (var == "Brood") {
+      res <- SMSE@NOB[, s, ] + SMSE@HOB[, s, ]
+    } else if (var == "Egg") {
+      res <- SMSE@Egg_NOS[, s, ] + SMSE@Egg_HOS[, s, ]
+    } else if (var == "Mean age") {
+      Sp <- SMSE@NOS[, 1, , ] + SMSE@HOS[, 1, , ]
+      res <- apply(Sp, c(1, 3), function(w) weighted.mean(x = 1:5, w = w))
+    } else if (var == "IR_Return") {
+      res <- apply(SMSE@Escapement_NOS[, s, , ] + SMSE@Escapement_HOS[, s, , ], c(1, 3), sum)
+    } else if (var == "IR_Catch") {
+      res <- SMSE@Misc$inriver_catch$HOS + SMSE@Misc$inriver_catch$NOS
+    } else {
+      res <- plot_statevar_ts(SMSE, var, figure = FALSE, quant = FALSE)
+    }
+    dimnames(res) <- NULL
+
+  } else {
+
+    if (var == "Brood") {
+      out <- apply(SMSE@NOB + SMSE@HOB, 3, quantile, c(0.025, 0.5, 0.975))
+    } else if (var == "Egg") {
+      out <- apply(SMSE@Egg_NOS + SMSE@Egg_HOS, 3, quantile, c(0.025, 0.5, 0.975))
+    } else {
+      out <- plot_statevar_ts(SMSE, var, figure = FALSE, quant = TRUE)
+    }
+
+    res <- reshape2::melt(out) %>%
+      rename(Year = Var2) %>%
+      mutate(name = name) %>%
+      reshape2::dcast(Year + name ~ Var1)
+  }
+
+  return(res)
+
+}
+
+ts_fn <- function(SMSE_list, name, var) {
+  d <- Map(.ts_fn, SMSE = SMSE_list, name = name, MoreArgs = list(var = var)) %>%
+    bind_rows() %>%
+    filter(!is.na(`50%`), `50%` > 0) %>%
+    mutate(var = .env$var)
+
+  g <- ggplot(d, aes(Year, `50%`, colour = name, fill = name)) +
+    geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.25, colour = NA, linetype = 2) +
+    geom_line() +
+    labs(x = "Year", y = var, colour = "Scenario", fill = "Scenario")
+  g
+}
+
+plot_dotplot <- function(val_sim) {
+  g <- val_sim %>%
+    ggplot(aes(Option, median, ymin = lwr, ymax = upr, shape = factor(IRER), colour = factor(pNOB_target))) +
+    facet_wrap(vars(variable), scales = "free_x", strip.position = "top") +
+    geom_point() +
+    geom_linerange() +
+    coord_flip()
+
+  g
+}
+
+
+plot_table <- function(df, padding = 0.52, ncol = 1) {
+
+  lev <- levels(df$variable)
+
+  df$variable <- sub(" ", "\n", df$variable)
+  lev <- sub(" ", "\n", lev)
+  df$variable <- factor(df$variable, lev)
+
+  d <- df %>%
+    mutate(txt = signif(median, 3)) %>%
+    mutate(txt = ifelse(txt < 0.01 & txt > 0, "<0.01", txt)) %>%
+    mutate(val_rel = median/max(median, na.rm = TRUE),
+           val_0_1 = (median - min(median, na.rm = TRUE)) / diff(range(median, na.rm = TRUE)),
+           .by = variable)
+
+  g <- ggplot(d, aes(variable, Option)) +
+    geom_tile(aes(fill = val_rel), alpha = 0.6, color = "white") +
+    geom_text(aes(label = txt), size = ggplot2::rel(3)) +
+    guides(fill = "none") +
+    labs(x = NULL, y = NULL) +
+    facet_wrap(vars(Scenario), ncol = ncol, scales = "free_y", dir = "v") +
+    coord_cartesian(
+      expand = FALSE,
+      xlim = range(as.numeric(d$variable)) + c(-padding, padding),
+      ylim = range(as.numeric(d$Option)) + c(-padding - 0.01, padding + 0.01)
+    ) +
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_text(color = "grey10", angle = 90),
+      strip.placement = "outside",
+      strip.text = element_text(face = "bold"),
+      strip.background = element_blank()
+    ) +
+    scale_x_discrete(position = "top") +
+    scale_fill_gradient2(low = "deeppink", high = "green4", mid = "white", limits = c(0, 1), midpoint = 0.5)
+  g
+}
+
+# Adapted for Upper SoG
+decision_table_grid <- function(x, title = "PNI", ncol = 2,
+                                fill_scheme = scale_fill_gradient2(low = "deeppink", high = "green4", mid = "white", midpoint = 0.5)) {
+
+  g <- salmonMSE::plot_decision_table(
+    x = x$u_preterminal,
+    y = x$n_yearling,
+    z = x$value,
+    # scenario = NULL,#x$n,
+    title = title,
+    xlab = "Preterminal ER",
+    ylab = "Proportion of current hactchery (yearling) releases",
+    ncol = ncol
+  ) +
+    fill_scheme
+
+  g
+}
+
+plot_tradeoff_custom <- function(pm1, pm2, x1, x2, xlab, ylab, x1lab, x2lab,
+                                 scenario,
+                                 scenario_rows, scenario_cols,
+                                 ncol = NULL, dir = "v") {
+
+  if (missing(x1)) x1 <- 0
+  if (missing(x2)) x2 <- 1
+
+  dt <- data.frame(
+    pm1 = if (is.matrix(pm1)) pm1[, 2] else pm1,
+    pm2 = if (is.matrix(pm1)) pm2[, 2] else pm2,
+    pm1_lower = if (is.matrix(pm1)) pm1[, 1] else pm1,
+    pm2_lower = if (is.matrix(pm1)) pm2[, 1] else pm2,
+    pm1_upper = if (is.matrix(pm1)) pm1[, 3] else pm1,
+    pm2_upper = if (is.matrix(pm1)) pm2[, 3] else pm2,
+    scenario_rows = scenario_rows,
+    scenario_cols = scenario_cols,
+    x1 = x1,
+    x2 = x2
+  )
+
+  if (!missing(scenario)) {
+    dt$scenario <- scenario
+  } else if (!missing(scenario_rows) && !missing(scenario_cols)) {
+    dt$scenario_rows <- scenario_rows
+    dt$scenario_cols <- scenario_cols
+  }
+
+  g <- ggplot(dt, aes(.data$pm1, .data$pm2, colour = .data$x1, shape = .data$x2)) +
+    geom_point() +
+    theme_bw()
+
+  if (is.matrix(pm1)) {
+    g <- g + geom_linerange(aes(xmin = .data$pm1_lower, xmax = .data$pm1_upper), linewidth = 0.25)
+  }
+  if (is.matrix(pm2)) {
+    g <- g + geom_linerange(aes(ymin = .data$pm2_lower, ymax = .data$pm2_upper), linewidth = 0.25)
+  }
+
+  if (length(x1) == 1) {
+    g <- g +
+      scale_colour_manual(values = GeomPoint$default_aes$colour) +
+      guides(colour = "none")
+  }
+  if (length(x2) == 2) {
+    g <- g +
+      scale_shape_manual(values = GeomPoint$default_aes$shape) +
+      guides(shape = "none")
+  }
+
+  if (!missing(scenario)) {
+    g <- g +
+      facet_wrap(vars(.data$scenario), ncol = ncol, dir = dir) +
+      theme(strip.background = element_blank())
+  } else if (!missing(scenario_rows) && !missing(scenario_cols)) {
+    g <- g +
+      facet_grid(vars(.data$scenario_rows), vars(.data$scenario_cols)) +
+      theme(strip.background = element_blank())
+  }
+
+  if (!missing(xlab)) g <- g + labs(x = xlab)
+  if (!missing(ylab)) g <- g + labs(y = ylab)
+  if (!missing(x1lab)) g <- g + labs(colour = x1lab)
+  if (!missing(x2lab)) g <- g + labs(shape = x2lab)
+
+  return(g)
+}
+
+tradeoff_grid <- function(val_sim, xname = "Total Spawners", yname = "PNI", xlab = xname, ylab = yname,
+                          x1 = "pNOB_target", x2 = "IRER", x1lab = "pNOB target", x2lab = "IRER 1300",
+                          xlim = NULL, ylim = NULL, ncol = 2, is_prob = FALSE) {
+
+  if (is_prob) {
+    pm1 <- val_sim %>% filter(variable == xname) %>% pull(.data$median)
+    pm2 <- val_sim %>% filter(variable == yname) %>% pull(.data$median)
+  } else {
+    pm1 <- val_sim %>% filter(variable == xname) %>% select(lwr, median, upr) %>% as.matrix()
+    pm2 <- val_sim %>% filter(variable == yname) %>% select(lwr, median, upr) %>% as.matrix()
+  }
+
+  g <- plot_tradeoff_custom(
+    pm1,
+    pm2,
+    val_sim %>% filter(variable == xname) %>% pull(.data[[x1]]) %>% factor(),
+    val_sim %>% filter(variable == xname) %>% pull(.data[[x2]]) %>% factor(),
+    xlab = xlab,
+    ylab = ylab,
+    x1lab = x1lab,
+    x2lab = x2lab,
+    scenario_rows = val_sim %>% filter(variable == xname) %>% pull(.data$rows),
+    scenario_cols = val_sim %>% filter(variable == xname) %>% pull(.data$cols),
+    ncol = ncol
+  ) +
+    scale_shape_manual(values = c(1, 4, 16)) +
+    coord_cartesian(xlim = xlim, ylim = ylim) +
+    theme(panel.grid = element_blank())
+  g
+}
+
+
+
+plot_histogram <- function(val, var = "PNI", binwidth = 0.025, scales = "free_y") {
+  g <- val %>%
+    ggplot(aes(value)) +
+    geom_histogram(binwidth = binwidth, linewidth = 0.1, fill = "grey80", colour = "black") +
+    facet_wrap(vars(scenario), scales = scales) +
+    labs(x = var, y = "Frequency") +
+    theme(strip.background = element_blank())
+  g
+}
+
+
+plot_spaghetti <- function(x, sims, OM_name = NULL, MP_name = NULL, alpha = 0.4, by_origin = FALSE) {
+
+  if (by_origin) {
+    require(ggborderline)
+
+    meds <- summarise(x, value = median(value), .by = c(Year, var_name, Scenario, Option, Origin))
+
+    g <- x %>%
+      mutate(gr = paste(Simulation, Origin)) %>%
+      ggplot(aes(Year, value)) +
+      facet_wrap(vars(var_name), scales = "free_y") +
+      geom_line(alpha = alpha, aes(colour = Origin, group = factor(gr))) +
+      #geom_line(data = meds, colour = "black", aes(group = Origin), linewidth = 1.5) +
+      ggborderline::geom_borderline(data = meds, aes(colour = Origin), bordercolour = "grey40", linewidth = 1) +
+      expand_limits(y = 0) +
+      theme(strip.background = element_blank(), legend.position = "bottom") +
+      labs(y = NULL, colour = NULL) +
+      ggtitle(OM_name, subtitle = MP_name)
+
+  } else if (missing(sims)) { # All simulations
+
+    meds <- summarise(x, value = median(value), .by = c(Year, var_name, Scenario, Option))
+
+    g <- ggplot(x, aes(Year, value)) +
+      facet_wrap(vars(var_name), scales = "free_y") +
+      geom_line(alpha = alpha, colour = "grey40", aes(group = factor(Simulation))) +
+      geom_line(data = meds, colour = "blue", linewidth = 1) +
+      expand_limits(y = 0) +
+      theme(strip.background = element_blank(), legend.position = "bottom") +
+      labs(y = NULL) +
+      ggtitle(OM_name, subtitle = MP_name)
+
+  } else {
+
+    val_plot <- dplyr::filter(x, Simulation %in% sims)
+    g <- ggplot(val_plot, aes(Year, value, colour = factor(Simulation))) +
+      facet_wrap(vars(var_name), scales = "free_y") +
+      geom_line() +
+      expand_limits(y = 0) +
+      theme(strip.background = element_blank(), legend.position = "bottom") +
+      labs(y = NULL, colour = "Simulation") +
+      scale_colour_brewer(palette = "Dark2") +
+      ggtitle(OM_name, subtitle = MP_name)
+  }
+  g
+}
+
+# Function that parses text for management options and typesets the ER (pass along to ggplot)
+font_fn <- function(x) {
+  xx <- strsplit(x, ",")
+  xout <- sapply(xx, function(i) {
+
+    if (length(i) < 2) i[2] <- ""
+
+    if (grepl("= 0.75", i[1])) {
+      paste0("italic(underline(\"", i[1], "\"))~\"", i[2], "\"")
+    } else if (grepl("= 0.25", i[1])) {
+      paste0("bold(\"", i[1], "\")~\"", i[2], "\"")
+    } else if (grepl("= 0", i[1])) {
+      paste0("plain(\"", i[1], "\")~\"", i[2], "\"")
+    }
+  })
+  parse(text = xout)
+}
+
+
+calc_CYER <- function(SMSE, PT = FALSE) {
+
+  maxage <- SMSE@Misc$SOM@Bio[[1]]@maxage
+  matt <- SMSE@Misc$SOM@Bio[[1]]@p_mature[, , seq(1, SMSE@proyears)]
+  M <- SMSE@Misc$SOM@Bio[[1]]@Mjuv_NOS[, , seq(1, SMSE@proyears), 1]
+  surv <- exp(-M)
+
+  # This is fine if M and maturity are constant, otherwise need to index by brood year
+  AEQ_PT <- array(NA_real_, c(SMSE@nsim, maxage, SMSE@proyears))
+  AEQ_PT[, maxage, ] <- 1
+  for (a in seq(maxage, 2) - 1) AEQ_PT[, a, ] <- matt[, a, ] + (1 - matt[, a, ]) * surv[, a, ] * AEQ_PT[, a+1, ]
+
+  AEQ_T <- 1
+
+  KPT_NOS <- SMSE@ExPT_NOS * SMSE@Njuv_NOS
+  KPT_HOS <- SMSE@ExPT_HOS * SMSE@Njuv_HOS
+
+  KT_NOS <- SMSE@ExT_NOS * SMSE@Return_NOS
+  KT_HOS <- SMSE@ExT_HOS * SMSE@Return_HOS
+
+  Esc <- SMSE@Escapement_HOS + SMSE@Escapement_NOS
+  num_PT <- (KPT_NOS + KPT_HOS)[, 1, , ] * AEQ_PT
+  num_T <- (KT_NOS + KT_HOS)[, 1, , ] * AEQ_T
+  denom <- num_PT + num_T + Esc[, 1, , ]
+
+  if (PT) {
+    CYER <- apply(num_PT, c(1, 3), sum)/apply(denom, c(1, 3), sum)
+  } else {
+    CYER <- apply(num_T, c(1, 3), sum)/apply(denom, c(1, 3), sum)
+  }
+
+  CYER[, SMSE@proyears] <- NA_real_
+  #matplot(CYER %>% t(), type = "l")
+
+  return(CYER)
+}

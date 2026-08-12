@@ -19,6 +19,7 @@ gadd <- data.frame(
 
 library(snowfall)
 sfInit(TRUE, nOM)
+sfExport(f_brood)
 
 
 tictoc::tic()

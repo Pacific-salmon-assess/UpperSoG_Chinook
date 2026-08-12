@@ -7,18 +7,20 @@ library(tidyverse)
 library(salmonMSE)
 library(here)
 
+# Get aggregated benchmarks
+source(here("98-ExtractMSY.R"))
 
 # Pull results from conditioning model
-ERM_QC <- readRDS("CM/QuinsamCampbell_06.15.26.rds")
+ERM_QC <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QC)
 
-ERM_Adam <- readRDS("CM/Adam_06.22.26.prior.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
+ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_Salmon <- readRDS("CM/Salmon_06.22.26.prior.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
+ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-ERM_Woss <- readRDS("CM/Woss_06.22.26.prior.rds")
+ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
 
@@ -97,6 +99,7 @@ for (pop in c("QC", "Woss", "Adam", "Salmon")){
                 here::here(paste0("data/CMoutput/", pop, "_timeseries.csv")))
 
   df_withpop <- df %>% mutate(Pop = pop)
+  if(pop == "Woss") df_withpop <- df %>% mutate (Pop = "Nimpkish")
   assign(paste0("Timeseries_", pop), df_withpop)
 
 }
@@ -139,6 +142,21 @@ ts_catchAll <- ts %>% mutate(catchAll = catchPT + catchT) %>%
   select(c(year, lwr, med, upr)) %>%
   mutate(label="TotalCatch")
 
+catchPT_bp <- ts_catchPT %>%
+  filter(year>=2002 & year <=2011) %>%
+  pull(med) %>%
+  mean()
+
+catchT_bp <- ts_catchT %>%
+  filter(year>=2002 & year <=2011) %>%
+  pull(med) %>%
+  mean()
+
+catchAll_bp <- ts_catchAll %>%
+  filter(year>=2002 & year <=2011) %>%
+  pull(med) %>%
+  mean()
+
 catch <- rbind(ts_catchPT, ts_catchT, ts_catchAll) %>%
   mutate(med=med/1000, upr=upr/1000, lwr=lwr/1000)
 
@@ -173,8 +191,16 @@ spawners <- rbind(ts_Tsp, ts_Nsp) %>%
   mutate(med=med/1000, upr=upr/1000, lwr=lwr/1000)
 
 # Calculated empirical alternatives to USR
-medspawners <- median(spawners$med)*1000
-spawners_bp <- spawners %>% filter(y<2012 & year>2001) %>% select(med)
+
+medspawners <- spawners %>%
+  filter(label == "Total") %>%
+  pull(med) %>%
+  median()*1000
+
+spawners_bp <- spawners %>%
+  filter(label == "Total") %>%
+  filter(year < 2012 & year > 2001) %>%
+  select(med)
 avespawners_bp <- mean(spawners_bp$med)*1000
 
 empUSR <- data.frame(medspawners = medspawners, avespawners_bp = avespawners_bp)
@@ -265,9 +291,20 @@ gcatch <- ggplot(catch, aes(x = year, y = med, group = label)) +
     legend.key = element_blank()
   ) +
   guides(colour = guide_legend(reverse = TRUE),
-         fill = guide_legend(reverse = TRUE))
+         fill = guide_legend(reverse = TRUE)) #+
+  # geom_hline(yintercept= catchAll_bp/1000,
+  #            colour= "#619CFF",
+  #            linetype= "dashed",
+  #            linewidth=0.3) +
+  # geom_hline(yintercept= catchPT_bp/1000,
+  #            colour= "#F8766D",
+  #            linetype= "dashed",
+  #            linewidth=0.3) +
+  # geom_hline(yintercept= catchT_bp/1000,
+  #            colour= "#00BA38",
+  #            linetype= "dashed",
+  #            linewidth=0.3)
 
-# + theme(legend.position = "none")
 gcatch
 
 # Black and White is too hard to interpret with 3 lines and 3 bands
@@ -342,8 +379,10 @@ gspawners <- ggplot(spawners, aes(x = year, y = med, group = label)) +
       reverse = TRUE
       )
   ) +
-  geom_hline(yintercept= medlBench_Nat/1000, colour= "darkred", linetype= "dashed") +
-  geom_hline(yintercept= meduBench_Nat/1000, colour= "darkgreen", linetype= "dashed")
+  geom_hline(yintercept= medlBench_Nat/1000, colour= "darkred", linetype= "dotted", linewidth=0.7) +
+  geom_hline(yintercept= meduBench_Nat/1000, colour= "darkgreen", linetype= "dashed", linewidth=0.7) +
+  geom_hline(yintercept= medspawners/1000, colour= "navyblue", linetype= "solid", linewidth=0.5, alpha=0.2)
+
 
 
   # + theme(legend.position = "none")
@@ -390,7 +429,8 @@ gER <- ggplot(ts_ER, aes(x = year, y = med, group = Pop, colour = Pop,
     legend.background = element_blank(),
     legend.key = element_blank()
   ) +
-  geom_hline(yintercept = UMSY_med, colour = "darkgrey", linetype = "dashed")+
+  geom_hline(yintercept = UMSY_med, colour = "grey40", linetype = "dashed",
+             linewidth = 0.6)+
   annotate(
     "rect",
     xmin = 1988, xmax = 2024,
@@ -463,3 +503,7 @@ g4panel <- (gcatch + gspawners)/
   (gER + grec)
 
 ggsave(paste("figures/Fourpanel.png", sep=""), g4panel, height = 6, width = 9)
+
+
+
+

@@ -1,20 +1,20 @@
 # Libraries
 library(tidyverse)
 library(salmonMSE)
-library(gpplot2)
+library(ggplot2)
 
 # Extract ERs
 
-ERM_QC <- readRDS("CM/QuinsamCampbell_06.15.26.rds")
+ERM_QC <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
 report_QC <- salmonMSE:::get_report(ERM_QC)
 
-ERM_Adam <- readRDS("CM/Adam_06.22.26.prior.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
+ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_Salmon <- readRDS("CM/Salmon_06.22.26.prior.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
+ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-ERM_Woss <- readRDS("CM/Woss_06.22.26.prior.rds")
+ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
 
@@ -24,7 +24,7 @@ pop <- "Salmon"#"Woss"#"Salmon"#"Adam"#QC"
 samp <- get(paste0("ERM_", pop))
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 if(pop == "QC") year1 <- 1984
-if(pop == "Nimpkish") year1 <- 2001
+if(pop == "Woss") year1 <- 2001
 if(pop == "Salmon") year1 <- 2002
 if(pop == "Adam") year1 <- 2002
 report <- get(paste0("report_", pop))
@@ -92,6 +92,55 @@ ER <- ER %>% rename("lower"="2.5%", "median"="50%" ,"upper"="97.5%") %>%
 
 
 # Compare to UMSY (see file 98-ExtractMSY.R)
+
+
+
+CM_ERx <- function(report, type = c("PT", "T", "all"), r = 1, index_AEQ = NULL,
+                   brood = FALSE, simplify = TRUE) {
+  type <- match.arg(type)
+
+  ER_list <- lapply(report, function(i) {
+    esc <- apply(i$escyear, 1:2, sum)
+    morts_PT <- apply(i$cyearPT, 1:2, sum)
+    morts_T <- apply(i$cyearT, 1:2, sum)
+
+    AEQ_PT <- calc_AEQ(i, index_AEQ = index_AEQ)[, , r] # Always by brood year
+    AEQ_T <- array(1, dim(esc))
+
+    if (brood) {
+      esc <- CY2BY(esc)
+      morts_PT <- CY2BY(morts_PT)
+      morts_T <- CY2BY(morts_T)
+      AEQ_PT2 <- AEQ_PT
+    } else {
+      AEQ_PT2 <- array(NA_real_, dim(esc)) # Re-index to align with calendar year
+      nt <- nrow(AEQ_PT2)
+      na <- ncol(AEQ_PT2)
+      for (t in 1:nt) {
+        for (a in 1:na) if (t-a+1>0) AEQ_PT2[t, a] <- AEQ_PT[t-a+1, a]
+      }
+    }
+    denom <- rowSums(morts_PT * AEQ_PT2 + morts_T * AEQ_T + esc)
+
+    if (type == "PT") {
+      num <- rowSums(morts_PT * AEQ_PT2)
+    } else if (type == "T") {
+      num <- rowSums(morts_T * AEQ_T)
+    } else {
+      num <- rowSums(morts_PT * AEQ_PT2 + morts_T * AEQ_T)
+    }
+
+    list(ER = num/denom)
+  })
+
+  if (simplify) {
+    sapply(ER_list, getElement, "ER", simplify = "array") # year sim
+  } else {
+    return(ER_list)
+  }
+}
+
+
 
 
 #----------------------------------------------------------------------
