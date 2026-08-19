@@ -16,7 +16,7 @@ report_QC <- salmonMSE:::get_report(ERM_QC)
 ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
+ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
@@ -38,7 +38,7 @@ for (pop in c("Adam", "Salmon", "Woss")){
   year <- year1 + seq(1, d$Ldyr) - 1
   year_borrow <- seq(max(year) - 9, max(year) - 5)
 
-  write_figures <- FALSE #Toggle to true to write figures to file
+  write_figures <- TRUE #Toggle to true to write figures to file
 
   theme_set(theme_bw())
 
@@ -460,7 +460,7 @@ for (pop in c("Adam", "Salmon", "Woss")){
 
 # Get Habitat based estimates of Smax
 Smax_hab <- as.data.frame( read.csv(
-  here("data", "UpperSoGChinook_out_posteriorpredictive.csv"))
+  here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 )
 
 # Smax_hab[ Smax_hab[,'Stock'] =="Adam/Eve",] $ SMAX_median * 0.2
@@ -509,7 +509,7 @@ if(write_figures) {
 
 #------------------------------------------------------------------------------
 # Get additional outputs from CM for population assessment
-pop <- "Adam"# "Woss", "Salmon" "Adam" "QC"
+pop <- "Salmon"# "Woss", "Salmon" "Adam" "QC"
 
 samp <- get(paste0("ERM_", pop))
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)

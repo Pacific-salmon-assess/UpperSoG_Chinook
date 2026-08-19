@@ -26,7 +26,7 @@ ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
-ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
+ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 # Define functions for calculating Umsy, Srep, and Heq, and extracting alpha
@@ -338,7 +338,7 @@ U_lab <- eq_sum_data |>
         ")"
       ),
       hjust = 0.1,
-      vjust = -1,
+      vjust = -0.4,#-1
       parse = TRUE
     ) +
     scale_x_continuous(
@@ -371,7 +371,7 @@ U_lab <- eq_sum_data |>
     annotate(geom="text", x=5000, y=0.92*ratio,
              label="Adam",
              colour="red", size=3) +
-    annotate(geom="text", x=5000, y=1.92*ratio,
+    annotate(geom="text", x=5000, y=1.8*ratio,
              label="Salmon", colour="red",
              size=3) +
     annotate(geom="text", x=3000, y=2.92*ratio,
@@ -387,6 +387,7 @@ ggsave(
   filename = here(
     "figures",
     "R-PLOT_equilibrium_harvest_curves.png"
+    # "R-PLOT_equilibrium_harvest_curves_Ugen.png"
   ),
   height = 4.5,
   width = 7, units = "in"

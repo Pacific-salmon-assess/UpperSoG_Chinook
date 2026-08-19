@@ -1,4 +1,4 @@
-# Reference points
+# Reference points - write csv of USRs
 
 # Libraries
 library(patchwork)
@@ -18,7 +18,7 @@ EqTradeOff_RP <- read.csv( here(
   pull %>%
   round()
 
-# Empirical alternative to USR
+# Empirical alternative to USR (see 94-ExtractAbundances.R)
 Emp_RP <- read.csv( here(
   "data",
   "EmpiricalUSR.csv"))
@@ -37,7 +37,7 @@ CM_RP <- read.csv( here(
 
 Hab_RP <-  read.csv( here(
   "data",
-  "UpperSoGChinook_out_posteriorpredictive.csv"))
+  "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 
 Agg_40Smax <- Hab_RP %>%
   summarise(RP = 0.4*sum(SMAX_median)) %>%

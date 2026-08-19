@@ -11,7 +11,7 @@ report_QC <- salmonMSE:::get_report(ERM_QC)
 ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
+ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")

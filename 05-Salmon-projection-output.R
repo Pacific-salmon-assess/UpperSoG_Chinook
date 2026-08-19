@@ -15,7 +15,7 @@ pop <- "Salmon"
 source("92-decision-table-plots.R") #for alternative version of decision tables
 
 # Get CM output for current PT and T ERs
-samp <-  readRDS("CM/Salmon_08.06.26.prior.rds")
+samp <-  readRDS("CM/Salmon_08.18.26.prior.rds")
 year1 <- 2002 # For Salmon
 
 pop <- "Salmon"
@@ -202,23 +202,23 @@ val_sim <- val_sim_all %>%
     filter(Pop == pop) %>% select(med) %>% pull()
 
 #Sgen = 730
-  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 126) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 126
+  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 129) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 129
     mean(val)
   })
 #SMSY85 =1744
-  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 260) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 260
+  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 251) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 251
     mean(val)
   })
 
-  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 126) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 126
+  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 129) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 129
     mean(val)
   })
 
-  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 260) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  260
+  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 251) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  251
     mean(val)
   })
 
@@ -511,9 +511,9 @@ Ccols <- c("0-0.10" = '#d01c8b', "0.11-0.33" = '#f1b6da',
            "0.34-0.65" = '#f7f7f7',
            "0.66-0.89" = '#b8e186', "0.90-1" = '#4dac26')
 
-CcolSp <- c("0-2000" = '#d01c8b', "2001-4000" = '#f1b6da',
-            "4001-6000" = '#f7f7f7', "6001-8000" = '#b8e186',
-            ">8000" = '#4dac26')
+CcolSp <- c("0-200" = '#d01c8b', "201-400" = '#f1b6da',
+            "401-600" = '#f7f7f7', "601-800" = '#b8e186',
+            ">800" = '#4dac26')
 
 
 CcolRel <- c("0-1" = '#d01c8b',
@@ -525,18 +525,18 @@ CcolPNI <- c("0-0.3" = '#d01c8b', "0.31-0.5" = '#f1b6da',
            "0.51-0.7" = '#f7f7f7', "0.71-0.82" = '#b8e186',
            "0.83-1.0"= '#4dac26')
 
-Ccolc <- c("0-500" = '#d01c8b', "501-1000" = '#f1b6da',
-             "1001-1500" = '#f7f7f7', "1501-2000" = '#b8e186',
-             ">2000" = '#4dac26')
+CcolTc <- c("0-10" = '#d01c8b', "11-20" = '#f1b6da',
+             "21-30" = '#f7f7f7', "31-40" = '#b8e186',
+             ">40" = '#4dac26')
 
 
-CcolTc <- c("0-100" = '#d01c8b', "101-200" = '#f1b6da',
+Ccolc <- c("0-100" = '#d01c8b', "101-200" = '#f1b6da',
              "201-300" = '#f7f7f7', "301-400" = '#b8e186',
              ">400" = '#4dac26')
 
-Ccolhoc <- c("0-200" = '#d01c8b', "201-400" = '#f1b6da',
-           "401-600" = '#f7f7f7', "601-800" = '#b8e186',
-           ">800" = '#4dac26')
+Ccolhoc <- c("0-50" = '#d01c8b', "51-100" = '#f1b6da',
+           "101-150" = '#f7f7f7', "151-200" = '#b8e186',
+           ">200" = '#4dac26')
 
 
 CcolTc <- c("0-5" = '#d01c8b', "6-10" = '#f1b6da',
@@ -544,9 +544,9 @@ CcolTc <- c("0-5" = '#d01c8b', "6-10" = '#f1b6da',
            ">20" = '#4dac26')
 
 
-CcolRet <- c("0-150" = '#d01c8b', "151-300" = '#f1b6da',
-            "301-450" = '#f7f7f7', "451-600" = '#b8e186',
-            ">600" = '#4dac26')
+CcolRet <- c("0-400" = '#d01c8b', "401-800" = '#f1b6da',
+            "801-1200" = '#f7f7f7', "1201-1600" = '#b8e186',
+            ">1600" = '#4dac26')
 
 
 # Get UMSY and current U to label on plots
@@ -703,14 +703,14 @@ g <- val_sim %>%
   filter(variable == "Natural Spawners") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2000",
-                        ifelse(value >= 2000 & value <= 4000, "2001-4000",
-                               ifelse(value > 4000 & value < 6000, "4001-6000",
-                                      ifelse(value >= 6000 & value < 8000, "6001-8000",
-                                             ">8000")))))
+  mutate(value = ifelse(value < 200, "0-200",
+                        ifelse(value >= 200 & value <= 400, "201-400",
+                               ifelse(value > 400 & value < 600, "401-600",
+                                      ifelse(value >= 600 & value < 800, "601-800",
+                                             ">800")))))
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
-                                      "6001-8000", ">8000"))
+g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
+                                      "601-800", ">800"))
 
 gSp<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
@@ -888,14 +888,15 @@ g <- val_sim %>%
   filter(variable == "Returns") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2000",
-                        ifelse(value >= 2000 & value <= 4000, "2001-4000",
-                               ifelse(value > 4000 & value < 6000, "4001-6000",
-                                      ifelse(value >= 6000 & value < 8000, "6001-8000",
-                                             ">8000")))))
+  mutate(value = ifelse(value < 200, "0-200",
+                        ifelse(value >= 200 & value <= 400, "201-400",
+                               ifelse(value > 400 & value < 600, "401-600",
+                                      ifelse(value >= 600 & value < 800, "601-800",
+                                             ">800")))))
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
-                                      "6001-8000", ">8000"))
+g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
+                                      "601-800", ">800"))
+
 
 gRet<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
@@ -987,15 +988,15 @@ g <- val_sim %>%
   filter(variable == "Aggcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  mutate(value = ifelse(value < 100, "0-100",
+                        ifelse(value >= 100 & value <= 200, "101-200",
+                               ifelse(value > 200 & value < 300, "201-300",
+                                      ifelse(value >= 300 & value < 400, "301-400",
+                                             ">400")))))
 
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
+                                      "301-400", ">400"))
 
 gc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
@@ -1031,20 +1032,20 @@ g <- val_sim %>%
   filter(variable == "AggHOcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  mutate(value = ifelse(value < 50, "0-50",
+                        ifelse(value >= 50 & value <= 100, "51-100",
+                               ifelse(value > 100 & value < 150, "101-150",
+                                      ifelse(value >= 150 & value < 200, "151-200",
+                                             ">200")))))
 
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
+                                      "151-200", ">200"))
 
 ghoc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = Ccolhoc,
                     name = "Total hatchery-\norigin catch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1075,20 +1076,20 @@ g <- val_sim %>%
   filter(variable == "AggNOcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  mutate(value = ifelse(value < 50, "0-50",
+                        ifelse(value >= 50 & value <= 100, "51-100",
+                               ifelse(value > 100 & value < 150, "101-150",
+                                      ifelse(value >= 150 & value < 200, "151-200",
+                                             ">200")))))
 
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
+                                      "151-200", ">200"))
 
 gnoc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = Ccolhoc,
                     name = "Total natural-\norigin catch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1117,15 +1118,15 @@ g <- val_sim %>%
   filter(variable == "PTcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  mutate(value = ifelse(value < 100, "0-100",
+                        ifelse(value >= 100 & value <= 200, "101-200",
+                               ifelse(value > 200 & value < 300, "201-300",
+                                      ifelse(value >= 300 & value < 400, "301-400",
+                                             ">400")))))
 
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
+                                      "301-400", ">400"))
 
 
 gptc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,fill = value, z = value)) +
@@ -1162,15 +1163,15 @@ g <- val_sim %>%
   filter(variable == "Tcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value < 100, "0-100",
-                        ifelse(value >= 100 & value <= 200, "101-200",
-                               ifelse(value > 200 & value < 300, "201-300",
-                                      ifelse(value >= 300 & value < 400, "301-400",
-                                             ">400")))))
+  mutate(value = ifelse(value < 5, "0-5",
+                        ifelse(value >= 5 & value <= 10, "6-10",
+                               ifelse(value > 10 & value < 15, "11-15",
+                                      ifelse(value >= 15 & value < 20, "16-20",
+                                             ">20")))))
 
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
-                                      "301-400", ">400"))
+g$value <- factor(g$value, levels = c("0-5", "6-10", "11-15",
+                                      "16-20", ">20"))
 
 gtc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +

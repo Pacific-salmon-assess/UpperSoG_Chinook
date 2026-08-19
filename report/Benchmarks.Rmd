@@ -3,6 +3,7 @@ title: "Benchmarks"
 output:
   html_document: default
   pdf_document: default
+  word_document: default
 date: "2026-08-06"
 ---
 
@@ -57,7 +58,7 @@ kable(BenchSimple,
 
 Srep_hab <- as.data.frame(
   read.csv(
-    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
+    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 )  %>%  select("Stock", "WA", "SREP_median", "SREP_lwr5", "SREP_upr95") %>% 
   rename(Population = "Stock", WatershedArea = "WA", SREP = "SREP_median", 
          lwr = "SREP_lwr5", upr = "SREP_upr95")
@@ -78,7 +79,7 @@ kable(Srep_hab,
 
 Smax_hab <- as.data.frame(
   read.csv(
-    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
+    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 ) %>% select("Stock", "WA", "SMAX_median", "SMAX_lwr5", "SMAX_upr95") %>% 
   rename(Population = "Stock", WatershedArea = "WA", SMAX = "SMAX_median", 
          lwr = "SMAX_lwr5", upr = "SMAX_upr95")

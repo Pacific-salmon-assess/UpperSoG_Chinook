@@ -18,14 +18,14 @@ report_QC <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")#readRDS("CM/Adam_06.01.26.JSpt.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
+ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
 report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
 # Set up population
-pop <- "Adam" #"Adam" #"Salmon"#"Woss"
+pop <- "Salmon" #"Adam" #"Salmon"#"Woss"
 pop.prior <- pop
 if(pop=="Adam") pop.prior <- "Adam/Eve"
 if(pop=="Woss") pop.prior <- "Nimpkish"
@@ -37,7 +37,7 @@ d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 
 # Srep prior
 data_Srep_prior <- as.data.frame( read.csv(
-  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
+  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 )
 Srep_prior <- data_Srep_prior %>% filter(Stock==pop.prior) %>% pull(SREP_median)
 logSrep_prior_sd <- data_Srep_prior %>% filter(Stock==pop.prior) %>%

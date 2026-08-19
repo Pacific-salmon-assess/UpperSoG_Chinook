@@ -1,5 +1,10 @@
 # Run projections for Quinsam/Campbell
 
+#libraries
+library(tidyverse)
+library(readxl)
+library(salmonMSE)
+
 # First, define brood function
 f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
 
@@ -35,9 +40,38 @@ premove_HOS <- function(NO, HO, m = 1, p.x=0.102) {
 }
 
 
-# Add brood rule and premove_HOS rules to SOM
-SOM@Hatchery@f_brood <- f_brood
-# SOM@Hatchery@premove_HOS <- premove_HOS
+
+# Get hatchery releases
+# Total hatchery releases from Quinsam and Campbell release sites, all release types
+rel_Quinsam.x <- readxl::read_excel(
+  file.path("data", "Quinsam", "2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx"),
+  sheet = "Actual Release"
+)
+
+# Suggestion from Brendan Zoehner, SEP, to include all Quinsam sites and Cold
+# Creek (for Quinsam River) and Campbell sites, Elk R Chanel sites and Second Is
+# (for Campbell River). Discovery Pass and Orange Pt are seapen releases, likely
+# impacting both Quinsam and Campbell (8 Oct 2025)
+rel_Quinsam <- rel_Quinsam.x %>%
+  filter(str_starts(RELEASE_SITE_NAME, "Quinsam") |
+           str_starts(RELEASE_SITE_NAME, "Cold") |
+           str_starts(RELEASE_SITE_NAME, "Campbell") |
+           str_starts(RELEASE_SITE_NAME, "Elk") |
+           str_starts(RELEASE_SITE_NAME, "Second") |
+           str_starts(RELEASE_SITE_NAME, "Discovery") |
+           str_starts(RELEASE_SITE_NAME, "Orange") |
+           str_starts(RELEASE_SITE_NAME, "Deepwater") |
+           str_starts(RELEASE_SITE_NAME, "Drew") |
+           str_starts(RELEASE_SITE_NAME, "Taku") ) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
+  summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
+
+# Average hatchery releases from Q/C over last 5 years
+hatch_rel <- rel_Quinsam %>%
+  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(4, 0))) %>%
+  pull(n_rel) %>%
+  mean()
 
 
 # # Run salmonMSE - single instance
@@ -45,11 +79,17 @@ SOM@Hatchery@f_brood <- f_brood
 plot.base.case <- FALSE
 
 if(plot.base.case == TRUE){
+  SOM <- readRDS(file.path("SOM", "SOM_QC_low.rds"))
+
+    # Add brood rule and premove_HOS rules to SOM
+  SOM@Hatchery@f_brood <- f_brood
+  # SOM@Hatchery@premove_HOS <- premove_HOS
+
   SMSE <- salmonMSE(SOM)
   report(SMSE , dir = "SMSE")
-  saveRDS(SMSE , file = file.path("SMSE", paste0("QC_08.09.26.rds")))
+  saveRDS(SMSE , file = file.path("SMSE", paste0("QC_08.18.26low.rds")))
 
-  png(here("figures", "QC_basecase_projecions_ts.png"),
+  png(here("figures", "QC_low_projecions_ts.png"),
       width = 6, height = 8, units = "in", res = 300)
   par(mfrow = c(3, 2))
 
@@ -93,6 +133,10 @@ if(plot.base.case == TRUE){
 
   nOM <- nrow(g)
 
+  folder_path <- "SMSE/QC"
+  if (!dir.exists(here::here(folder_path))) {
+    dir.create(here::here(folder_path), recursive = TRUE)
+  }
 
 
   library(snowfall)
@@ -123,13 +167,13 @@ if(plot.base.case == TRUE){
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_QC_base.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_QC_low.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, ".rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, "low.rds")))
     # saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC_basecase.rds")))
 
     invisible()

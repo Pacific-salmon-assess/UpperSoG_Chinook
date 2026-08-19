@@ -146,3 +146,17 @@ knitr::include_graphics(here("figures", "SMSE", "Adam", "gic2_Adam.png"))
 ```
 
 
+## Aggregate results
+
+
+### Outputs
+
+```{r Aggfig, fig.cap = "Fig. 5. Contour plots of peformance metrics from projections summed over populations (total poulations= sum of Quinsum/Campbell, Nimpkish, Salmon and Adam River, and natural-dominated populations = sum of Nimpkish, Salmon and Adam Rivers) along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners (all populations), natural spawners (natural-dominated populations),probability that natural spawners are greater than Sgen (summed over natural dominated populaitons), probability that natural spawners are greater than 85% SMSY (summed over natural-dominated populations), total catch, total returns, pre-terminal catch, terminal catch, natural-origin catch and hatchery-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal, averaged over populations) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the total UMSY for natural-dominated populations for pre-terminral and terminal exploitation combined."}
+
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
+
+```
+
+

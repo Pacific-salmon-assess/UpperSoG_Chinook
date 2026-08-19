@@ -1,14 +1,19 @@
-# Run projections for Quinsam/Campbell
+# Run projections for Nimpkish
+
+# Libraries
+library(tidyverse)
+library(salmonMSE)
+library(readxl)
 
 
 # First, define brood function
-f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
+f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.33) {
 
   NOB <- array(0, dim(NO))
   HOB_marked <- HOB_unmarked <- array(0, dim(HO))
   HOB_stray <- array(0, dim(stray))
 
-  # This function will take the maximum amount of brood (pmax_esc = 0.7, 0.8, etc of escapement)
+  # This function will take the maximum amount of brood (pmax_esc = 0.33 of escapement)
   # of age 4 and 5, not selective for brood origin
   # However, salmonMSE will return brood that exceeds release target
   # Assume there are no strays in the system
@@ -37,6 +42,39 @@ f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
 # Create grid of u_preterminal and n_yearling
 # Default is u_preterminal is mean(UPT)=0.449 n_yearling in hatch_rel=3561051
 
+
+#Get recent hatchery releases
+# Total hatchery releases from Quinsam and Campbell release sites, all release types
+rel.x <- readxl::read_excel(
+  file.path("data", "Quinsam", "2025-07-23-NimpkishWoss_Chinook_Releases_1970-2024.xlsx"),
+  sheet = "Actual Release"
+)
+
+# Suggestion from Brendan Zoehner, SEP and Matt Clarke, StAD to include these
+# July 2026
+rel_NimpkishWoss <- rel.x %>%
+  filter(str_starts(RELEASE_SITE_NAME, "Woss R") |
+           str_starts(RELEASE_SITE_NAME, "Woss Lk") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish R") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish R Up") |
+           str_starts(RELEASE_SITE_NAME, "Nimpkish Lk") |
+           str_starts(RELEASE_SITE_NAME, "Sebalhall Cr") |
+           str_starts(RELEASE_SITE_NAME, "Vernon Lk") |
+           str_starts(RELEASE_SITE_NAME, "Anutz Lk") |
+           str_starts(RELEASE_SITE_NAME, "Wagidis Ch") |
+           str_starts(RELEASE_SITE_NAME, "Rough Bay Cr") |
+           str_starts(RELEASE_SITE_NAME, "Alert Bay") ) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
+  summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
+
+# Average hatchery releases from Q/C over last 5 years
+hatch_rel <- rel_NimpkishWoss %>%
+  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(4, 0))) %>%
+  pull(n_rel) %>%
+  mean()
+
+
 folder_path <- "SMSE/Nimpkish"
 if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
@@ -55,7 +93,7 @@ if (!dir.exists(here::here(folder_path))) {
   library(parallel)
   sfInit(TRUE, nOM, cpus=(parallel::detectCores()-1))
   # First, define brood function
-  f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
+  f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.33) {
 
     NOB <- array(0, dim(NO))
     HOB_marked <- HOB_unmarked <- array(0, dim(HO))
@@ -80,13 +118,13 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_base.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_low.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, ".rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, "low.rds")))
 
     invisible()
 

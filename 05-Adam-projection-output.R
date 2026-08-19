@@ -250,7 +250,7 @@ if (FALSE) {
 
   val_prob <- data.frame(n = 1:nrow(gr)) %>%
     mutate(
-      P_PNI50 = P_PNI50,
+      # P_PNI50 = P_PNI50,
       # P_Sgen_NOS = P_Sgen_NOS,
       # P_Smsy85_NOS = P_Smsy85_NOS,
       P_Sgen_NS = P_Sgen,

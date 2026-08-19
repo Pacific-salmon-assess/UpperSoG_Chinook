@@ -1,7 +1,7 @@
 ---
 title: "Appendix D: Outputs for conditioning model - Salmon River"
 output: word_document
-date: "2026-08-10"
+date: "2026-08-18"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 
@@ -27,7 +27,7 @@ theme_set(theme_bw())
 ```{r}
 pop <- "Salmon"
 if(pop=="Salmon") {
-  ERM <- readRDS(here("CM/Salmon_08.06.26.prior.rds"))
+  ERM <- readRDS(here("CM/Salmon_08.18.26.prior.rds"))
   year1 <- 2002
 }
 report <- salmonMSE:::get_report(ERM)

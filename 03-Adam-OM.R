@@ -11,22 +11,22 @@ nsim <- 500
 proyears <- 30
 n_g <- 1
 year1 <- 2002 # from conditioning model
-msurv <- "base" #"low" #"high"
+msurv <- "low"#"base" #"low" #"high"
 # for estimated value or 0.001 or 0.1 for lower and upper sens. anal.
 # also used for file name of SOM
-som_name <- "Adam base" #"low msurv" # "high msurv" # for internal naming
+som_name <- "Adam low msurv"#"Adam base" #"low msurv" # "high msurv" # for internal naming
 
 # Load exploitation rate model - Adam
 ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 
-report <- salmonMSE:::get_report(ERM)
+report <- salmonMSE:::get_report(ERM_Adam)
 set.seed(24)
 sim_samp <- sample(seq(1, length(report)), nsim)
-d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
-pars <- rstan::extract(ERM)
+d <- salmonMSE:::get_CMdata(ERM_Adam@.MISC$CMfit)
+pars <- rstan::extract(ERM_Adam)
 
 # For Adam, use ERs from Salmon CM
-ERM_Salmon <- readRDS("CM/Salmon_08.06.26.prior.rds")
+ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 
@@ -66,7 +66,7 @@ if(msurv %in% c("low", "high")){
 
   # Transform percentage ER to logistic distribution before sampling
 
-  if(msurv == "low") s1_mu <- mean(qlogis(0.001))
+  if(msurv == "low") s1_mu <- mean(qlogis(0.002))
   if(msurv == "high") s1_mu <- mean(qlogis(0.01))
   s1_sd <- sd(qlogis(exp(-df$'50%')))
 
@@ -338,7 +338,7 @@ Hatchery <- new(
   # stray_external = matrix(c(rep(0, 5), stray), maxage, 2),
   gamma = 0.8,  # HSRG standard, Sarita AHA inputs
   m = 1, # for purposes of premove_HOS for CWT sampling with is selective for marks. A different assumption (m=0) is made for f_brood - brood take rule is not selective for marks
-  pmax_esc = 0.7, # Ignored if using Brood rule in projection.R file #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
+  pmax_esc = 0.33, # Ignored if using Brood rule in projection.R file #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
   pmax_NOB = 1.0, # Ignored if using Brood rule in projection.R file #SEP guideline 0.5, suggested by Lian
   #f_brood = f_brood,  # Function defined in script 4
   ptarget_NOB = NA_real_,  # TBD

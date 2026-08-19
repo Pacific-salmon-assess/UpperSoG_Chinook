@@ -1,7 +1,7 @@
 ---
 title: "Appendix C: Outputs for conditioning model - Adam River"
 output: word_document
-date: "2026-08-10"
+date: "2026-08-18"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 

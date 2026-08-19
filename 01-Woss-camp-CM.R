@@ -219,7 +219,7 @@ cwtExp <- 1
 
 # Smax prior
 data_Smax_prior <- as.data.frame( read.csv(
-  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWA.csv"))
+  ("data/UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 )
 Smax_prior <- data_Smax_prior %>% filter(Stock==pop) %>% pull(SREP_median)
 logSmax_prior_sd <- data_Smax_prior %>% filter(Stock==pop) %>%

@@ -1,13 +1,17 @@
-# Run projections for Quinsam/Campbell
+# Run projections for Salmon River
+# Libraries
+library(tidyverse)
+library(salmonMSE)
+library(readxl)
 
 # First, define brood function
-f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
+f_brood <- function(NO, HO, stray, m = 1, pmax_esc = 0.33) {
 
   NOB <- array(0, dim(NO))
   HOB_marked <- HOB_unmarked <- array(0, dim(HO))
   HOB_stray <- array(0, dim(stray))
 
-  # This function will take the maximum amount of brood (pmax_esc = 0.7, 0.8, etc of escapement)
+  # This function will take the maximum amount of brood (pmax_esc = 0.33, etc of escapement)
   # of age 4 and 5, not selective for brood origin
   # However, salmonMSE will return brood that exceeds release target
   # Assume there are no strays in the system
@@ -31,6 +35,31 @@ f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
 
 #------------------------------------------------------------------------------
 # Run over multiple SOMs
+
+# Get hatchery releases
+
+# Total hatchery releases from Quinsam and Campbell release sites, all release types
+rel.x <- readxl::read_excel(
+  file.path("data", "Quinsam", "2025-10-08-SalmonRiverChinookReleases-AllYears.xlsx"),
+  sheet = "Actual Release"
+)
+
+# Suggestion from Brendan Zoehner, SEP and Matt Clarke, StAD to include these
+# July 2026
+rel <- rel.x %>%
+  filter(str_starts(RELEASE_SITE_NAME, "Salmon R/JNST") |
+           str_starts(RELEASE_SITE_NAME, "Salmon R Up/JNST") |
+           str_starts(RELEASE_SITE_NAME, "Pallans Cr")) %>%
+  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
+  summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
+  arrange(RELEASE_YEAR)
+
+# Average hatchery releases from Q/C over last 5 years
+hatch_rel <- rel %>%
+  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(4, 0))) %>%
+  pull(n_rel) %>%
+  mean()
+
 
 # Create grid of u_preterminal and n_yearling
 # Default is u_preterminal is mean(UPT)=0.449 n_yearling in hatch_rel=3561051
@@ -78,13 +107,13 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Salmon_base.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Salmon_low.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Salmon", paste0("Salmon", i, ".rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Salmon", paste0("Salmon", i, "low.rds")))
 
     invisible()
 

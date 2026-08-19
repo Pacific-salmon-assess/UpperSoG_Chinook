@@ -11,10 +11,10 @@ nsim <- 500
 proyears <- 30
 n_g <- 1
 year1 <- 1984 # from conditioning model
-msurv <- "base" #"low" #"high"
+msurv <- "low"#"base" #"low" #"high"
 # for estimated value or 0.001 or 0.1 for lower and upper sens. anal.
 # also used for file name of SOM
-som_name <- "QC base" #"QC low msurv" # "QC high msurv" # for internal naming
+som_name <- "QC low msurv" #"QC base" #"QC low msurv" # "QC high msurv" # for internal naming
 
 # Load exploitation rate model - Quinsam/Campbell
 ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
@@ -70,7 +70,7 @@ if(msurv %in% c("low", "high")){
     filter(Age=='Age 1')
 
   # Transform percentage ER to logistic distribution before sampling
-  if(msurv == "low") s1_mu <- mean(qlogis(0.001))
+  if(msurv == "low") s1_mu <- mean(qlogis(0.002))
   if(msurv == "high") s1_mu <- mean(qlogis(0.01))
   s1_sd <- sd(qlogis(exp(-df$'50%')))
   set.seed(234)
@@ -328,6 +328,27 @@ ppnRemove_HOS <-
 # premove_HOS function in script 4
 
 h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
+
+# f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
+#
+#   NOB <- array(0, dim(NO))
+#   HOB_marked <- HOB_unmarked <- array(0, dim(HO))
+#   HOB_stray <- array(0, dim(stray))
+#
+#   # This function will take the maximum amount of brood (pmax_esc = 0.7, 0.8, etc of escapement)
+#   # of age 4 and 5, not selective for brood origin
+#   # However, salmonMSE will return brood that exceeds release target
+#   # Assume there are no strays in the system
+#   ptake <- c(0, 0, 0, rep(pmax_esc, 2))
+#
+#   NOB[] <- ptake * NO
+#   HOB_unmarked[] <- ptake * (1 - m) * HO
+#   HOB_marked[] <- ptake * m * HO
+#
+#   list(NOB = NOB, HOB_marked = HOB_marked, HOB_unmarked = HOB_unmarked, HOB_stray = HOB_stray)
+# }
+
+
 Hatchery <- new(
   "Hatchery",
   n_r = n_r,
@@ -343,7 +364,7 @@ Hatchery <- new(
   m = 1, # for purposes of premove_HOS for CWT sampling with is selective for marks. A different assumption (m=0) is made for f_brood - brood take rule is not selective for marks
   pmax_esc = 0.7, # Ignored if using Brood rule in projection.R file #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
   pmax_NOB = 1.0, # Ignored if using Brood rule in projection.R file #SEP guideline 0.5, suggested by Lian
-  #f_brood = f_brood,  # Function defined in script 4
+  # f_brood = f_brood,  # Function defined in script 4
   ptarget_NOB = NA_real_,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
