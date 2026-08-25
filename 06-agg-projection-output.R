@@ -10,6 +10,9 @@ library(ggplot2)
 source("92-decision-table-plots.R") #for alternative version of decision tables
 
 save.files <- TRUE
+scenario <- "high"
+if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
+
 
 folder_path <- "figures/SMSE/Aggregate"
 
@@ -49,7 +52,7 @@ if(pop == "Adam") {
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, ".rds")))
+  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, "high.rds")))
 
   # Update PNI = 1 when there is no brood & pHOS = 0
   Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]
@@ -225,7 +228,7 @@ val_sim_all_tot <- list(NS_tot, NS_nat, Ret_tot, Ret_nat, Tcatch_tot, Tcatch_nat
   # rename(Option = Option_name) %>%
   reshape2::melt(id.vars = c("n", "Simulation"))#, "Option"
 if(save.files){
-  readr::write_csv(val_sim_all, file = "tables/Agg_outcomes_tot_sim.csv") # Save for Slick object
+  readr::write_csv(val_sim_all, file = paste0("tables/Agg_outcomes_tot_sim", file_suffix, ".csv")) # Save for Slick object
 }
 
 # Median and range for state variables across simulations
@@ -246,7 +249,7 @@ val_sim_all_nat <- list(NS_nat, Ret_nat, Tcatch_nat,
   # rename(Option = Option_name) %>%
   reshape2::melt(id.vars = c("n", "Simulation"))#, "Option"
 if(save.files){
-  readr::write_csv(val_sim_all, file = "tables/Agg_outcomes_nat_sim.csv") # Save for Slick object
+  readr::write_csv(val_sim_all, file = paste0("tables/Agg_outcomes_nat_sim", file_suffix, ".csv")) # Save for Slick object
 }
 
 # Median and range for state variables across simulations
@@ -298,7 +301,7 @@ val_prob <- left_join(P_NS_Sgen, P_NS_85SMSY) %>%
 
 
 if(save.files) {
-  readr::write_csv(val_prob, file = "tables/Agg_outcomes_prob.csv") # Save for Slick object
+  readr::write_csv(val_prob, file = paste0("tables/Agg_outcomes_prob", file_suffix, ".csv")) # Save for Slick object
 }
 
 
@@ -320,6 +323,14 @@ CcolSp <- c("0-5,000" = '#d01c8b', "5,001-10,000" = '#f1b6da',
             "10,001-15,000" = '#f7f7f7',
             "15,001-20,000" = '#b8e186', ">20,000" = '#4dac26')
 
+CcolSp_low <- c("0-1,000" = '#460930', "1,001-2,000" = '#610c42',
+            "2,001-3,000" = '#7d1054', "3,001-4,000" = '#981467',
+            "4,001-5,000" = '#b41879', ">5,000" = '#d01c8b')
+
+CcolSp_high <- c("0-20,000" = '#4dac26', "20,001-30,000" = '#439420',
+            "30,001-40,000" = '#397c1b', "40,001-50,000" = '#2f6516',
+            "50,001-60,000" = '#254d10', ">60,000" = '#1b360b')
+
 Ccols <- c("0-0.10" = '#d01c8b', "0.11-0.33" = '#f1b6da',
            "0.34-0.65" = '#f7f7f7',
            "0.66-0.89" = '#b8e186', "0.90-1" = '#4dac26')
@@ -328,39 +339,115 @@ Ccolc <- c("0-2,000" = '#d01c8b', "2,001-4,000" = '#f1b6da',
            "4,001-6,000" = '#f7f7f7', "6,001-8,000" = '#b8e186',
            ">8,000" = '#4dac26')
 
+Ccolc_high <- c("0-10,000" = '#4dac26', "10,001-20,000" = '#439420',
+           "20,001-30,000" = '#397c1b', "30,001-40,000" = '#2f6516',
+           ">40,000" = '#254d10')
+
+Ccolc_low <- c("0-500" = '#460930', "501-1,000" = '#7d1054',
+               "1,001-1,500" = '#981467', "1,501-2,000" = '#b41879',
+               ">2,000" = '#d01c8b')
+
+CcolnSp_high <- c("0-8,000" = '#4dac26', "8,001-10,000" = '#439420',
+           "10,001-12,000" = '#397c1b', "12,001-14,000" = '#2f6516',
+           ">14,000" = '#254d10')
 
 Ccolhoc <- c("0-1,000" = '#d01c8b', "1,001-2,000" = '#f1b6da',
            "2,001-3,000" = '#f7f7f7', "3,001-4,000" = '#b8e186',
            ">4,000" = '#4dac26')
 
+Ccolhoc_high <- c("0-4,000" = '#4dac26', "4,001-8,000" = '#439420',
+                  "8,001-12,000" = '#397c1b', "12,001-16,000" = '#2f6516',
+                  ">16,000" = '#254d10')
+
+Ccolhoc_low <- c("0-200" = '#460930', "201-400" = '#610c42',
+                "401-600" = '#7d1054', "601-800" = '#981467',
+                "801-1,000" = '#b41879', ">1,000" = '#d01c8b')
 
 Ccolnoc <- c("0-1,500" = '#d01c8b', "1,501-3,000" = '#f1b6da',
              "3,001-4,500" = '#f7f7f7', "4,501-6,000" = '#b8e186',
-             ">6,200" = '#4dac26')
+             ">6,000" = '#4dac26')
+
+Ccolnoc_high <- c("0-6,000" = '#4dac26', "6,001-12,000" = '#439420',
+                  "12,001-18,000" = '#397c1b', "18,001-24,000" = '#2f6516',
+                  ">24,000" = '#254d10')
+Ccolnoc_low <- c("0-300" = '#460930', "301-600" = '#610c42',
+                 "601-900" = '#7d1054', "901-1,200" = '#981467',
+                 "1,200-1,5000" = '#b41879', ">1,500" = '#d01c8b')
 
 CcolTc <- c("0-500" = '#d01c8b', "501-1,000" = '#f1b6da',
             "1,001-1,500" = '#f7f7f7', "1,501-2,000" = '#b8e186',
             ">2,000" = '#4dac26')
+CcolTc_high <- c("0-2,000" = '#4dac26', "2,001-3,000" = '#439420',
+                 "3,001-4,000" = '#397c1b', "4,001-5,000" = '#2f6516',
+                 "5,001-6,000" = '#254d10', ">6,000" = '#1b360b')
 
+CcolTc_low <- c("0-100" = '#460930', "101-200" = '#610c42',
+            "201-300" = '#7d1054', "301-400" = '#981467',
+            "401-500" = '#b41879', ">500" = '#d01c8b')
+
+"#d01c8b"
+"#b41879"
+"#981467"
+"#7d1054"
+"#610c42"
+"#460930"
+"#4dac26"
+"#439420"
+"#397c1b"
+"#2f6516"
+"#254d10"
+"#1b360b"
 
 g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Natural Spawners") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 5000, "0-5,000",
-                        ifelse(value >= 5000 & value <= 10000, "5,001-10,000",
-                               ifelse(value > 10000 & value < 15000, "10,001-15,000",
-                                      ifelse(value >= 15000 & value < 20000, "15,001-20,000",
-                                             ">20,000")))))
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-5,000", "5,001-10,000", "10,001-15,000",
-                                      "15,001-20,000", ">20,000"))
+  rename(value = median)
 
+if(scenario == "base"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 5000, "0-5,000",
+                          ifelse(value > 5000 & value < 10000, "5,001-10,000",
+                                 ifelse(value > 10000 & value <= 15000, "10,001-15,000",
+                                        ifelse(value > 15000 & value <= 20000, "15,001-20,000",
+                                               ">20,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-5,000", "5,001-10,000", "10,001-15,000",
+                                        "15,001-20,000", ">20,000"))
+  col <- CcolSp
+}
+
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 1000, "0-1,000",
+                          ifelse(value > 1000 & value <= 2000, "1,001-2,000",
+                                 ifelse(value > 2000 & value <= 3000, "2,001-3,000",
+                                        ifelse(value > 3000 & value <= 4000, "3,001-4,000",
+                                               ifelse(value > 4000 & value <= 5000, "4,001-5,000",
+                                               ">5,000"))))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-1,000", "1,001-2,000", "2,001-3,000",
+                                        "3,001-4,000", "4,001-5,000", ">5,000"))
+  col <- CcolSp_low
+}
+
+if (scenario == "high"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 20000, "0-20,000",
+                          ifelse(value > 20000 & value <= 30000, "20,001-30,000",
+                                 ifelse(value > 30000 & value <= 40000, "30,001-40,000",
+                                        ifelse(value > 40000 & value <= 50000, "40,001-50,000",
+                                               ifelse(value > 50000 & value <= 60000, "50,001-60,000",
+                                               ">60,000"))))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-20,000", "20,001-30,000", "30,001-40,000",
+                                        "40,001-50,000", "50,001-60,000", ">60,000"))
+  col <- CcolSp_high
+}
 gSp_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = CcolSp,
+  scale_fill_manual(values = col,
                     name = "Natural spawners\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -381,28 +468,61 @@ gSp_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_NatSp_Agg_tot.png"),
-         gSp_tot, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_NatSp_Agg_tot", file_suffix, ".png")),
+         gSp_tot, width = 5, height = 5)
 }
 
 g <- val_sim_nat %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Natural Spawners") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2,000",
-                        ifelse(value >= 2000 & value <= 4000, "2,001-4,000",
-                               ifelse(value > 4000 & value < 6000, "4,001-6,000",
-                                      ifelse(value >= 6000 & value < 8000, "6,001-8,000",
-                                             ">8,000")))))
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2,000", "2,001-4,000", "4,001-6,000",
-                                      "6,001-8,000", ">8,000"))
+  rename(value = median)
+
+if(scenario == "base"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 2000, "0-2,000",
+                          ifelse(value > 2000 & value <= 4000, "2,001-4,000",
+                                 ifelse(value > 4000 & value <= 6000, "4,001-6,000",
+                                        ifelse(value > 6000 & value <= 8000, "6,001-8,000",
+                                               ">8,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-2,000", "2,001-4,000", "4,001-6,000",
+                                        "6,001-8,000", ">8,000"))
+col <- Ccolc
+}
+
+if(scenario == "high"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 8000, "0-8,000",
+                          ifelse(value >= 8000 & value <= 10000, "8,001-10,000",
+                                 ifelse(value > 10000 & value <= 12000, "10,001-12,000",
+                                        ifelse(value > 12000 & value <= 14000, "12,001-14,000",
+                                               ">14,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-8,000", "8,001-10,000", "10,001-12,000",
+                                        "12,001-14,000", ">14,000"))
+  col <- CcolnSp_high
+
+}
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 500, "0-500",
+                          ifelse(value > 500 & value <= 1000, "501-1,000",
+                                 ifelse(value > 1000 & value <= 1500, "1,001-1,500",
+                                        ifelse(value > 1500 & value <= 2000, "1,501-2,000",
+                                               ">2,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1,000", "1,001-1,500",
+                                        "1,501-2,000", ">2,000"))
+  col <- Ccolc_low
+}
+
 
 gSp_nat<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Natural spawners\n(natural-dominated pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -423,8 +543,9 @@ gSp_nat<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_NatSp_Agg_nat.png"),
-         gSp_nat, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_NatSp_Agg_nat", file_suffix, ".png")),
+         gSp_nat, width = 5, height = 5)
 }
 
 # NS relative to Sgen
@@ -498,8 +619,9 @@ gSmsy85<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 
-ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_85Smsy_Agg.png"),
-       gSmsy85, width = 7, height = 5)
+ggsave(file.path("figures", "SMSE", "Aggregate",
+                 paste0("icecream_85Smsy_Agg", file_suffix, ".png")),
+       gSmsy85, width = 5, height = 5)
 
 ### Returns decision tables
 # Option of icecream plot with legend:
@@ -508,20 +630,54 @@ g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Returns") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 5000, "0-5,000",
-                        ifelse(value >= 5000 & value <= 10000, "5,001-10,000",
-                               ifelse(value > 10000 & value < 15000, "10,001-15,000",
-                                      ifelse(value >= 15000 & value < 20000, "15,001-20,000",
-                                             ">20,000")))))
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-5,000", "5,001-10,000", "10,001-15,000",
-                                      "15,001-20,000", ">20,000"))
+  rename(value = median)
+
+if(scenario == "base") {
+  g <- g %>%
+    mutate(value = ifelse(value < 5000, "0-5,000",
+                          ifelse(value >= 5000 & value <= 10000, "5,001-10,000",
+                                 ifelse(value > 10000 & value < 15000, "10,001-15,000",
+                                        ifelse(value >= 15000 & value < 20000, "15,001-20,000",
+                                               ">20,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-5,000", "5,001-10,000", "10,001-15,000",
+                                        "15,001-20,000", ">20,000"))
+  col <- CcolSp
+}
+
+if(scenario =="high") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 20000, "0-20,000",
+                          ifelse(value > 20000 & value <= 30000, "20,001-30,000",
+                                 ifelse(value > 30000 & value <= 40000, "30,001-40,000",
+                                        ifelse(value > 40000 & value <= 50000, "40,001-50,000",
+                                               ifelse(value > 50000 & value <= 60000, "50,001-60,000",
+                                                      ">60,000"))))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-20,000", "20,001-30,000", "30,001-40,000",
+                                        "40,001-50,000", "50,001-60,000", ">60,000"))
+  col <- CcolSp_high
+}
+
+
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 1000, "0-1,000",
+                          ifelse(value > 1000 & value <= 2000, "1,001-2,000",
+                                 ifelse(value > 2000 & value <= 3000, "2,001-3,000",
+                                        ifelse(value > 3000 & value <= 4000, "3,001-4,000",
+                                               ifelse(value > 4000 & value <= 5000, "4,001-5,000",
+                                                      ">5,000"))))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-1,000", "1,001-2,000", "2,001-3,000",
+                                        "3,001-4,000", "4,001-5,000", ">5,000"))
+  col <- CcolSp_low
+}
 
 gRet_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = CcolSp,
+  scale_fill_manual(values = col,
                     name = "Returns\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -542,29 +698,65 @@ gRet_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z 
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_Ret_Agg_tot.png"),
-         gRet_tot, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_Ret_Agg_tot", file_suffix, ".png")),
+         gRet_tot, width = 5, height = 5)
 }
 
 g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Aggcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2,000",
-                        ifelse(value >= 2000 & value <= 4000, "2,001-4,000",
-                               ifelse(value > 4000 & value < 6000, "4,001-6,000",
-                                      ifelse(value >= 6000 & value < 8000, "6,001-8,000",
-                                             ">8,000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2,000", "2,001-4,000", "4,001-6,000",
-                                      "6,001-8,000", ">8,000"))
+if(scenario == "base") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 2000, "0-2,000",
+                          ifelse(value > 2000 & value <= 4000, "2,001-4,000",
+                                 ifelse(value > 4000 & value <= 6000, "4,001-6,000",
+                                        ifelse(value > 6000 & value <= 8000, "6,001-8,000",
+                                               ">8,000")))))
 
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-2,000", "2,001-4,000", "4,001-6,000",
+                                        "6,001-8,000", ">8,000"))
+  col <- Ccolc
+
+}
+
+if(scenario == "high") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 10000, "0-10,000",
+                          ifelse(value > 10000 & value <= 20000, "10,001-20,000",
+                                 ifelse(value > 20000 & value <= 30000, "20,001-30,000",
+                                        ifelse(value > 30000 & value <= 40000, "30,001-40,000",
+                                               ">40,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-10,000", "10,001-20,000", "20,001-30,000",
+                                        "30,001-40,000", ">40,000"))
+  col <- Ccolc_high
+
+}
+
+if(scenario == "low") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 500, "0-500",
+                          ifelse(value > 500 & value <= 1000, "501-1,000",
+                                 ifelse(value > 1000 & value <= 1500, "1,001-1,500",
+                                        ifelse(value > 1500 & value <= 2000, "1,501-2,000",
+                                               ">2,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1,000", "1,001-1,500",
+                                        "1,501-2,000", ">2,000"))
+  col <- Ccolc_low
+
+}
 gc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Total catch\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -585,8 +777,9 @@ gc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = 
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_catch_Agg_tot.png"),
-         gc_tot, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_catch_Agg_tot", file_suffix, ".png")),
+         gc_tot, width = 5, height = 5)
 }
 
 
@@ -594,21 +787,56 @@ g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "AggHOcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 1000, "0-1,000",
-                        ifelse(value >= 1000 & value <= 2000, "1,001-2,000",
-                               ifelse(value > 2000 & value < 3000, "2,001-3,000",
-                                      ifelse(value >= 3000 & value < 4000, "3,001-4,000",
-                                             ">4,000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-1,000", "1,001-2,000", "2,001-3,000",
-                                      "3,001-4,000", ">4,000"))
+if(scenario == "base") {
+  g <-  g %>%
+    mutate(value = ifelse(value <= 1000, "0-1,000",
+                          ifelse(value > 1000 & value <= 2000, "1,001-2,000",
+                                 ifelse(value > 2000 & value <= 3000, "2,001-3,000",
+                                        ifelse(value > 3000 & value <= 4000, "3,001-4,000",
+                                               ">4,000")))))
 
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-1,000", "1,001-2,000", "2,001-3,000",
+                                        "3,001-4,000", ">4,000"))
+  col <- Ccolhoc
+
+}
+
+if(scenario == "high") {
+  g <-  g %>%
+    mutate(value = ifelse(value <= 4000, "0-4,000",
+                          ifelse(value > 4000 & value <= 8000, "4,001-8,000",
+                                 ifelse(value > 8000 & value <= 12000, "8,001-12,000",
+                                        ifelse(value > 12000 & value <= 14000, "12,001-16,000",
+                                               ">16,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-4,000", "4,001-8,000", "8,001-12,000",
+                                        "12,001-16,000", ">16,000"))
+  col <- Ccolhoc_high
+
+}
+if(scenario == "low") {
+  g <-  g %>%
+    mutate(value = ifelse(value <= 200, "0-200",
+                          ifelse(value > 200 & value <= 400, "201-400",
+                                 ifelse(value > 400 & value <= 600, "401-600",
+                                        ifelse(value > 600 & value <= 800, "601-800",
+                                               ifelse(value > 800 & value <= 1000, "801-1,000",
+                                               ">1,000"))))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
+                                        "601-800", "801-1,000", ">1,000"))
+  col <- Ccolhoc_low
+
+}
 ghoc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolhoc,
+  scale_fill_manual(values = col,
                     name = "Total hatchery-\norigin catch\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -629,7 +857,8 @@ ghoc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z 
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_HOcatch_Agg_tot.png"),
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_HOcatch_Agg_tot", file_suffix, ".png")),
          ghoc_tot, width = 7, height = 5)
 }
 
@@ -640,21 +869,55 @@ g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "AggNOcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 1500, "0-1,500",
-                        ifelse(value >= 1500 & value <= 3000, "1,501-3,000",
-                               ifelse(value > 3000 & value < 4500, "3,001-4,500",
-                                      ifelse(value >= 4500 & value < 6000, "4,501-6,000",
-                                             ">6,000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-1,500", "1,501-3,000", "3,001-4,500",
-                                      "4,501-6,000", ">6,000"))
+if(scenario == "base") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 1500, "0-1,500",
+                          ifelse(value > 1500 & value <= 3000, "1,501-3,000",
+                                 ifelse(value > 3000 & value <= 4500, "3,001-4,500",
+                                        ifelse(value > 4500 & value <= 6000, "4,501-6,000",
+                                               ">6,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-1,500", "1,501-3,000", "3,001-4,500",
+                                        "4,501-6,000", ">6,000"))
+  col <- Ccolnoc
+  }
+
+if(scenario == "high") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 6000, "0-6,000",
+                          ifelse(value > 6000 & value <= 12000, "6,001-12,000",
+                                 ifelse(value > 12000 & value <= 18000, "12,001-18,000",
+                                        ifelse(value > 18000 & value <= 24000, "18,001-24,000",
+                                               ">24,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-6,000", "6,001-12,000", "12,001-18,000",
+                                        "18,001-24,000", ">24,000"))
+  col <- Ccolnoc_high
+}
+
+if(scenario == "low") {
+  g <-  g %>%
+    mutate(value = ifelse(value <= 200, "0-200",
+                          ifelse(value > 200 & value <= 400, "201-400",
+                                 ifelse(value > 400 & value <= 600, "401-600",
+                                        ifelse(value > 600 & value <= 800, "601-800",
+                                               ifelse(value > 800 & value <= 1000, "801-1,000",
+                                                      ">1,000"))))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
+                                        "601-800", "801-1,000", ">1,000"))
+  col <- Ccolhoc_low
+}
 
 gnoc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolnoc,
+  scale_fill_manual(values = col,
                     name = "Total natural-\norigin catch\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -675,8 +938,9 @@ gnoc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z 
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate",  "icecream_NOcatch_Agg_tot.png"),
-         gnoc_tot, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_NOcatch_Agg_tot", file_suffix, ".png")),
+         gnoc_tot, width = 5, height = 5)
 }
 
 ### Pre-terminal Catches
@@ -685,20 +949,53 @@ g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "PTcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2,000",
-                        ifelse(value >= 2000 & value <= 4000, "2,001-4,000",
-                               ifelse(value > 4000 & value < 6000, "4,001-6,000",
-                                      ifelse(value >= 6000 & value < 8000, "6,001-8,000",
-                                             ">8,000")))))
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2,000", "2,001-4,000", "4,001-6,000",
-                                      "6,001-8,000", ">8,000"))
+  rename(value = median)
 
+if(scenario == "base") {
+  g <- g %>%
+    mutate(value = ifelse(value < 2000, "0-2,000",
+                          ifelse(value >= 2000 & value <= 4000, "2,001-4,000",
+                                 ifelse(value > 4000 & value < 6000, "4,001-6,000",
+                                        ifelse(value >= 6000 & value < 8000, "6,001-8,000",
+                                               ">8,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-2,000", "2,001-4,000", "4,001-6,000",
+                                        "6,001-8,000", ">8,000"))
+  col <- Ccolc
+}
+
+
+if(scenario == "high") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 10000, "0-10,000",
+                          ifelse(value > 10000 & value <= 20000, "10,001-20,000",
+                                 ifelse(value > 20000 & value <= 30000, "20,001-30,000",
+                                        ifelse(value > 30000 & value <= 40000, "30,001-40,000",
+                                               ">40,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-10,000", "10,001-20,000", "20,001-30,000",
+                                        "30,001-40,000", ">40,000"))
+  col <- Ccolc_high
+}
+
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 500, "0-500",
+                          ifelse(value > 500 & value <= 1000, "501-1,000",
+                                 ifelse(value > 1000 & value <= 1500, "1,001-1,500",
+                                        ifelse(value > 1500 & value <= 2000, "1,501-2,000",
+                                               ">2,000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1,000", "1,001-1,500",
+                                        "1,501-2,000", ">2,000"))
+  col <- Ccolc_low
+}
 gptc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Pre-terminal\ncatch\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -719,8 +1016,9 @@ gptc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z =
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate",  "icecream_ptcatch_Agg_tot.png"),
-         gptc_tot, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_ptcatch_Agg_tot", file_suffix, ".png")),
+         gptc_tot, width = 5, height = 5)
 }
 
 ### Terminal Catches
@@ -730,20 +1028,54 @@ g <- val_sim_tot %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Tcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value <= 500, "0-500",
-                        ifelse(value > 500 & value <= 1000, "501-1,000",
-                               ifelse(value > 1000 & value <= 1500, "1,001-1,500",
-                                      ifelse(value > 1500 & value <= 2000, "1,501-2,000",
-                                             ">2,000")))))
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1,000", "1,001-1,500",
-                                      "1,501-2,000", ">2,000"))
+  rename(value = median)
 
+if(scenario == "base") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 500, "0-500",
+                          ifelse(value > 500 & value <= 1000, "501-1,000",
+                                 ifelse(value > 1000 & value <= 1500, "1,001-1,500",
+                                        ifelse(value > 1500 & value <= 2000, "1,501-2,000",
+                                               ">2,000")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1,000", "1,001-1,500",
+                                        "1,501-2,000", ">2,000"))
+  col <- CcolTc
+
+}
+
+if(scenario =="high") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 2000, "0-2,000",
+                          ifelse(value > 2000 & value <= 3000, "2,001-3,000",
+                                 ifelse(value > 3000 & value <= 4000, "3,001-4,000",
+                                        ifelse(value > 4000 & value <= 5000, "4,001-5,000",
+                                               ifelse(value > 5000 & value <= 6000, "5,001-6,000",
+                                               ">6,000"))))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-2,000", "2,001-3,000", "3,001-4,000",
+                                        "4,001-5,000", "5,001-6,000", ">6,000"))
+  col <- CcolTc_high
+
+}
+if(scenario == "low") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 100, "0-100",
+                          ifelse(value > 100 & value <= 200, "101-200",
+                                 ifelse(value > 200 & value <= 300, "201-300",
+                                        ifelse(value > 300 & value <= 400, "301-400",
+                                               ifelse(value > 400 & value <= 500, "401-500",
+                                               ">500"))))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
+                                        "301-400", "401-500", ">500"))
+  col <- CcolTc_low
+
+}
 gtc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = CcolTc,
+  scale_fill_manual(values = col,
                     name = "Terminal\ncatch\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -764,8 +1096,9 @@ gtc_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "icecream_tcatch_Agg_tot.png"),
-         gtc_tot, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("icecream_tcatch_Agg_tot", file_suffix, ".png")),
+         gtc_tot, width = 5, height = 5)
 }
 
 # Combine ice-cream plots
@@ -782,11 +1115,14 @@ gic3 <- (gnoc_tot + ghoc_tot)/
 
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", "Aggregate", "gic1_Agg.png"),
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gic1_Agg", file_suffix, ".png")),
          gic1, height = 9, width = 7)
-  ggsave(file.path("figures", "SMSE", "Aggregate", "gic2_Agg.png"),
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gic2_Agg", file_suffix, ".png")),
          gic2, height = 9, width = 7)
-  ggsave(file.path("figures", "SMSE", "Aggregate", "gic3_Agg.png"),
-         gic3, height = 9, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gic3_Agg", file_suffix, ".png")),
+         gic3, height = 7, width = 7)
 
 }

@@ -1,7 +1,7 @@
 ---
 title: "Appendix D: Outputs for conditioning model - Salmon River"
 output: word_document
-date: "2026-08-18"
+date: "2026-08-22"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 
@@ -28,6 +28,7 @@ theme_set(theme_bw())
 pop <- "Salmon"
 if(pop=="Salmon") {
   ERM <- readRDS(here("CM/Salmon_08.18.26.prior.rds"))
+  # ERM <- readRDS(here("CM/Salmon_08.22.26.altprior.rds"))
   year1 <- 2002
 }
 report <- salmonMSE:::get_report(ERM)
@@ -150,9 +151,9 @@ salmonMSE:::CM_SRR(report, year1)
 ```
 
 
-```{r SrepPriorPost, fig.cap="Figure E15. Prior and posterior estimates of Srep, unfished equilibrium spawner abundances at replacement."}
-# (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
+```{r SrepPriorPost, fig.cap="Figure D15. Prior and posterior estimates of Srep, unfished equilibrium spawner abundances at replacement."}
 file <-  paste0(pop, "_priorpost.png")
+# file <-  paste0(pop, "_priorpost_altprior.png")
 
 knitr::include_graphics(here(
   "figures", file
@@ -166,8 +167,8 @@ knitr::include_graphics(here(
 
 
 ```{r SmaxPriorPost, fig.cap="Figure D16. Habitat-based estimates of Smax with posterior estimates of Smax, spawner abundances at maximum recruitment."}
-# (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
 file <-  paste0(pop, "_Smax_IWAM-post.png")
+# file <-  paste0(pop, "_Smax_IWAM-post_altprior.png")
 
 knitr::include_graphics(here(
   "figures", file
@@ -179,8 +180,8 @@ knitr::include_graphics(here(
 ```
 
 ```{r prod, fig.cap="Figure D17. Estimate of life-cycle productivity, recuits/spawner."}
-# (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
 file <-  paste0(pop, "_prod.png")
+# file <-  paste0(pop, "_prod_altprior.png")
 
 knitr::include_graphics(here(
   "figures", file

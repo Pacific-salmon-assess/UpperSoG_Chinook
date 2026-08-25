@@ -3,7 +3,7 @@ Fecundity at age,fa,"Age 2: 0, Age 3: 800, Age 4: 2000, Age 5: 2500","Bio, Hatch
 Proportion-at-age mature,ra,"Age 2: 0.015, Age 3: 0.17, Age 4: 0.82, Age 5: 1.00","Bio, Hatchery",Estimated from Quinsam/Campbell conditioning model (average 2020-2024)
 Productivity over the life-cycle (recruits/spawner),kappa,6.92 (5.86-7.99),Bio,Estimated from Quinsam/Campbell  conditioning model 
 Spawner abundances at maximum recruitment,Smax,"20,075 (13,398 - 31,764)",Bio,Estimated from Quinsam/Campbell  conditioning model 
-Prespawn survival,sprespawn,0.05,"Bio, Hatchery","M. Clarke pers. comm. (DFO Area Stock Assessment), B. Zoehner pers. comm. (DFO Salmonid Enhancement Program)"
+Prespawn survival,sprespawn,0.95,"Bio, Hatchery","M. Clarke pers. comm. (DFO Area Stock Assessment), B. Zoehner pers. comm. (DFO Salmonid Enhancement Program)"
 First-year marine natural survival,M,Age 1: 0.0035 (0.0020-0.0058),"Bio, Hatchery",Estimated from Quinsam/Campbell  conditioning model (sampled 1984-2024)
 Natural survival (age 2+),M,"Age 2: 0.7, Age 3:0.8, Age 4+:0. 9","Bio, Hatchery",CTC (2023) 
 Unfished per capita egg production rate (eggs/smolt),phi ,20.64,Bio,Calculated in Quinsam/Campbell  conditioning model assuming base marine mortality and maturity

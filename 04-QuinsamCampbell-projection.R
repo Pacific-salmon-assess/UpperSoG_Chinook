@@ -167,13 +167,13 @@ if(plot.base.case == TRUE){
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_QC_low.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_QC_high.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, "low.rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, "high.rds")))
     # saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC_basecase.rds")))
 
     invisible()

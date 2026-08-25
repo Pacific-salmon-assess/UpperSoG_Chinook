@@ -3,17 +3,9 @@
 library(tidyverse)
 library(salmonMSE)
 library(readxl)
+library(here)
 
 source("03-Adam-OM.R")
-# # Run salmonMSE - single instance
-#
-# SMSE <- salmonMSE(SOM)
-# report(SMSE , dir = "SMSE")
-# saveRDS(SMSE , file = file.path("SMSE", paste0("QC_07.20.26.rds")))
-
-# SMSE <- readRDS(file.path("SMSE", paste0("QC_07.20.26.rds")))
-# SMSE <- readRDS(file.path("SMSE", paste0("QC", 1, ".rds")))
-# report(SMSE , dir = "SMSE")
 
 #------------------------------------------------------------------------------
 # Run over multiple SOMs

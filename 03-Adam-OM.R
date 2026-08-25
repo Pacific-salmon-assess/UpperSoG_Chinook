@@ -11,10 +11,10 @@ nsim <- 500
 proyears <- 30
 n_g <- 1
 year1 <- 2002 # from conditioning model
-msurv <- "low"#"base" #"low" #"high"
+msurv <- "base"#"base" #"low" #"high"
 # for estimated value or 0.001 or 0.1 for lower and upper sens. anal.
 # also used for file name of SOM
-som_name <- "Adam low msurv"#"Adam base" #"low msurv" # "high msurv" # for internal naming
+som_name <- "Adam base"#"Adam base" #"low msurv" # "high msurv" # for internal naming
 
 # Load exploitation rate model - Adam
 ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
@@ -114,8 +114,8 @@ SRbeta <- sapply(report[sim_samp], getElement, "beta")
 Emax <- 1/SRbeta
 Smax <- Emax * tau/phi
 kappa <- as.numeric(exp(pars$log_cr[sim_samp]))
-#quantile(Smax, c(0.25, 0.5, 0.75))
-#quantile(kappa, c(0.25, 0.5, 0.75))
+# quantile(Smax, c(0.25, 0.5, 0.75))
+# quantile(kappa, c(0.25, 0.5, 0.75))
 
 Bio <- new(
   "Bio",

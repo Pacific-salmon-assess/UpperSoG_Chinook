@@ -1,0 +1,25 @@
+﻿Parameter,Symbol,Values,Class,Source
+Fecundity at age,fa,"Age 2: 0, Age 3: 1174, Age 4: 2936, Age 5: 3669","Bio, Hatchery","B. Zoehner pers. comm. (DFO Salmonid Enhancement Program), with distribution over ages from (Walters and Korman 2024)"
+Proportion-at-age mature,ra,"Age 2: 0.007, Age 3: 0.16, Age 4: 0.81, Age 5: 1.00","Bio, Hatchery",Estimated from Salmon River conditioning model (average 2020-2024)
+Productivity over the life-cycle (recruits/spawner),kappa,6.89 (4.23-12.11),Bio,Estimated from Salmon River conditioning model 
+Spawner abundances at maximum recruitment,Smax,1763 (1123 - 3018),Bio,Estimated from Salmon River conditioning model 
+Prespawn survival,sprespawn,0.95,"Bio, Hatchery","M. Clarke pers. comm. (DFO Area Stock Assessment), B. Zoehner pers. comm. (DFO Salmonid Enhancement Program)"
+First-year marine natural survival,M,"0.0043 (0.0026, 0.0064)","Bio, Hatchery",Estimated from Salmon River conditioning model (sampled 1984-2024)
+Natural survival (age 2+),M,"Age 2: 70%, Age 3: 80%, Age 4+: 90%","Bio, Hatchery",CTC (2023) 
+Unfished per capita egg production rate (eggs/smolt),phi,16.5,Bio,Calculated in Salmon River conditioning model assuming base marine mortality and maturity
+Unfished per capita spawners (spawners/smolt),tau,0.012,Bio,Calculated in Salmon River conditioning model assuming assuming base marine mortality and maturity
+Enroute survival,senroute,0.9,"Bio, Hatchery",M. Clarke pers. comm. (DFO Area Stock Assessment)
+Relative vulnerabilit by age to the pre-terminal fishery,vPT,"Age 1: 0, Age 2: 0.0057, Age 3: 0.15, Age 4: 0.82. Age 5: 1.0 ",Harvest,Estimated from Salmon River conditioning model 
+Relative vulnerabilit by age to the terminal fishery,vT,"Age 1: 0, Age 2: 0.03, Age 3: 0.91, Age 4: 0.97. Age 5: 1.0 ",Harvest,Estimated from Salmon River conditioning model
+Terminal exploitation rate,uT,0.02,Harvest,Estimated from Salmon River conditioning model  (average 2020-2024)
+Number of hatchery smolt releases,smoltrel,103953,Hatchery,B. Zoehner pers. comm.(DFO Salmonid Enhancement Program) (average 2021-2025)
+Survival of hatchery eggs to yearling life stage,syearling,0.75,Hatchery ,B. Zoehner  pers. comm.(DFO Salmonid Enhancement Program)
+"Relative reproductive success, hatchery spawners",gamma,0.8,Hatchery,Withler et al. (2018)
+Mark rate of hatchery-origin fish ,m,1,Hatchery,Assumed 100% marking of hatchery origin fish
+Maximum natural brood-escapement ratio,pescmax,0.33,Hatchery,SEP guideline
+Maximum proportion of the natural-origin broodtak from the escapement,pNOBmax,1,Hatchery,Assume no limitation on natural-origin brood from available natural-origin spawners
+"Proportion of hatchery-origin fish removed from spawning grounds, not available for broodtake",pHOSremoval,0,Hatchery,No fish are removed for CWT sampling
+Phenotype optimum,theta,"100 in natural environmental, 80 in hatchery",Hatchery,Withler et al. (2018)
+Phenotype variance,sigma2,10,Hatchery,Withler et al. (2018)
+Fitness variance,omega2,100,Hatchery,Withler et al. (2018)
+Heritability,h2,mean = 0.25 (sd=0.15),Hatchery,"Withler et al. (2018), sampled from a normal distribution"

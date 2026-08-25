@@ -17,6 +17,7 @@ ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
 ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds")
+# ERM_Salmon <- readRDS("CM/Salmon_08.22.26.altprior.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
@@ -38,7 +39,7 @@ for (pop in c("Adam", "Salmon", "Woss")){
   year <- year1 + seq(1, d$Ldyr) - 1
   year_borrow <- seq(max(year) - 9, max(year) - 5)
 
-  write_figures <- TRUE #Toggle to true to write figures to file
+  write_figures <- FALSE #Toggle to true to write figures to file
 
   theme_set(theme_bw())
 

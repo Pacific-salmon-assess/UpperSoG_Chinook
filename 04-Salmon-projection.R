@@ -19,7 +19,7 @@ f_brood <- function(NO, HO, stray, m = 1, pmax_esc = 0.33) {
 
   NOB[] <- ptake * NO
   HOB_unmarked[] <- ptake * (1 - m) * HO
-  HOB_marked[] <- ptake * m * HO
+  HOB_marked[] <- 0#ptake * m * HO
 
   list(NOB = NOB, HOB_marked = HOB_marked, HOB_unmarked = HOB_unmarked, HOB_stray = HOB_stray)
 }
@@ -82,7 +82,7 @@ if (!dir.exists(here::here(folder_path))) {
   library(parallel)
   sfInit(TRUE, nOM, cpus=(parallel::detectCores()-1))
   # First, define brood function
-  f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
+  f_brood <- function(NO, HO, stray, m = 1, pmax_esc = 0.33) {
 
     NOB <- array(0, dim(NO))
     HOB_marked <- HOB_unmarked <- array(0, dim(HO))
@@ -96,7 +96,7 @@ if (!dir.exists(here::here(folder_path))) {
 
     NOB[] <- ptake * NO
     HOB_unmarked[] <- ptake * (1 - m) * HO
-    HOB_marked[] <- ptake * m * HO
+    HOB_marked[] <- 0#ptake * m * HO
 
     list(NOB = NOB, HOB_marked = HOB_marked, HOB_unmarked = HOB_unmarked, HOB_stray = HOB_stray)
   }
@@ -107,13 +107,13 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Salmon_low.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Salmon_base.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Salmon", paste0("Salmon", i, "low.rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Salmon", paste0("Salmon", i, ".rds")))
 
     invisible()
 

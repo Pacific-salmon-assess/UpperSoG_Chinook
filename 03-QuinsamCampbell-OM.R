@@ -11,10 +11,10 @@ nsim <- 500
 proyears <- 30
 n_g <- 1
 year1 <- 1984 # from conditioning model
-msurv <- "low"#"base" #"low" #"high"
+msurv <- "base"#"base" #"low" #"high"
 # for estimated value or 0.001 or 0.1 for lower and upper sens. anal.
 # also used for file name of SOM
-som_name <- "QC low msurv" #"QC base" #"QC low msurv" # "QC high msurv" # for internal naming
+som_name <- "QC base" #"QC base" #"QC low msurv" # "QC high msurv" # for internal naming
 
 # Load exploitation rate model - Quinsam/Campbell
 ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
@@ -58,6 +58,22 @@ set.seed(23)
 sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
 m1_sample <- df[sim_samp_long]
 exp(-quantile(df[sim_samp_long], prob = c(0.025, 0.5, 0.975)))
+exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
+
+# Plot distribution of survival first year at sea, with sens analysis values
+if(FALSE){
+  df <- data.frame(x = exp(-m1_sample))
+  g <- ggplot(df, aes(x=x)) +
+    geom_density(alpha=0.1, col = grey(0.4), linewidth=1.2, fill = "grey") +
+    geom_vline(xintercept = 0.002, linetype = "dashed", col = grey(0.4)) +
+    geom_vline(xintercept = 0.01, linetype = "dashed", col = grey(0.4)) +
+    geom_vline(xintercept = median(exp(-m1_sample)), linetype = "solid",
+               col = grey(0.4)) +
+    xlab("Marine survial to age-2") +
+    ylab("Density")
+  ggsave(file.path("figures", "msurv_dist.png"), g, height = 5, width = 5)
+}
+
 
 # Alternative approach: making a parametric distribution from all years
 if(msurv %in% c("low", "high")){
@@ -96,6 +112,7 @@ p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
   array(c(nsim, maxage,  proyears))
 
 # matt.x <- apply(p_mature,2,mean)
+
 # matt_ppn <- NA
 # matt_ppn[1] <- matt.x[1]
 # matt_ppn[2] <- matt.x[2]-matt.x[1]

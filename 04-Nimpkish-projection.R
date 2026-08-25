@@ -118,13 +118,13 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_low.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_high.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, "low.rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, "high.rds")))
 
     invisible()
 

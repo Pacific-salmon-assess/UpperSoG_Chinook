@@ -19,6 +19,8 @@ pop <- "Nimpkish"
 samp <- readRDS("CM/Woss_07.22.26.prior.rds")
 year1 <- 2001 # For Nimpkish/Woss
 save.files <- TRUE
+scenario <- "base"
+if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 folder_path <- "figures/SMSE/Nimpkish"
 
@@ -178,7 +180,7 @@ Reduce(left_join, .) %>%
   # rename(Option = Option_name) %>%
   reshape2::melt(id.vars = c("n", "Simulation"))#, "Option"
 if(save.files){
-  readr::write_csv(val_sim_all, file = paste0("tables/", pop, "_outcomes_sim.csv")) # Save for Slick object
+  readr::write_csv(val_sim_all, file = paste0("tables/", pop, "_outcomes_sim", file_suffix, ".csv")) # Save for Slick object
 }
 # Median and range for state variables across simulations
 val_sim <- val_sim_all %>%
@@ -265,7 +267,7 @@ if (FALSE) {
 
 
   if(save.files){
-    readr::write_csv(val_prob, file = paste0("tables/", pop, "_outcomes_prob.csv") ) # Save for Slick object
+    readr::write_csv(val_prob, file = paste0("tables/", pop, "_outcomes_prob", file_suffix, ".csv") ) # Save for Slick object
 }
 ### Big data frame of state variables for each simulation and year (for shinysalmon app)
 ### CSV file is 200 MB, but we'll have to convert the data frame to arrays and save as an R object (.rds) later to reduce disk space
@@ -288,7 +290,7 @@ if(FALSE){
     left_join(select(gr,  n), by = "n")# %>% Option_name,
   # rename(Option = Option_name)
   if(save.files){
-    readr::write_csv(df, file = "tables/Quinsam_outcomes_sim_year_app.csv") # Save for Slick object
+    readr::write_csv(df, file = paste0("tables/Quinsam_outcomes_sim_year_app", file_suffix, ".csv")) # Save for Slick object
   }
   rm(df)
 }
@@ -451,7 +453,7 @@ if(FALSE){
       scale_y_discrete(labels = font_fn, limits = rev) +
       geom_hline(yintercept = 3.5, linewidth = 1)
     if(save.files){
-      ggsave(file.path("figures", "SMSE", paste0("performance_table_", i, ".png")), g, width = 7.5, height = 7)
+      ggsave(file.path("figures", "SMSE", paste0("performance_table_", i, file_suffix, ".png")), g, width = 5.5, height = 7)
     }
   }
 
@@ -480,7 +482,7 @@ if(FALSE){
 
   g <- ggpubr::ggarrange(plotlist = glist, ncol = 3, widths = c(3, 2, 2))
   if(save.files){
-    ggsave("figures/SMSE/performance_table_full.png", g, width = 17, height = 8)
+    ggsave(paste0("figures/SMSE/performance_table_full", file_suffix, ".png"), g, width = 17, height = 8)
   }
   # Short performance metrics
   glist <- lapply(LETTERS[1:3], function(i) {
@@ -507,7 +509,7 @@ if(FALSE){
 
   g <- ggpubr::ggarrange(plotlist = glist, ncol = 3, widths = c(3, 2, 2))
   if(save.files){
-    ggsave("figures/SMSE/performance_table_short.png", g, width = 8, height = 7)
+    ggsave(paste0("figures/SMSE/performance_table_short", file_suffix, ".png"), g, width = 8, height = 7)
   }
 }
 
@@ -547,7 +549,21 @@ Ccolhoc <- c("0-200" = '#d01c8b', "201-400" = '#f1b6da',
            "401-600" = '#f7f7f7', "601-800" = '#b8e186',
            ">800" = '#4dac26')
 
+Ccol1000 <- c("0-250" = '#d01c8b', "251-500" = '#f1b6da',
+             "501-750" = '#f7f7f7', "751-1000" = '#b8e186',
+             ">1000" = '#4dac26')
 
+Ccol200 <- c("0-50" = '#d01c8b', "51-100" = '#f1b6da',
+              "101-150" = '#f7f7f7', "151-200" = '#b8e186',
+              ">200" = '#4dac26')
+
+Ccol100 <- c("0-25" = '#d01c8b', "26-50" = '#f1b6da',
+             "51-75" = '#f7f7f7', "76-100" = '#b8e186',
+             ">100" = '#4dac26')
+
+Ccol1600 <- c("0-400" = '#d01c8b', "401-800" = '#f1b6da',
+              "801-1200" = '#f7f7f7', "1201-1600" = '#b8e186',
+              ">1600" = '#4dac26')
 
 CcolRet <- c("0-150" = '#d01c8b', "151-300" = '#f1b6da',
             "301-450" = '#f7f7f7', "451-600" = '#b8e186',
@@ -618,7 +634,7 @@ gPNI <- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = va
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_PNI_", pop, ".png")), gPNI, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_PNI_", pop, file_suffix, ".png")), gPNI, width = 5, height = 5)
 }
 
 # # Option of icecream plot without legend and numbers on the plot:
@@ -639,7 +655,7 @@ if(save.files){
 #   )
 # g$facet$params$free$y <- TRUE
 # g$facet$params$free$x <- TRUE
-# # ggsave(file.path("figures", "SMSE", "decisiontable_PNI_QC.png"), g, width = 7, height = 5)
+# # ggsave(file.path("figures", "SMSE", "decisiontable_PNI_QC.png"), g, width = 5, height = 5)
 #
 #
 # Option of icecream plot with legend:
@@ -678,8 +694,8 @@ gPNIprob <- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_probPNI_", pop, ".png")),
-                 gPNIprob, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_probPNI_", pop, file_suffix, ".png")),
+                 gPNIprob, width = 5, height = 5)
 }
 
 # # Option of icecream plot without legend and numbers on the plot:
@@ -701,7 +717,7 @@ if(save.files){
 #   )
 # g$facet$params$free$y <- TRUE
 # g$facet$params$free$x <- TRUE
-# # ggsave(file.path("figures", "SMSE", "decisiontable_PNI50_QC.png"), g, width = 7, height = 5)
+# # ggsave(file.path("figures", "SMSE", "decisiontable_PNI50_QC.png"), g, width = 5, height = 5)
 
 ### Natural spawners decision tables
 # Option of icecream plot with legend:
@@ -710,20 +726,35 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Natural Spawners") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2000",
+  rename(value = median)
+
+if(scenario == "base"|scenario == "high"){
+  g <- g %>%
+    mutate(value = ifelse(value < 2000, "0-2000",
                         ifelse(value >= 2000 & value <= 4000, "2001-4000",
                                ifelse(value > 4000 & value < 6000, "4001-6000",
                                       ifelse(value >= 6000 & value < 8000, "6001-8000",
                                              ">8000")))))
+  g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
+                                        "6001-8000", ">8000"))
+  col <- CcolSp
+}
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 250, "0-250",
+                          ifelse(value > 250 & value <= 500, "251-500",
+                                 ifelse(value > 500 & value <= 750, "501-750",
+                                        ifelse(value > 750 & value <= 1000, "751-1000",
+                                               ">1000")))))
+  g$value <- factor(g$value, levels = c("0-250", "251-500", "501-750",
+                                        "751-1000", ">1000"))
+  col <- Ccol1000
+}
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
-                                      "6001-8000", ">8000"))
-
 gSp<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = CcolSp,
+  scale_fill_manual(values = col,
                     name = "Natural spawners") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -743,8 +774,8 @@ gSp<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = val
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_NatSp_", pop, ".png")),
-       gSp, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_NatSp_", pop, file_suffix, ".png")),
+       gSp, width = 5, height = 5)
 }
 
 # option for icream plot with numbers on plot (no legend)
@@ -760,7 +791,7 @@ g <- val_sim %>%
                                                          midpoint = 1500))
 g$facet$params$free$y <- TRUE
 g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_sp_QC.png"), g, width = 7, height = 5)
+# ggsave(file.path("figures", "SMSE", "decisiontable_sp_QC.png"), g, width = 5, height = 5)
 
 ### NS <1500 prob decision tables
 # Option of icecream plot without legend:
@@ -779,7 +810,7 @@ g <- val_prob %>%
   )
 g$facet$params$free$y <- TRUE
 g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_P_1500_QC.png"), g, width = 7, height = 5)
+# ggsave(file.path("figures", "SMSE", "decisiontable_P_1500_QC.png"), g, width = 5, height = 5)
 
 # Option of icecream plot with legend:
 g <- val_prob %>%
@@ -815,8 +846,8 @@ gNSprob<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = 
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_NOSProb1500_", pop, ".png")),
-       gNSprob, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_NOSProb1500_", pop, file_suffix, ".png")),
+       gNSprob, width = 5, height = 5)
 }
 
 # NS relative to Sgen
@@ -853,8 +884,8 @@ gSgen<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = v
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Sgen_", pop, ".png")),
-       gSgen, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Sgen_", pop, file_suffix, ".png")),
+       gSgen, width = 5, height = 5)
 }
 
 # NS relative to 85%SMSY
@@ -891,8 +922,8 @@ gSmsy85<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = 
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Smsy_", pop, ".png")),
-       gSmsy85, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Smsy_", pop, file_suffix, ".png")),
+       gSmsy85, width = 5, height = 5)
 }
 
 ### Returns decision tables
@@ -902,20 +933,37 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Returns") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 2000, "0-2000",
+  rename(value = median)
+
+if(scenario == "base"|scenario == "high") {
+  g <- g %>%
+    mutate(value = ifelse(value < 2000, "0-2000",
                         ifelse(value >= 2000 & value <= 4000, "2001-4000",
                                ifelse(value > 4000 & value < 6000, "4001-6000",
                                       ifelse(value >= 6000 & value < 8000, "6001-8000",
                                              ">8000")))))
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
-                                      "6001-8000", ">8000"))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
+                                        "6001-8000", ">8000"))
+  col <- CcolSp
+}
 
+if(scenario == "low") {
+  g <- g %>%
+    mutate(value = ifelse(value < 400, "0-400",
+                          ifelse(value >= 400 & value <= 800, "401-800",
+                                 ifelse(value > 800 & value < 1200, "801-1200",
+                                        ifelse(value >= 1200 & value < 1600, "1201-1600",
+                                               ">1600")))))
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-400", "401-800", "801-1200",
+                                        "1201-1600", ">1600"))
+  col <- Ccol1600
+}
 gRet<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = CcolSp,
+  scale_fill_manual(values = col,
                     name = "Returns") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -935,8 +983,8 @@ gRet<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = val
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Ret_", pop, ".png")),
-       gRet, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Ret_", pop, file_suffix, ".png")),
+       gRet, width = 5, height = 5)
 }
 
 ### Hatchery releases
@@ -950,7 +998,7 @@ g <- val_sim %>%
   decision_table_grid(ncol = 3, "Hatchery releases\n(100,000s)")
 g$facet$params$free$y <- TRUE
 g$facet$params$free$x <- TRUE
-#ggsave(file.path("figures", "SMSE", "decisiontable_rel.png"), g, width = 7, height = 5)
+#ggsave(file.path("figures", "SMSE", "decisiontable_rel.png"), g, width = 5, height = 5)
 
 
 # Option of icecream plot with legend:
@@ -994,8 +1042,8 @@ gRel<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = val
   coord_cartesian(clip = "off")
 
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Rel_", pop, ".png")),
-       gRel, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_Rel_", pop, file_suffix, ".png")),
+       gRel, width = 5, height = 5)
 }
 
 ### Total Catches (preterminal + terminal)
@@ -1005,21 +1053,41 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Aggcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+if(scenario == "base"| scenario == "high"){
+  g <- g %>%
+    mutate(value = ifelse(value < 500, "0-500",
+                          ifelse(value >= 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value < 1500, "1001-1500",
+                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
+                                               ">2000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccolc
+}
+
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value < 50, "0-50",
+                          ifelse(value >= 50 & value <= 100, "51-100",
+                                 ifelse(value > 100 & value < 150, "101-150",
+                                        ifelse(value >= 150 & value < 200, "151-200",
+                                               ">200")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
+                                        "151-200", ">200"))
+  col <- Ccol200
+
+}
 
 gc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Total catch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1040,7 +1108,7 @@ gc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value
   coord_cartesian(clip = "off")
 if(save.files){
   ggsave(file.path("figures", "SMSE", pop, paste0("icecream_catch_", pop, ".png")),
-       gc, width = 7, height = 5)
+       gc, width = 5, height = 5)
 }
 
 ### Total Catches (preterminal + terminal), hatchery-orgin only
@@ -1050,21 +1118,40 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "AggHOcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+if(scenario == "base" | scenario == "high"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 200, "0-200",
+                          ifelse(value > 200 & value <= 400, "201-400",
+                                 ifelse(value > 400 & value <= 600, "01-600",
+                                        ifelse(value > 600 & value <= 800, "601-800",
+                                               ">800")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
+                                        "601-800", ">800"))
+  col <- Ccolhoc
+}
+
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 25, "0-25",
+                          ifelse(value > 25 & value <= 50, "26-50",
+                                 ifelse(value > 50 & value <= 75, "51-75",
+                                        ifelse(value > 75 & value <= 100, "76-100",
+                                               ">100")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-25", "26-50", "51-75",
+                                        "76-100", ">100"))
+  col <- Ccol100
+}
 
 ghoc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Total hatchery-\norigin catch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1084,8 +1171,8 @@ ghoc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = va
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop,  paste0("icecream_HOcatch_", pop, ".png")),
-       ghoc, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop,  paste0("icecream_HOcatch_", pop, file_suffix, ".png")),
+       ghoc, width = 5, height = 5)
 }
 
 ### Total Catches (preterminal + terminal), natural-origin only
@@ -1095,21 +1182,41 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "AggNOcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+if(scenario == "base" | scenario =="high") {
+  g <- g %>%
+    mutate(value = ifelse(value < 500, "0-500",
+                          ifelse(value >= 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value < 1500, "1001-1500",
+                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
+                                               ">2000")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccolc
+
+}
+
+if(scenario == "low") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 50, "0-50",
+                          ifelse(value > 50 & value <= 100, "51-100",
+                                 ifelse(value > 100 & value <= 150, "101-150",
+                                        ifelse(value > 150 & value <= 200, "151-200",
+                                               ">200")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
+                                        "151-200", ">200"))
+  col <- Ccol200
+}
 
 gnoc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Total natural-\norigin catch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1129,8 +1236,8 @@ gnoc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z = va
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_NOcatch_", pop, ".png")),
-       gnoc, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_NOcatch_", pop, file_suffix, ".png")),
+       gnoc, width = 5, height = 5)
 }
 
 ### Pre-terminal Catches
@@ -1139,22 +1246,41 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "PTcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 500, "0-500",
-                        ifelse(value >= 500 & value <= 1000, "501-1000",
-                               ifelse(value > 1000 & value < 1500, "1001-1500",
-                                      ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                             ">2000")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                      "1501-2000", ">2000"))
+if(scenario == "base" | scenario == "high") {
+  g <- g %>%
+    mutate(value = ifelse(value < 500, "0-500",
+                          ifelse(value >= 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value < 1500, "1001-1500",
+                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
+                                               ">2000")))))
 
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccolc
+
+}
+
+if(scenario == "low") {
+  g <- g %>%
+    mutate(value = ifelse(value <= 50, "0-50",
+                          ifelse(value > 50 & value <= 100, "51-100",
+                                 ifelse(value > 100 & value <= 150, "101-150",
+                                        ifelse(value > 150 & value <= 200, "151-200",
+                                               ">200")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
+                                        "151-200", ">200"))
+  col <- Ccol200
+}
 
 gptc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccolc,
+  scale_fill_manual(values = col,
                     name = "Pre-terminal\ncatch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1174,8 +1300,8 @@ gptc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = val
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_ptcatch_", pop, ".png")),
-       gptc, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_ptcatch_", pop, file_suffix, ".png")),
+       gptc, width = 5, height = 5)
 }
 
 ### Terminal Catches
@@ -1185,21 +1311,41 @@ g <- val_sim %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
   filter(variable == "Tcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  mutate(value = ifelse(value < 100, "0-100",
-                        ifelse(value >= 100 & value <= 200, "101-200",
-                               ifelse(value > 200 & value < 300, "201-300",
-                                      ifelse(value >= 300 & value < 400, "301-400",
-                                             ">400")))))
+  rename(value = median)
 
-# Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
-                                      "301-400", ">400"))
+if(scenario == "base" | scenario == "high"){
+  g <- g %>%
+    mutate(value = ifelse(value < 100, "0-100",
+                          ifelse(value >= 100 & value <= 200, "101-200",
+                                 ifelse(value > 200 & value < 300, "201-300",
+                                        ifelse(value >= 300 & value < 400, "301-400",
+                                               ">400")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
+                                        "301-400", ">400"))
+  col <- CcolTc
+
+}
+
+if(scenario == "low"){
+  g <- g %>%
+    mutate(value = ifelse(value <= 50, "0-50",
+                          ifelse(value > 50 & value <= 100, "51-100",
+                                 ifelse(value > 100 & value <= 150, "101-150",
+                                        ifelse(value > 150 & value <= 200, "151-200",
+                                               ">200")))))
+
+  # Specify order of legend elements:
+  g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
+                                        "151-200", ">200"))
+  col <- Ccol200
+}
 
 gtc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = CcolTc,
+  scale_fill_manual(values = col,
                     name = "Terminal\ncatch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1219,8 +1365,8 @@ gtc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = valu
   #          colour="grey40", size=3) +
   coord_cartesian(clip = "off")
 if(save.files){
-  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_tcatch_", pop, ".png")),
-       gtc, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", pop, paste0("icecream_tcatch_", pop, file_suffix, ".png")),
+       gtc, width = 5, height = 5)
 
 }
 
@@ -1240,11 +1386,11 @@ gic3 <- (gptc + gtc)/
 
 if(save.files){
 
-ggsave(file.path("figures", "SMSE", pop, paste0("gic1_", pop, ".png")), gic1,
+ggsave(file.path("figures", "SMSE", pop, paste0("gic1_", pop, file_suffix, ".png")), gic1,
        height = 9, width = 7)
-ggsave(file.path("figures", "SMSE", pop, paste0("gic2_", pop, ".png")), gic2,
+ggsave(file.path("figures", "SMSE", pop, paste0("gic2_", pop, file_suffix, ".png")), gic2,
        height = 9, width = 7)
-ggsave(file.path("figures", "SMSE", pop, paste0("gic3_", pop, ".png")), gic3,
+ggsave(file.path("figures", "SMSE", pop, paste0("gic3_", pop, file_suffix, ".png")), gic3,
        height = 9, width = 7)
 
 }
@@ -1263,7 +1409,7 @@ if(FALSE){
     theme(panel.spacing = unit(0, "in")) +
     geom_vline(xintercept = 1500, linetype = 3) +
     geom_hline(yintercept = 0.5, linetype = 3)
-  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp.png"), g, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp.png"), g, width = 5, height = 5)
 
   val_prob2 <- val_prob %>%
     left_join(select(gr, IRER, pNOB_target, n, Letter, Number, fs, MM, MSF_T)) %>%
@@ -1276,14 +1422,14 @@ if(FALSE){
     theme(panel.spacing = unit(0, "in")) +
     geom_vline(xintercept = 0.5, linetype = 3) +
     geom_hline(yintercept = 0.5, linetype = 3)
-  ggsave(file.path("figures", "SMSE", "tradeoff_prob.png"), g, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "tradeoff_prob.png"), g, width = 5, height = 5)
 
   g <- val_sim2 %>%
     tradeoff_grid(xname = "IR_Catch", yname = "PNI", xlim = c(0, 4000), ylim = c(0, 1), ncol = 3) +
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in")) +
     labs(x = "In-river catch")
-  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_IRC.png"), g, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_IRC.png"), g, width = 5, height = 5)
 
 
   g <- val_sim2 %>%
@@ -1291,7 +1437,7 @@ if(FALSE){
                   ncol = 3, xlab = "Hatchery releases (100,000s)") +
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_rel.png"), g, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_rel.png"), g, width = 5, height = 5)
 
 
   #### Revise tradeoff figure layout 1
@@ -1306,7 +1452,7 @@ if(FALSE){
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in")) +
     scale_colour_hue(labels = c("0.5" = "0.5 (MM)", "1" = "1 (MM)", "NA" = "NA (no MM)"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_prob2.png"), g, width = 7, height = 4)
+  ggsave(file.path("figures", "SMSE", "tradeoff_prob2.png"), g, width = 5, height = 4)
 
   g <- val_sim2 %>%
     mutate(
@@ -1319,7 +1465,7 @@ if(FALSE){
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in")) +
     scale_colour_hue(labels = c("0.5" = "0.5 (MM)", "1" = "1 (MM)", "NA" = "NA (no MM)"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp2.png"), g, width = 7, height = 4)
+  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp2.png"), g, width = 5, height = 4)
 
 
   #### Revise tradeoff figure layout 2
@@ -1337,7 +1483,7 @@ if(FALSE){
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in")) +
     scale_colour_hue(labels = c("0.5" = "0.5 (MM)", "1" = "1 (MM)", "NA" = "NA (no MM)"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_prob3.png"), g, width = 7, height = 4)
+  ggsave(file.path("figures", "SMSE", "tradeoff_prob3.png"), g, width = 5, height = 4)
 
   g <- val_sim2 %>%
     mutate(
@@ -1353,7 +1499,7 @@ if(FALSE){
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in")) +
     scale_colour_hue(labels = c("0.5" = "0.5 (MM)", "1" = "1 (MM)", "NA" = "NA (no MM)"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp3.png"), g, width = 7, height = 4)
+  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp3.png"), g, width = 5, height = 4)
 
   #### Revise tradeoff figure layout 3 - revert to four rows but switch fw and IRER
   g <- val_prob2 %>%
@@ -1365,7 +1511,7 @@ if(FALSE){
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in")) +
     scale_colour_hue(labels = c("0.5" = "0.5 (MM)", "1" = "1 (MM)", "NA" = "NA (no MM)"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_prob3.png"), g, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "tradeoff_prob3.png"), g, width = 5, height = 5)
 
   g <- val_sim2 %>%
     mutate(cols = paste("IRER =", IRER)) %>%
@@ -1375,7 +1521,7 @@ if(FALSE){
     geom_vline(xintercept = 1500, linetype = 3) +
     geom_hline(yintercept = 0.5, linetype = 3) +
     theme(panel.spacing = unit(0, "in"))
-  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp3.png"), g, width = 7, height = 5)
+  ggsave(file.path("figures", "SMSE", "tradeoff_PNI_sp3.png"), g, width = 5, height = 5)
 
 }
 

@@ -19,6 +19,7 @@ ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")#readRDS("CM/Adam_06.01.26.JSpt
 report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
 ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
+# ERM_Salmon <- readRDS("CM/Salmon_08.22.26.altprior.rds") #file:///C:/github/UpperSoG_Chinook/CM/Salmon_06.10.JSesc.NGTSt.html
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 ERM_Woss <- readRDS("CM/Woss_07.22.26.prior.rds")
@@ -30,7 +31,7 @@ pop.prior <- pop
 if(pop=="Adam") pop.prior <- "Adam/Eve"
 if(pop=="Woss") pop.prior <- "Nimpkish"
 
-report <- report_Adam#report_QC#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
+report <- report_Salmon#report_QC#report_SalmonPhillips#report_AdamPhillips#report_WossPhillips
 year1 <- 2002#2002#2001#1984#2010#1984
 samp <- ERM_Salmon#readRDS(paste("CM/",pop,"_06.01.26.JSpt.rds", sep=""))#paste("ERM_", pop, "Phillips", sep="")
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -38,6 +39,7 @@ d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 # Srep prior
 data_Srep_prior <- as.data.frame( read.csv(
   ("data/UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
+  # ("data/UpperSoGChinook_out_posteriorpredictive_UPDATEDAWA_Aug18.csv"))
 )
 Srep_prior <- data_Srep_prior %>% filter(Stock==pop.prior) %>% pull(SREP_median)
 logSrep_prior_sd <- data_Srep_prior %>% filter(Stock==pop.prior) %>%
