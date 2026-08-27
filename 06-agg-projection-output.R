@@ -22,8 +22,11 @@ if (!dir.exists(here::here(folder_path))) {
 
 
 # Identify scenarios and management options ----
-gr <- readr::read_csv(file.path("tables", "scenarios.csv"))
-nOM <- nrow(gr)
+gr <- expand.grid(
+  u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
+  n_yearling = seq(0.5, 1.5, 0.05)
+)
+nOM <- nrow(g)
 
 
 # pop <- "QC"
@@ -1125,4 +1128,60 @@ if(save.files){
                    paste0("gic3_Agg", file_suffix, ".png")),
          gic3, height = 7, width = 7)
 
+}
+
+# Tradeoff figure: aggregate total catch vs aggregate natural spawners ----
+Aggcatch_NS <- val_sim_tot %>%
+  filter(variable %in% c("Aggcatch", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  mutate(
+    bin = cut(
+      g$n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+gto1 <- plot_tradeoff(
+  pm1 = Aggcatch_NS$`Natural Spawners`,
+  pm2 = Aggcatch_NS$Aggcatch,
+  x1 = Aggcatch_NS$u_preterminal,
+  x2 = Aggcatch_NS$bin,
+  xlab = "Aggregate natural spawners (median)",
+  ylab = "Aggregate catch (median)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+)
+
+
+# Tradeoff figure: aggregate hatchery-origin catch vs aggregate natural spawners
+AggHOcatch_NS <- val_sim_tot %>%
+  filter(variable %in% c("AggHOcatch", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  mutate(
+    bin = cut(
+      g$n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+gto2 <- plot_tradeoff(
+  pm1 = AggHOcatch_NS$`Natural Spawners`,
+  pm2 = AggHOcatch_NS$AggHOcatch,
+  x1 = AggHOcatch_NS$u_preterminal,
+  x2 = AggHOcatch_NS$bin,
+  xlab = "Aggregate natural spawners (median)",
+  ylab = "Aggregate hatchery-origin catch (median)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+)
+
+if(save.files){
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto1_Agg", file_suffix, ".png")),
+         gto1, height = 9, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto2_Agg", file_suffix, ".png")),
+         gto2, height = 9, width = 7)
 }
