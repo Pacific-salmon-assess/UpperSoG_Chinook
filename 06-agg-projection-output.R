@@ -10,7 +10,7 @@ library(ggplot2)
 source("92-decision-table-plots.R") #for alternative version of decision tables
 
 save.files <- TRUE
-scenario <- "high"
+scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 
@@ -52,7 +52,7 @@ if(pop == "Adam") {
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, "high.rds")))
+  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, ".rds")))
 
   # Update PNI = 1 when there is no brood & pHOS = 0
   Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]
