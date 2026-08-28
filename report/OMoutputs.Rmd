@@ -5,7 +5,7 @@ output:
     toc: true 
     toc_depth: 3
     toc_float: true
-date: "2026-08-09"
+date: "2026-08-28"
 ---
 
 ```{r setup, include=FALSE}
@@ -68,9 +68,20 @@ get_OMtable(pop = "qc", caption = "Table 2. Input parameters for the projection 
 
 ### Outputs
 
-Contour plots of performance metrics for Quinsam/Cambbell on PNI, abundances, recruitment, and catches along gradients in pre-terminal exploitation rates (X-axis) and hatchery releases (Y-axis), specified as a proportion of recent hatchery releases averaged 2021-2025. Projections assume constant terminal exploitation rate, averaged over recent 5 years, 2020-2024. Dashed horizontal and vertical lines depict recent 5-year average of pre-terminal exploitation rates (2020-2024) and hatchery releases (2021-2025). Solid vertical lines depicts the pre-terminal exploitation rate, which when combined with recent average terminal exploitation rate results in *U<sub>MSY</sub>*, labeled, *U<sub>MSY</sub> (proxy)*. 
 
-```{r QCfig, fig.cap = "Fig. 1. Contour plots of peformance metrics from projections of Quinsam/Campbell Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: proportionate natural influence (PNI), total catch, abundance of natural spawners, abundance of returns, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+Contour plots of performance metrics from projections of Quinsam/Campbell Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: proportionate natural influence (PNI), total catch, abundance of natural spawners, abundance of returns, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
+
+#### Main results
+
+- Spawner abundances and returns increase as pre-terminal exploitation rates decline.
+
+- Catches are maximized near MSY exploitation rates, except for terminal catches and natural-origin catches which are maximized at relatively low exploitation rates where spawner abundances are high.
+
+- Spawner abundances, returns, and catches increase with hatchery releases.
+
+- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. An increase from "Integrated Hatchery" (PNI <0.5) to "Integrated Transition" (PNI<0.8 and >=0.5) designation, hatchery releases could occur with reductions in hatchery releases to > 75% of current levels, and pre-terminal ERs < 10%.
+
+```{r QCfig, fig.cap = ""}
 
 knitr::include_graphics(here("figures", "SMSE", "QC", "gic1_QC.png"))
 knitr::include_graphics(here("figures", "SMSE", "QC", "gic2_QC.png"))
@@ -92,7 +103,24 @@ get_OMtable(pop = "nimpkish", caption = "Table 3. Input parameters for the proje
 
 ### Outputs
 
-```{r Nimpkishfig, fig.cap = "Fig. 2. Contour plots of peformance metrics from projections of Nimpkish Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than Sgen, probability that natural spawners are greater than 85% SMSY, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+Contour plots of performance metrics from projections of Nimpkish Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than *S<sub>gen</sub>*, probability that natural spawners are greater than 85% *S<sub>MSY</sub>*, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
+
+#### Main results
+
+- Spawner abundances and returns increase as pre-terminal exploitation rates decline.
+
+- There is a high probability (0.66-0.89) that spawner abundances are above *S<sub>gen</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- There is a moderate probability (0.34-0.65) that spawner abundances are above 85% *S<sub>MSY</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- Catches tend to be maximized near MSY exploitation rates, except for terminal catches which are maximized at relatively low exploitation rates where spawner abundances are high, and hatchery-origin catches which are maximized at high hatchery releases and exploitation rates.
+
+- Spawner abundances, returns, and catches increase with hatchery releases.
+
+- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. A drop from "Integrated Wild" (PNI>=0.8) to "Integrated Transition" (PNI<0.8 and >=0.5) designation, hatchery releases could occur with increase in hatchery releases to > 125% of current levels, and pre-terminal ERs > 40%. 
+
+
+```{r Nimpkishfig, fig.cap = ""}
 
 knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic1_Nimpkish.png"))
 knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic2_Nimpkish.png"))
@@ -115,7 +143,25 @@ get_OMtable(pop = "Salmon", caption = "Table 4. Input parameters for the project
 
 ### Outputs
 
-```{r Salmonfig, fig.cap = "Fig. 3. Contour plots of peformance metrics from projections of Salmon River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than Sgen, probability that natural spawners are greater than 85% SMSY, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+Contour plots of performance metrics from projections of Salmon River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than *S<sub>gen</sub>*, probability that natural spawners are greater than 85% *S<sub>MSY</sub>*, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
+
+
+#### Main results
+
+- Spawner abundances and returns increase as pre-terminal exploitation rates decline.
+
+- There is a high probability (0.66-0.89) that spawner abundances are above *S<sub>gen</sub>* at current pre-terminal ER and hatchery release levels, and a moderate probability (0.34-0.65) at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- There is a moderate probability (0.34-0.65) that spawner abundances are above 85% *S<sub>MSY</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- Catches tend to be maximized near MSY exploitation rates, except for terminal catches which are maximized at relatively low exploitation rates where spawner abundances are high.
+
+- Spawner abundances, returns, and catches increase with hatchery releases.
+
+- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. An increase from "Integrated Transition" (PNI < 0.8 and >=0.5) to "Integrated Transition" (PNI<=0.8) designation, hatchery releases could occur with decreases in hatchery releases to < 75% of current levels, at the current pre-terminal ER. 
+
+
+```{r Salmonfig, fig.cap = ""}
 
 knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic1_Salmon.png"))
 knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic2_Salmon.png"))
@@ -138,7 +184,23 @@ get_OMtable(pop = "Adam", caption = "Table 5. Input parameters for the projectio
 
 ### Outputs
 
-```{r Adamfig, fig.cap = "Fig. 4. Contour plots of peformance metrics from projections of Adam River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than Sgen, probability that natural spawners are greater than 85% SMSY,  total catch, pre-terminal catch, and terminal catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitatoin equal to the aggregrate UMSY for natural-dominated populations."}
+Contour plots of performance metrics from projections of Adam River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis, shown for consistency among populations even though there are no hatchery releases into the Adam River) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than *S<sub>gen</sub>*, probability that natural spawners are greater than 85% *S<sub>MSY</sub>*,  total catch, pre-terminal catch, and terminal catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
+
+
+#### Main results
+
+- There are no hatchery releases into the Adam River, so performance metrics do not with hatchery size.
+
+- Spawner abundances and returns increase as pre-terminal exploitation rates decline.
+
+- There is a moderate probability (0.34-0.65) that spawner abundances are above *S<sub>gen</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- There is a moderate probability (0.34-0.65) that spawner abundances are above 85% *S<sub>MSY</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- Catches tend to be maximized near MSY exploitation rates, except for terminal catches which are maximized at relatively low exploitation rates where spawner abundances are high.
+
+
+```{r Adamfig, fig.cap = ""}
 
 knitr::include_graphics(here("figures", "SMSE", "Adam", "gic1_Adam.png"))
 knitr::include_graphics(here("figures", "SMSE", "Adam", "gic2_Adam.png"))
@@ -149,9 +211,27 @@ knitr::include_graphics(here("figures", "SMSE", "Adam", "gic2_Adam.png"))
 ## Aggregate results
 
 
-### Outputs
+### Outputs: Base case
 
-```{r Aggfig, fig.cap = "Fig. 5. Contour plots of peformance metrics from projections summed over populations (total poulations= sum of Quinsum/Campbell, Nimpkish, Salmon and Adam River, and natural-dominated populations = sum of Nimpkish, Salmon and Adam Rivers) along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners (all populations), natural spawners (natural-dominated populations),probability that natural spawners are greater than Sgen (summed over natural dominated populaitons), probability that natural spawners are greater than 85% SMSY (summed over natural-dominated populations), total catch, total returns, pre-terminal catch, terminal catch, natural-origin catch and hatchery-origin catch. Dashed lines represent the recent 5-year average pre-terminal exlploitation rate (horizontal, averaged over populations) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the total UMSY for natural-dominated populations for pre-terminral and terminal exploitation combined."}
+Contour plots of performance metrics from projections summed over populations (total populations= sum of Quinsam/Campbell, Nimpkish, Salmon and Adam River, and natural-dominated populations = sum of Nimpkish, Salmon and Adam Rivers) along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners (all populations), natural spawners (natural-dominated populations), probability that natural spawners are greater than Sgen (summed over natural dominated populations), probability that natural spawners are greater than 85% *S<sub>MSY</sub>* (summed over natural-dominated populations), total catch, total returns, pre-terminal catch, terminal catch, natural-origin catch and hatchery-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal, averaged over populations) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the total *U<sub>MSY</sub>* for natural-dominated populations for pre-terminal and terminal exploitation combined.
+
+
+
+#### Main results
+
+- Spawner abundances and returns increase as pre-terminal exploitation rates decline.
+
+- There is a high probability (0.66-0.89) that spawner abundances of natural-dominated populations are above *S<sub>gen</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- There is a high probability (0.66-0.89) that spawner abundances of natural-dominated populations are above 85% *S<sub>MSY</sub>* at current pre-terminal ER and hatchery release levels, and a moderate probability (0.34-0.65) at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- Catches tend to be maximized near MSY exploitation rates, except for terminal catches which are maximized at relatively low exploitation rates where spawner abundances are high.
+
+- Spawner abundances, returns, and catches increase with hatchery releases.
+
+
+
+```{r Aggfig, fig.cap = ""}
 
 knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg.png"))
 knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg.png"))
@@ -159,4 +239,101 @@ knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
 
 ```
 
+### Sensitivity Analyses
 
+Distribution of marine surival to age-2 estimated from CWTs for Quinsam River, depicting the median (solid vertical line), lower sensitivity analyis (0.002, left dashed line) and upper sensistivity analysis (0.01, rigth dashed line). Lower values of marine surival below 0.002 resulted in population crashes when used in projections.
+
+```{r msurv_dist, fig.cap = ""}
+
+knitr::include_graphics(here("figures","msurv_dist.png"))
+
+```
+
+
+#### Sensitivity Analyses: Low Survival
+
+Contour plots of performance metrics from projections assuming low marine survival rate to age-2 (mean = 0.002) summed over populations, as described in the figure caption for the base case.
+
+
+#### Main results
+
+- Patterns are similar across pre-terminal ER and hatchery releases, but abundances are much lower, and catches are maximized at lower exploitation rates.
+
+- There is a low probability (0.11-0.33) that spawner abundances of natural-dominated populations are above *S<sub>gen</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- There is a low probability (0.11-0.33) that spawner abundances of natural-dominated populations are above 85% *S<sub>MSY</sub>* at current pre-terminal ER and hatchery release levels, and a very low probability (0-0.10) at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- The highest catches occur at high hatchery releases and moderate pre-terminal ERs, and are in similar in value to or lower than the lowest catches in the base case marine survival. The range of marine survival rates explored here has a larger impact on performance than varying pre-terminal ERs from 0-50% and hatchery releases from 50-150%.
+
+
+```{r Aggfig_low, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_low.png"))
+
+```
+
+
+#### Sensitivity Analyses: High Survival
+
+Contour plots of performance metrics from projections assuming high marine survival rate to age-2 (mean = 0.002) summed over populations, as described in the figure caption for the base case.
+
+
+#### Main results
+
+- Patterns are similar across pre-terminal ER and hatchery releases, but abundances are much higher, and catches are maximized at higher exploitation rates (>50%).
+
+- There is a very high probability (0.90-1) that spawner abundances of natural-dominated populations are above *S<sub>gen</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- There is a very probability (0.90-1) that spawner abundances of natural-dominated populations are above 85% *S<sub>MSY</sub>* at current pre-terminal ER and hatchery release levels, and at *U<sub>MSY</sub>* exploitation rates (and current hatchery release levels). 
+
+- The lowest catches occur at low hatchery releases and low pre-terminal ERs, and are in similar in value to or higher than the highest catches in the base case marine survival. As illustrated in the sensitivity analysis on low marine survival rates, the range of marine survival rates explored here has a larger impact on performance than varying pre-terminal ERs from 0-50% and hatchery releases from 50-150%.
+
+
+```{r Aggfig_high, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_high.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_high.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_high.png"))
+
+```
+
+<!--
+#### Sensitivity Analyses: Spawners
+
+Contour plots of performance metrics on spawner abundances across three marine survival sensitivity analyses (low = 0.002: first four panels, base case median = 0.003: second four panels, high = 0.01: third four panels).
+
+```{r Aggfig_gic1, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_high.png"))
+
+```
+
+#### Sensitivity Analyses: Retuns and Catches
+
+Contour plots of performance metrics on returns, aggregate catches, pre-terminal catches, and terminal catches across three marine survival sensitivity analyses (low = 0.002: first four panels, base case median = 0.003: second four panels, high = 0.01: third four panels).
+
+```{r Aggfig_gic2, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_high.png"))
+
+```
+
+
+#### Sensitivity Analyses: Hatchery- and Natrual-Origin  Catches
+
+Contour plots of performance metrics on hatchery- and natural-origin catches across three marine survival sensitivity analyses (low = 0.002: first four panels, base case median = 0.003: second four panels, high = 0.01: third four panels).
+
+```{r Aggfig_gic3, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_high.png"))
+
+```
+-->

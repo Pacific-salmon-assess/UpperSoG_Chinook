@@ -10,7 +10,7 @@ library(ggplot2)
 source("92-decision-table-plots.R") #for alternative version of decision tables
 
 save.files <- TRUE
-scenario <- "base"
+scenario <- "high"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 
@@ -22,11 +22,9 @@ if (!dir.exists(here::here(folder_path))) {
 
 
 # Identify scenarios and management options ----
-gr <- expand.grid(
-  u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-  n_yearling = seq(0.5, 1.5, 0.05)
-)
-nOM <- nrow(g)
+gr <- readr::read_csv(file.path("tables", "scenarios.csv"))
+nOM <- nrow(gr)
+
 
 
 # pop <- "QC"
@@ -55,7 +53,7 @@ if(pop == "Adam") {
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, ".rds")))
+  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, "high.rds")))
 
   # Update PNI = 1 when there is no brood & pHOS = 0
   Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]

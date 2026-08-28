@@ -557,9 +557,9 @@ CcolRel <- c("0-10" = '#f1b6da',
             "11-20" = '#f7f7f7',
             "21-30" = '#b8e186', ">30" = '#4dac26')
 
-CcolPNI <- c("0-0.3" = '#d01c8b', "0.31-0.5" = '#f1b6da',
-           "0.51-0.7" = '#f7f7f7', "0.71-0.82" = '#b8e186',
-           "0.83-1.0"= '#4dac26')
+CcolPNI <- c("0-0.30" = '#d01c8b', "0.31-0.50" = '#f1b6da',
+           "0.51-0.70" = '#f7f7f7', "0.71-0.79" = '#b8e186',
+           "0.80-1.0"= '#4dac26')
 
 Ccolc <- c("0-1,000" = '#d01c8b', "1,001-2,000" = '#f1b6da',
              "2,001-3,000" = '#f7f7f7', "3,001-4,000" = '#b8e186',
@@ -609,11 +609,11 @@ g <- val_sim %>%
   filter(variable == "PNI") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value <= 0.3, "0-0.3",
-                          ifelse(value > 0.30 & value <= 0.5, "0.31-0.5",
-                                 ifelse(value > 0.5 & value <= 0.7, "0.51-0.7",
-                                        ifelse(value > 0.7 & value <= 0.82, "0.71-0.82",
-                                               ifelse(value > 0.82 & value <= 1, "0.83-1.0", NA))))))
+  mutate(value = ifelse(value <= 0.3, "0-0.30",
+                          ifelse(value > 0.30 & value <= 0.5, "0.31-0.50",
+                                 ifelse(value > 0.5 & value <= 0.7, "0.51-0.70",
+                                        ifelse(value > 0.7 & value < 0.80, "0.71-0.79",
+                                               ifelse(value >= 0.8 & value <= 1, "0.80-1.0", NA))))))
 
 gPNI <- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +

@@ -17,7 +17,7 @@ source("92-decision-table-plots.R") #for alternative version of decision tables
 # Get CM output for current PT and T ERs
 samp <-  readRDS("CM/Salmon_08.18.26.prior.rds")
 year1 <- 2002 # For Salmon
-scenario <- "low"
+scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 folder_path <- "figures/SMSE/Salmon"
@@ -28,17 +28,14 @@ if (!dir.exists(here::here(folder_path))) {
 
 
 # Identify scenarios and management options ----
-gr <- expand.grid(
-  u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-  n_yearling = seq(0.5, 1.5, 0.05)
-)
+gr <- readr::read_csv(file.path("tables", "scenarios.csv"))
 nOM <- nrow(gr)
 
 # Grab all model output ----
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE",pop, paste0(pop, i, "low.rds")))
+  SMSE <- readRDS(file.path("SMSE",pop, paste0(pop, i, ".rds")))
 
   # Update PNI = 1 when there is no brood & pHOS = 0
   Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]
@@ -525,9 +522,9 @@ CcolRel <- c("0-1" = '#d01c8b',
             "2.1-3" = '#f7f7f7', "3.1-4" = '#b8e186',
             ">4" = '#4dac26')
 
-CcolPNI <- c("0-0.3" = '#d01c8b', "0.31-0.5" = '#f1b6da',
-           "0.51-0.7" = '#f7f7f7', "0.71-0.82" = '#b8e186',
-           "0.83-1.0"= '#4dac26')
+CcolPNI <- c("0-0.30" = '#d01c8b', "0.31-0.50" = '#f1b6da',
+             "0.51-0.70" = '#f7f7f7', "0.71-0.79" = '#b8e186',
+             "0.80-1.0"= '#4dac26')
 
 CcolTc <- c("0-10" = '#d01c8b', "11-20" = '#f1b6da',
              "21-30" = '#f7f7f7', "31-40" = '#b8e186',
@@ -601,11 +598,11 @@ g <- val_sim %>%
   filter(variable == "PNI") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value <= 0.3, "0-0.3",
-                          ifelse(value > 0.30 & value <= 0.5, "0.31-0.5",
-                                 ifelse(value > 0.5 & value <= 0.7, "0.51-0.7",
-                                        ifelse(value > 0.7 & value <= 0.82, "0.71-0.82",
-                                               ifelse(value > 0.82 & value <= 1, "0.83-1.0", NA))))))
+  mutate(value = ifelse(value <= 0.3, "0-0.30",
+                        ifelse(value > 0.30 & value <= 0.5, "0.31-0.50",
+                               ifelse(value > 0.5 & value <= 0.7, "0.51-0.70",
+                                      ifelse(value > 0.7 & value < 0.80, "0.71-0.79",
+                                             ifelse(value >= 0.8 & value <= 1, "0.80-1.0", NA))))))
 
 gPNI <- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value, z = value)) +
   geom_raster() +
@@ -1373,7 +1370,7 @@ ggsave(file.path("figures", "SMSE", pop, paste0("gic2_", pop, file_suffix,
        height = 9, width = 7)
 ggsave(file.path("figures", "SMSE", pop, paste0("gic3_", pop, file_suffix,
                                                 ".png")), gic3,
-       height = 9, width = 7)
+       height = 7, width = 7)
 
 
 
@@ -1386,7 +1383,7 @@ PNI_NS <- val_sim %>%
   reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
   mutate(
     bin = cut(
-      g$n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
+      n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
       labels = c("50-75%", "75-100%", "100-125%", "125-150%"),
       include.lowest = TRUE, right = TRUE
     )
@@ -1403,6 +1400,36 @@ gto <- plot_tradeoff(
 )
 ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, ".png")), gto,
        height = 9, width = 7)
+
+
+
+PNI_NS <- val_sim %>%
+  filter(variable %in% c("PNI", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  # mutate(
+  #   bin = cut(
+  #     g$n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
+  #     labels = c("50-75%", "75-100%", "100-125%", "125-150%"),
+  #     include.lowest = TRUE, right = TRUE
+  #   )
+  # )
+gto <- plot_tradeoff(
+  pm1 = PNI_NS$`Natural Spawners`,
+  pm2 = PNI_NS$PNI,
+  x1 = PNI_NS$u_preterminal,
+  x2 = PNI_NS$n_yearling,
+  xlab = "Natural spawners (median)",
+  ylab = "PNI (median)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+)
+ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, "v2.png")), gto,
+       height = 9, width = 7)
+
+
 
 # #### Plot Simulated CYER- Quang's archived plots
 # CYER_PT <- calc_CYER(SMSE_list[[1]], PT = TRUE)

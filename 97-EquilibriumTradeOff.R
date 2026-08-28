@@ -369,10 +369,10 @@ U_lab <- eq_sum_data |>
     ) +
     #Hard coded order of populations
     annotate(geom="text", x=5000, y=0.92*ratio,
-             label="Adam",
+             label="Salmon",
              colour="red", size=3) +
     annotate(geom="text", x=5000, y=1.8*ratio,
-             label="Salmon", colour="red",
+             label="Adam", colour="red",
              size=3) +
     annotate(geom="text", x=3000, y=2.92*ratio,
              label="Nimpkish", colour="red",
