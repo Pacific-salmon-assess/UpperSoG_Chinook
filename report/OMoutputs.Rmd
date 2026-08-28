@@ -71,7 +71,7 @@ get_OMtable(pop = "qc", caption = "Table 2. Input parameters for the projection 
 
 Contour plots of performance metrics from projections of Quinsam/Campbell Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: proportionate natural influence (PNI), total catch, abundance of natural spawners, abundance of returns, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
 
-#### Main results
+#### Key messages
 
 - Spawner abundances and returns increase as pre-terminal exploitation rates decline.
 
@@ -105,7 +105,7 @@ get_OMtable(pop = "nimpkish", caption = "Table 3. Input parameters for the proje
 
 Contour plots of performance metrics from projections of Nimpkish Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than *S<sub>gen</sub>*, probability that natural spawners are greater than 85% *S<sub>MSY</sub>*, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
 
-#### Main results
+#### Key messages
 
 - Spawner abundances and returns increase as pre-terminal exploitation rates decline.
 
@@ -146,7 +146,7 @@ get_OMtable(pop = "Salmon", caption = "Table 4. Input parameters for the project
 Contour plots of performance metrics from projections of Salmon River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than *S<sub>gen</sub>*, probability that natural spawners are greater than 85% *S<sub>MSY</sub>*, proportionate natural influence (PNI), total catch, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
 
 
-#### Main results
+#### Key messages
 
 - Spawner abundances and returns increase as pre-terminal exploitation rates decline.
 
@@ -187,7 +187,7 @@ get_OMtable(pop = "Adam", caption = "Table 5. Input parameters for the projectio
 Contour plots of performance metrics from projections of Adam River Chinook salmon along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis, shown for consistency among populations even though there are no hatchery releases into the Adam River) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: abundance of natural spawners, abundance of returns, probability that natural spawners are greater than *S<sub>gen</sub>*, probability that natural spawners are greater than 85% *S<sub>MSY</sub>*,  total catch, pre-terminal catch, and terminal catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
 
 
-#### Main results
+#### Key messages
 
 - There are no hatchery releases into the Adam River, so performance metrics do not with hatchery size.
 
@@ -217,7 +217,7 @@ Contour plots of performance metrics from projections summed over populations (t
 
 
 
-#### Main results
+#### Key messages
 
 - Spawner abundances and returns increase as pre-terminal exploitation rates decline.
 
@@ -243,7 +243,7 @@ knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
 
 Distribution of marine surival to age-2 estimated from CWTs for Quinsam River, depicting the median (solid vertical line), lower sensitivity analyis (0.002, left dashed line) and upper sensistivity analysis (0.01, rigth dashed line). Lower values of marine surival below 0.002 resulted in population crashes when used in projections.
 
-```{r msurv_dist, fig.cap = ""}
+```{r msurv_dist, out.width= "50%", fig.cap = ""}
 
 knitr::include_graphics(here("figures","msurv_dist.png"))
 
@@ -255,7 +255,7 @@ knitr::include_graphics(here("figures","msurv_dist.png"))
 Contour plots of performance metrics from projections assuming low marine survival rate to age-2 (mean = 0.002) summed over populations, as described in the figure caption for the base case.
 
 
-#### Main results
+#### Key messages
 
 - Patterns are similar across pre-terminal ER and hatchery releases, but abundances are much lower, and catches are maximized at lower exploitation rates.
 
@@ -280,7 +280,7 @@ knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_low.png")
 Contour plots of performance metrics from projections assuming high marine survival rate to age-2 (mean = 0.002) summed over populations, as described in the figure caption for the base case.
 
 
-#### Main results
+#### Key messages
 
 - Patterns are similar across pre-terminal ER and hatchery releases, but abundances are much higher, and catches are maximized at higher exploitation rates (>50%).
 
