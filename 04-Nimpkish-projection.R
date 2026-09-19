@@ -82,7 +82,7 @@ if (!dir.exists(here::here(folder_path))) {
 
   g <- expand.grid(
     u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-    n_yearling = hatch_rel * seq(0.5, 1.5, 0.05)
+    n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
   )
 
   nOM <- nrow(g)
@@ -118,13 +118,13 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_high.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Nimpkish_base.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, "high.rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, ".rds")))
 
     invisible()
 

@@ -69,7 +69,7 @@ get_OMtable(pop = "qc", caption = "Table 2. Input parameters for the projection 
 ### Outputs
 
 
-Contour plots of performance metrics from projections of Quinsam/Campbell Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: proportionate natural influence (PNI), total catch, abundance of natural spawners, abundance of returns, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregrate *U<sub>MSY</sub>* for natural-dominated populations.
+Contour plots of performance metrics from projections of Quinsam/Campbell Chinook along a gradient in hatchery releases as a proportion of most recent five-year average (x-axis) and a gradient in pre-terminal exploitation rates (y-axis). Performance metrics  are median values among Monte Carlo trials for the last year of the projection: proportionate natural influence (PNI), total catch, abundance of natural spawners, abundance of returns, pre-terminal catch, terminal catch, total hatchery-origin catch, and total natural-origin catch. Dashed lines represent the recent 5-year average pre-terminal exploitation rate (horizontal) and hatchery release (vertical, set to 1.0), and the solid horizontal line is the pre-terminal exploitation that when combined with the recent 5-year average terminal exploitation rate results in a combined exploitation equal to the aggregate *U<sub>MSY</sub>* for natural-dominated populations.
 
 #### Key messages
 
@@ -117,7 +117,7 @@ Contour plots of performance metrics from projections of Nimpkish Chinook along 
 
 - Spawner abundances, returns, and catches increase with hatchery releases.
 
-- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. A drop from "Integrated Wild" (PNI>=0.8) to "Integrated Transition" (PNI<0.8 and >=0.5) designation, hatchery releases could occur with increase in hatchery releases to > 125% of current levels, and pre-terminal ERs > 40%. 
+- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. A drop from "Integrated Wild" (PNI>=0.8) to "Integrated Transition" (PNI<0.8 and >=0.5) designation, hatchery releases could occur with increases in hatchery releases to > 125% of current levels, and pre-terminal ERs > 40%. 
 
 
 ```{r Nimpkishfig, fig.cap = ""}
@@ -125,6 +125,16 @@ Contour plots of performance metrics from projections of Nimpkish Chinook along 
 knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic1_Nimpkish.png"))
 knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic2_Nimpkish.png"))
 knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gic3_Nimpkish.png"))
+
+```
+
+### Trade-off plots
+
+The relationship between spawner abundances and PNI can be illustrated in a trade-off plot including various combinations of pre-terminal ERs (colours) and hatchery production (symbols, binned into 6 groups). The maximum level of hatchery production associated with PNI >= 0.8 (horizontal dashed line) depends on the pre-terminal exploitation rate. At low to moderate exploitation rates < 0.36, high hatchery production, up to 125% of recent 5-year average, is possible while maintaining PNI >= 0.8, while at higher exploitation, hatchery production needs to be reduced to near current levels. Abundances are higher than  *S<sub>gen</sub>* (vertical dotted line) under all scenarios of pre-terminal ERs and hatchery production, and above 85% *S<sub>MSY</sub>* (vertical dot-dashed line) when pre-terminal ERs are <0.44 or <046, depending on hatchery production. 
+
+```{r NimpkishTradeOff, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Nimpkish", "gto_Nimpkish.png"))
 
 ```
 
@@ -158,7 +168,7 @@ Contour plots of performance metrics from projections of Salmon River Chinook sa
 
 - Spawner abundances, returns, and catches increase with hatchery releases.
 
-- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. An increase from "Integrated Transition" (PNI < 0.8 and >=0.5) to "Integrated Transition" (PNI<=0.8) designation, hatchery releases could occur with decreases in hatchery releases to < 75% of current levels, at the current pre-terminal ER. 
+- PNI declines with increases in pre-terminal ER and spawner abundances decline, and PNI declines with increases in hatchery-releases. An increase from "Integrated Transition" (PNI < 0.8 and >=0.5) to "Integrated Transition" (PNI<=0.8) designation, hatchery releases could occur with decreases in hatchery releases to approximately < 75% of current levels, at the current pre-terminal ER. 
 
 
 ```{r Salmonfig, fig.cap = ""}
@@ -166,6 +176,16 @@ Contour plots of performance metrics from projections of Salmon River Chinook sa
 knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic1_Salmon.png"))
 knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic2_Salmon.png"))
 knitr::include_graphics(here("figures", "SMSE", "Salmon", "gic3_Salmon.png"))
+
+```
+
+### Trade-off plots
+
+The relationship between spawner abundances and PNI can be illustrated in a trade-off plot including various combinations of pre-terminal ERs (colours) and hatchery production (symbols, binned into 6 groups). The maximum level of hatchery production associated with PNI >= 0.8 (horizontal dashed line) depends on the pre-terminal exploitation rate. At low exploitation rates < 0.1, then moderate hatchery production is possible (near 100% of recent 5-year average) while maintaining PNI >= 0.8, while at higher exploitation, hatchery production needs to be reduced to <75% of current levels. Abundances are higher than  *S<sub>gen</sub>* (vertical dotted line) under all scenarios of pre-terminal ERs and hatchery production, and above 85% *S<sub>MSY</sub>* (vertical dot-dashed line) when pre-terminal ERs are <0.46, irrespective of hatchery production. 
+. 
+```{r SalmonTradeOff, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "Salmon", "gto_Salmon.png"))
 
 ```
 
@@ -233,9 +253,9 @@ Contour plots of performance metrics from projections summed over populations (t
 
 ```{r Aggfig, fig.cap = ""}
 
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic1_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic2_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic3_Agg.png"))
 
 ```
 
@@ -268,9 +288,9 @@ Contour plots of performance metrics from projections assuming low marine surviv
 
 ```{r Aggfig_low, fig.cap = ""}
 
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_low.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_low.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic1_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic2_Agg_low.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic3_Agg_low.png"))
 
 ```
 
@@ -293,9 +313,23 @@ Contour plots of performance metrics from projections assuming high marine survi
 
 ```{r Aggfig_high, fig.cap = ""}
 
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_high.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_high.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_high.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic1_Agg_high.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic2_Agg_high.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic3_Agg_high.png"))
+
+```
+
+### Trade-off Plots
+
+Increasing pre-terminal ER from 0 to 45% result in increasing aggregate catch over all populations, but reduced spawner abundances to natural-dominated populations. However, spawner abundances remained above aggregate Sgen (vertical dotted line) and 85% SMSY (vertical dot-dashed line), even at 50% pre-terminal exploitation. Increasing hatchery production resulted in increased catch and spawner abundances. Median aggregate catch from 2002-2024 is shown with the vertical dashed line. <!-- CH: why are simulated catches so low compared to historical median?--> NOTE: I am not sure why simulated aggregate catches are lower then those estimated from the conditioning model; spawner abundances and returns are in the right ballpark.
+
+Similar patterns are shown for hatchery-origin catch versus natural spawners from natural-dominated populations.
+
+
+```{r Aggfig_tradeoff, fig.cap = ""}
+
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gto3_Agg.png"))
+knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gto4_Agg.png"))
 
 ```
 
@@ -306,9 +340,9 @@ Contour plots of performance metrics on spawner abundances across three marine s
 
 ```{r Aggfig_gic1, fig.cap = ""}
 
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_low.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic1_Agg_high.png"))
+#knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic1_Agg_low.png"))
+#knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic1_Agg.png"))
+#knitr::include_graphics(here("figures", "SMSE", "AggregateHatchRel50-150", "gic1_Agg_high.png"))
 
 ```
 
@@ -318,9 +352,9 @@ Contour plots of performance metrics on returns, aggregate catches, pre-terminal
 
 ```{r Aggfig_gic2, fig.cap = ""}
 
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_low.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_high.png"))
+#knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_low.png"))
+#knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg.png"))
+#knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic2_Agg_high.png"))
 
 ```
 
@@ -331,9 +365,9 @@ Contour plots of performance metrics on hatchery- and natural-origin catches acr
 
 ```{r Aggfig_gic3, fig.cap = ""}
 
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_low.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
-knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_high.png"))
+#knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_low.png"))
+#knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg.png"))
+#knitr::include_graphics(here("figures", "SMSE", "Aggregate", "gic3_Agg_high.png"))
 
 ```
 -->

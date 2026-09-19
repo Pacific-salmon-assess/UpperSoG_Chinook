@@ -15,7 +15,7 @@ source("92-decision-table-plots.R") #for alternative version of decision tables
 samp <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
 year1 <- 1984 # For Quinsam/Campbell
 save.files <- TRUE
-scenario <- "low"
+scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 folder_path <- "figures/SMSE/QC"
@@ -32,7 +32,7 @@ nOM <- nrow(gr)
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 pop <- "QC"
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, "low.rds")))
+  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, ".rds")))
 
   # Update PNI = 1 when there is no brood & pHOS = 0
   Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]

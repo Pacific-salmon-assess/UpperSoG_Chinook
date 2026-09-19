@@ -71,7 +71,7 @@ if (!dir.exists(here::here(folder_path))) {
 
   g <- expand.grid(
     u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-    n_yearling = hatch_rel * seq(0.5, 1.5, 0.05)
+    n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
   )
 
   nOM <- nrow(g)

@@ -193,12 +193,31 @@ cwt_rel <- left_join(full_year, cwt_rel,by = "RELEASE_YEAR")
 Ldyr <- nrow(cwt_esc)
 Nages <- 5
 
-mat <- c(0, 0.1, 0.4, 0.95, 1)#c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+### Get initial maturity, by tuning in the model
+# ERM_tuned <-  readRDS("CM/Adam_08.06.26.prior.rds")
+# ERM_tuned <-  readRDS("CM/Adam_09.09.26.rds")
+# report_tuned <- salmonMSE:::get_report(ERM_tuned)
+# matt <- sapply(report_tuned, function(i)
+#   salmonMSE:::CY2BY(i[["matt"]][, , 1]), simplify = 'array') %>%
+#   apply(2, quantile,
+#         probs =  0.5, na.rm = TRUE) #median over years and MC trials
+# matt = c(0, 0.00599, 0.123, 0.690, 1) # First tuning
+# matt = c(0, 0.00552, 0.121, 0.676, 1) # Second tuning
+mat <- c(0, 0.00552, 0.121, 0.676, 1)# Tune this vector for initial abundance #from WCVI = c(0, 0.1, 0.4, 0.95, 1)
+
 vulPT <- c(0, 0.075, 0.9, 0.9, 1)
 vulT <- vulPT#rep(0, Nages)#
 
 M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation Rate analyses
-M_CTC[1] <- 4 # Need to tune this value for initial abundance
+### Get initial M in year 1, by tuning in the model
+# ERM_tuned <-  readRDS("CM/Adam_08.06.26.prior.rds")
+# ERM_tuned <-  readRDS("CM/Adam_09.09.26.rds")
+# report_tuned <- salmonMSE:::get_report(ERM_tuned)
+# mo <- sapply(report_tuned, function(x) x$mo[, 1]) %>%
+# quantile(probs = 0.5)
+# mo = 5.560  # First tuning
+# mo = 5.552  # Second tuning
+M_CTC[1] <- 5.552 #4 # Tune this value for initial abundance
 
 fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 
@@ -207,14 +226,33 @@ fec_Quinsam <- c(0, 0, 800, 2000, 2500) # Walters and Korman (2024) removing age
 # Use alternative values to change data weighting of CWT (re-adjust numbers accordingly)
 cwtExp <- 1
 
-# Smax prior
+# # Srep prior
+# data_Srep_prior <- as.data.frame( read.csv(
+#   ("data/UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
+# )
+# Srep_prior <- data_Srep_prior %>% filter(Stock=="Adam/Eve") %>% pull(SREP_median)
+# logSrep_prior_sd <- data_Srep_prior %>% filter(Stock=="Adam/Eve") %>%
+#   mutate(sigma=(log(SREP_upr95)-log(SREP_median))/2) %>%
+#   pull(sigma)
+
 data_Smax_prior <- as.data.frame( read.csv(
   ("data/UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
 )
-Smax_prior <- data_Smax_prior %>% filter(Stock=="Adam/Eve") %>% pull(SREP_median)
-logSmax_prior_sd <- data_Smax_prior %>% filter(Stock=="Adam/Eve") %>%
-  mutate(sigma=(log(SREP_upr95)-log(SREP_median))/2) %>%
+med_Smax_prior <- data_Smax_prior %>% filter(Stock == "Adam/Eve") %>% pull(SMAX_median)
+logSmax_prior_sd <- data_Smax_prior %>% filter(Stock == "Adam/Eve") %>%
+  mutate(sigma=(log(SMAX_upr95)-log(SMAX_median))/2) %>%
   pull(sigma)
+
+# Productivity for Cowichan Chinook (= mean prod for Fraser river, 3 stocks)
+# (Greenberg et al. in prep, Table S4)
+mean_logalpha <- 0.87
+logalpha_sig <- 0.23
+
+logalpha <- rnorm(2000, mean_logalpha, logalpha_sig)
+logSmax <- rnorm(2000, log(med_Smax_prior), logSmax_prior_sd)
+
+Srep_prior <-  logalpha * exp(logSmax) # Srep = log(alpha)/beta, beta = 1/Smax
+logSrep_prior_sd <- sd(log(Srep_prior))
 
 d <- list(
   Nages = Nages,
@@ -242,8 +280,8 @@ d <- list(
   finitPT = 0.4,
   finitT = 0,#0.1,#, #0,#,0.8,
   cwtExp = cwtExp,
-  so_mu =  log(Smax_prior),#log(3 * max(esc$escapement, na.rm = TRUE)), #prior on S0, reduce from default 3x to 1.5x
-  so_sd = round(logSmax_prior_sd, 2)# #SD of prior on S0, reduce from default 0.5 to 0.2. Change to uncertainty in logSmax from IWAM
+  so_mu =  mean(log(Srep_prior)),#log(3 * max(esc$escapement, na.rm = TRUE)), #prior on S0, reduce from default 3x to 1.5x
+  so_sd = round(logSrep_prior_sd, 2)# #SD of prior on S0, reduce from default 0.5 to 0.2. Change to uncertainty in logSmax from IWAM
 )
 
 # Fix these parameters
@@ -275,16 +313,16 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Adam_08.06.26.prior.rds")
+saveRDS(samp, file = "CM/Adam_09.12.26.rds")
 
-samp <- readRDS(file = "CM/Adam_08.06.26.prior.rds")
+samp <- readRDS(file = "CM/Adam_09.12.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Adam", year = year,
-  dir = "CM", filename = "Adam_08.06.prior"
+  dir = "CM", filename = "Adam_09.12"
 )
 
 

@@ -19,7 +19,7 @@ folder_path <- "figures/SMSE/Adam"
 # Get CM output for current PT and T ERs- use Salmon River as proxy for Adam
 samp <- readRDS("CM/Salmon_08.06.26.prior.rds")
 year1 <- 2002 # For Adam and Salmon
-scenario <- "low"
+scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 
@@ -35,7 +35,7 @@ nOM <- nrow(gr)
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE","Adam", paste0("Adam", i, "low.rds")))
+  SMSE <- readRDS(file.path("SMSE","Adam", paste0("Adam", i, ".rds")))
 
   # # Update PNI = 1 when there is no brood & pHOS = 0
   # Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]

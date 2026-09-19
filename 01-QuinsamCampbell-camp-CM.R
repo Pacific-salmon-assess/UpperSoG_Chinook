@@ -33,8 +33,6 @@ esc_all <- readxl::read_excel(
 
 
 
-
-
 ## pHOS data (use Quinsam as it's 5-10x larger than Campbell)
 ## 2024 value is much different compared to previous years!
 pHOS_df_all <- readxl::read_excel(
@@ -213,13 +211,32 @@ cwt_rel <- left_join(full_year, cwt_rel,by = "RELEASE_YEAR")
 Ldyr <- dim(cwt_esc)[1]
 Nages <- 5#6
 
-#mat <- c(0, 0.1, 0.4, 0.95, 1) # from WCVI = c(0, 0.1, 0.4, 0.95, 1)
-mat <- c(0, 0.01, 0.05, 0.2, 1) # Need to tune this vector for initial abundance
+### Get initial maturity, by tuning in the model
+# ERM_tuned <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
+# ERM_tuned <- readRDS("CM/QuinsamCampbell_09.09.26.rds")
+# report_tuned <- salmonMSE:::get_report(ERM_tuned)
+# matt <- sapply(report_tuned, function(i)
+#   salmonMSE:::CY2BY(i[["matt"]][, , 1]), simplify = 'array') %>%
+#   apply(2, quantile,
+#         probs =  0.5, na.rm = TRUE) #median over years and MC trials
+# matt = c(0, 0.00485, 0.120, 0.599, 1.00)  # First tuning
+# matt = c(0, 0.00450, 0.121, 0.601, 1)  # Second tuning
+mat <- c(0, 0.00450, 0.121, 0.601, 1) # c(0, 0.01, 0.05, 0.2, 1) # Tune this vector for initial abundance
+
 vulPT <- c(0, 0.075, 0.9, 0.9, 1) #  from WCVI = c(0, 0.075, 0.9, 0.9, 1)
 vulT <- vulPT#rep(0, Nages)
 
 M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation Rate analyses
-M_CTC[1] <- 4 # Need to tune this value for initial abundance
+
+### Get initial M in year 1, by tuning in the model
+# ERM_tuned <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
+# ERM_tuned <- readRDS("CM/QuinsamCampbell_09.09.26.rds")
+# report_tuned <- salmonMSE:::get_report(ERM_tuned)
+mo <- sapply(report_tuned, function(x) x$mo[, 1]) %>%
+  quantile(probs = 0.5)
+# mo = 5.643  # First tuning
+# mo = 5.636 # Second Tunding
+M_CTC[1] <- 5.636 #4 # Need to tune this value for initial abundance
 
 covariate1 <- readxl::read_excel(
   file.path("data", "Quinsam", "covariate1.xlsx"),
@@ -308,20 +325,20 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                                stepsize = 0.01,
                                max_treedepth = 20))
 
-saveRDS(samp, file = "CM/QuinsamCampbell_07.29.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_09.11.26.rds")
 
 # saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
 #   } # end of for i in 1:length(Ryears)
 # } # end of RunRetro(years)
 
-samp <- readRDS(file = "CM/QuinsamCampbell_07.29.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_09.11.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-  dir = "CM", filename = "QuinsamCampbell_07.29"
+  dir = "CM", filename = "QuinsamCampbell_09.11"
 )
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
@@ -369,7 +386,7 @@ if (FALSE) { # Diagnostic figures do not run when sourcing file
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = "QuinsamCampbell_08.06"
+    dir = "CM", filename = "QuinsamCampbell_09.09"
   )
 
   SMSY <- salmonMSE:::.CM_SMSY(report, d)

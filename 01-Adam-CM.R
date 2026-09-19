@@ -144,8 +144,6 @@ esc <- esc %>%
 # No hatchery releases from Adam River
 
 
-
-
 # Data object for model
 Ldyr <- dim(cwt_esc)[1]
 Nages <- 5#6

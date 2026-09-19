@@ -1397,6 +1397,41 @@ ggsave(file.path("figures", "SMSE", pop, paste0("gic3_", pop, file_suffix, ".png
 
 
 #### Trade-off figures
+# PNI vs natural spawners
+
+PNI_NS <- val_sim %>%
+  filter(variable %in% c("PNI", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  # filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  # filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+gto <- plot_tradeoff(
+  pm1 = PNI_NS$`Natural Spawners`,
+  pm2 = PNI_NS$PNI,
+  x1 = factor(PNI_NS$u_preterminal),
+  x2 = PNI_NS$bin,
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Natural spawners (median)",
+  ylab = "PNI (median)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
+  geom_vline(xintercept = Sgen, linetype = 3) + # SMSY
+  geom_vline(xintercept = SMSY85, linetype = 4) + # SMSY
+  geom_point(size = 3)
+
+ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, ".png")), gto,
+       height = 7, width = 7)
+
+#### Other Trade-off figures
 # Not implemented
 if(FALSE){
   val_sim2 <- val_sim %>%

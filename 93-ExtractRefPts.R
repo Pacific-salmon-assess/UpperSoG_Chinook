@@ -20,13 +20,13 @@ EqTradeOff_RP <- read.csv( here(
 
 # Empirical alternative to USR (see 94-ExtractAbundances.R)
 Emp_RP <- read.csv( here(
-  "data",
+  "tables",
   "EmpiricalUSR.csv"))
 
 # MSY ref points from conditioning model
 
 CM_RP <- read.csv( here(
-  "data",
+  "tables",
   "BenchmarksSimple_NatPops.csv")) %>%
   filter(Benchmark == "85% SMSY") %>%
   summarize (RP = sum(med)) %>%
@@ -94,7 +94,7 @@ df <- data.frame(Population = c(rep("Natural-dominated populations",2),
 
 
 write.csv(df, here(
-  "data",
+  "tables",
   "USR.csv"),
 row.names = FALSE
 )
@@ -102,8 +102,7 @@ row.names = FALSE
 # UMSY
 
 Umsy <- read.csv( here(
-  "data",
-  "Equilibrium trade-off analysis",
+  "tables",
   "R-OUT_SMU_ref-pt_values_eq-trade-off.csv")) %>%
   filter(variable == "Umsy") %>%
   select(mid) %>%
@@ -121,7 +120,10 @@ for (pop in c("QC", "Adam", "Salmon", "Woss")){
                                               pop,
                                               "_timeseries.csv"))) %>%
     filter(label=="50%") %>%
-    mutate(catch= catchPT + catchT) %>% pull(catch) %>% median()
+    mutate(catch= catchPT + catchT) %>%
+    filter (year >=2002) %>% # over available time-series for overlap
+    pull(catch) %>%
+    median()
 
   catch_med <- data.frame(pop = pop, catch=catch_med)
   assign(paste0("catchMed_", pop), catch_med)

@@ -5,7 +5,7 @@ library(salmonMSE)
 library(readxl)
 library(here)
 
-source("03-Adam-OM.R")
+# source("03-Adam-OM.R")
 
 #------------------------------------------------------------------------------
 # Run over multiple SOMs
@@ -22,7 +22,7 @@ if (!dir.exists(here::here(folder_path))) {
 
   g <- expand.grid(
     u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-    n_yearling = hatch_rel * seq(0.5, 1.5, 0.05)
+    n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
   )
 
   nOM <- nrow(g)
@@ -65,12 +65,12 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Adam_low.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Adam_base.rds"))
     # SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Adam", paste0("Adam", i, "low.rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Adam", paste0("Adam", i, ".rds")))
 
     invisible()
 

@@ -79,7 +79,7 @@ hatch_rel <- rel_Quinsam %>%
 plot.base.case <- FALSE
 
 if(plot.base.case == TRUE){
-  SOM <- readRDS(file.path("SOM", "SOM_QC_low.rds"))
+  SOM <- readRDS(file.path("SOM", "SOM_QC_base.rds"))
 
     # Add brood rule and premove_HOS rules to SOM
   SOM@Hatchery@f_brood <- f_brood
@@ -87,9 +87,9 @@ if(plot.base.case == TRUE){
 
   SMSE <- salmonMSE(SOM)
   report(SMSE , dir = "SMSE")
-  saveRDS(SMSE , file = file.path("SMSE", paste0("QC_08.18.26low.rds")))
+  saveRDS(SMSE , file = file.path("SMSE", paste0("QC_08.18.26.rds")))
 
-  png(here("figures", "QC_low_projecions_ts.png"),
+  png(here("figures", "QC_projections_ts.png"),
       width = 6, height = 8, units = "in", res = 300)
   par(mfrow = c(3, 2))
 
@@ -111,6 +111,14 @@ if(plot.base.case == TRUE){
   plot_statevar_ts(SMSE, var = "PNI", s = 1, figure = TRUE,
                    xlab = "Projection Year", quant = TRUE, ylab="PNI")
   mtext("(f)",  side = 3, adj = 0,line = 0.5, font = 1, cex = 1)
+  plot_statevar_ts(SMSE, var = "KT_HOS", s = 1, figure = TRUE,
+                   xlab = "Projection Year", quant = TRUE, ylab="HO Catch")
+  mtext("(g)",  side = 3, adj = 0,line = 0.5, font = 1, cex = 1)
+  plot_statevar_ts(SMSE, var = "KT_NOS", s = 1, figure = TRUE,
+                   xlab = "Projection Year", quant = TRUE, ylab="NO Catch")
+  mtext("(h)",  side = 3, adj = 0,line = 0.5, font = 1, cex = 1)
+  SMSE@KT_HOS
+  SMSE@KT_NOS# Dimensions [nsims, nstocks, agess, years]
   dev.off()
 }
 
@@ -128,7 +136,7 @@ if(plot.base.case == TRUE){
 
   g <- expand.grid(
     u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-    n_yearling = hatch_rel * seq(0.5, 1.5, 0.05)
+    n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
   )
 
   nOM <- nrow(g)
@@ -167,13 +175,13 @@ if(plot.base.case == TRUE){
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_QC_high.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_QC_base.rds"))
     SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
     SOM@Harvest@u_preterminal <- g$u_preterminal[i]
     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, "high.rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, ".rds")))
     # saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC_basecase.rds")))
 
     invisible()

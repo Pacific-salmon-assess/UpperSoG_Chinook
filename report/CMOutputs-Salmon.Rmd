@@ -1,7 +1,7 @@
 ---
 title: "Appendix D: Outputs for conditioning model - Salmon River"
 output: word_document
-date: "2026-08-22"
+date: "2026-09-03"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 
@@ -50,7 +50,7 @@ df_pars <- rstan::summary(ERM)$summary %>%
 df_summary <- df_pars[c("log_cr", "log_so", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"),
         c("mean", "sd", "2.5%", "50%", "97.5%", "n_eff", "Rhat")]
 row.names(df_summary) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*", "*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
-kable(df_summary, escape=FALSE, caption = "Table D2. Parameter estimates from the conditioning model: mean, standard deviation, 2.5th percentile, 50th percentil, 97.5th percentile, effective sample size and Rhat values")
+kable(df_summary, escape=FALSE, caption = "Table D2. Parameter estimates from the conditioning model: mean, standard deviation, 2.5th percentile, 50th percentile, 97.5th percentile, effective sample size and Rhat values")
 
 # Replace parameter names with greek symbols
 
@@ -214,7 +214,7 @@ if (sum(FPT)) salmonMSE:::CM_ER(report, brood = FALSE, type = "PT", year1, r = d
 salmonMSE:::CM_maturity(report, d, year1, r = d$r_matt, brood = FALSE, rs_names = rs_names)
 ```
 
-Full results (to be) available on github repository: https://github.com/Pacific-salmon-assess/UpperSoG_Chinook
+<!--Full results (to be) available on github repository: https://github.com/Pacific-salmon-assess/UpperSoG_Chinook-->
 
 <!-- CH: Add results to CM folder once finalized, and make sure this code points to those files-->
 

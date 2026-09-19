@@ -10,7 +10,7 @@ library(ggplot2)
 source("92-decision-table-plots.R") #for alternative version of decision tables
 
 save.files <- TRUE
-scenario <- "high"
+scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
 
@@ -53,7 +53,7 @@ if(pop == "Adam") {
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, "high.rds")))
+  SMSE <- readRDS(file.path("SMSE", pop, paste0(pop, i, ".rds")))
 
   # Update PNI = 1 when there is no brood & pHOS = 0
   Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]
@@ -220,10 +220,13 @@ AggNOcatch_nat[,3] <- AggNOcatch_Nimpkish[,3] + AggNOcatch_Salmon[,3] +
   AggNOcatch_Adam[,3]
 
 # State variables for all simulations in year y in one data frame
-val_sim_all_tot <- list(NS_tot, NS_nat, Ret_tot, Ret_nat, Tcatch_tot, Tcatch_nat,
-                    PTcatch_tot, PTcatch_nat, Aggcatch_tot, Aggcatch_nat,
-                    AggHOcatch_tot, AggHOcatch_nat, AggNOcatch_tot,
-                    AggNOcatch_nat) %>%
+# val_sim_all_tot <- list(NS_tot, NS_nat, Ret_tot, Ret_nat, Tcatch_tot, Tcatch_nat,
+#                     PTcatch_tot, PTcatch_nat, Aggcatch_tot, Aggcatch_nat,
+#                     AggHOcatch_tot, AggHOcatch_nat, AggNOcatch_tot,
+#                     AggNOcatch_nat) %>%
+val_sim_all_tot <- list(NS_tot, Ret_tot, Tcatch_tot,
+                    PTcatch_tot, Aggcatch_tot,
+                    AggHOcatch_tot,  AggNOcatch_tot) %>%
   Reduce(left_join, .) %>%
   left_join(gr %>% select( n), by = "n") %>%#Option_name,
   # rename(Option = Option_name) %>%
@@ -1135,15 +1138,15 @@ Aggcatch_NS <- val_sim_tot %>%
   reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
   mutate(
     bin = cut(
-      g$n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
-      labels = c("50-75%", "75-100%", "100-125%", "125-150%"),
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
       include.lowest = TRUE, right = TRUE
     )
   )
 gto1 <- plot_tradeoff(
   pm1 = Aggcatch_NS$`Natural Spawners`,
   pm2 = Aggcatch_NS$Aggcatch,
-  x1 = Aggcatch_NS$u_preterminal,
+  x1 = factor(Aggcatch_NS$u_preterminal),
   x2 = Aggcatch_NS$bin,
   xlab = "Aggregate natural spawners (median)",
   ylab = "Aggregate catch (median)",
@@ -1159,15 +1162,15 @@ AggHOcatch_NS <- val_sim_tot %>%
   reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
   mutate(
     bin = cut(
-      g$n_yearling, breaks = seq(0.5, 1.5, length.out = 5),
-      labels = c("50-75%", "75-100%", "100-125%", "125-150%"),
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
       include.lowest = TRUE, right = TRUE
     )
   )
 gto2 <- plot_tradeoff(
   pm1 = AggHOcatch_NS$`Natural Spawners`,
   pm2 = AggHOcatch_NS$AggHOcatch,
-  x1 = AggHOcatch_NS$u_preterminal,
+  x1 = factor(AggHOcatch_NS$u_preterminal),
   x2 = AggHOcatch_NS$bin,
   xlab = "Aggregate natural spawners (median)",
   ylab = "Aggregate hatchery-origin catch (median)",
@@ -1175,11 +1178,87 @@ gto2 <- plot_tradeoff(
   x2lab = "Relative\nhatchery\nproduction"
 )
 
+
+
+# Tradeoff figure 3: aggregate total catch vs natural spawners from natural-
+# dominated systems ----
+
+medAggCatch <- read.csv("data/CatchAgg.csv") %>% pull(catch)
+sum_medAggCatch <- sum(medAggCatch)
+
+Aggcatch_NS_nat <- val_sim_tot %>% # from val_sim_tot (all populations)
+  filter(variable %in% c("Aggcatch")) %>%
+  add_row(val_sim_nat %>% filter (variable == "Natural Spawners")) %>% # from val_sim_nat (only natural dominated pops)
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+gto3 <- plot_tradeoff(
+  pm1 = Aggcatch_NS_nat$`Natural Spawners`,
+  pm2 = Aggcatch_NS_nat$Aggcatch,
+  x1 = factor(Aggcatch_NS_nat$u_preterminal),
+  x2 = Aggcatch_NS_nat$bin,
+  xlab = "Natural spawners from natural-dominated populations (median)",
+  ylab = "Aggregate catch (median)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_hline(yintercept = sum_medAggCatch, linetype = 2) + # PNI target
+  geom_vline(xintercept = CM_Sgen, linetype = 3) + # SMSY
+  geom_vline(xintercept = CM_85SMSY, linetype = 4) + # SMSY
+  geom_point(size = 3)
+
+# Tradeoff figure 4: aggregate HO catch vs natural spawners from natural-
+# dominated systems ----
+
+medAggCatch <- read.csv("data/CatchAgg.csv") %>% pull(catch)
+sum_medAggCatch <- sum(medAggCatch)
+
+Aggcatch_NS_nat <- val_sim_tot %>% # from val_sim_tot (all populations)
+  filter(variable %in% c("AggHOcatch")) %>%
+  add_row(val_sim_nat %>% filter (variable == "Natural Spawners")) %>% # from val_sim_nat (only natural dominated pops)
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+gto4 <- plot_tradeoff(
+  pm1 = Aggcatch_NS_nat$`Natural Spawners`,
+  pm2 = Aggcatch_NS_nat$AggHOcatch,
+  x1 = factor(Aggcatch_NS_nat$u_preterminal),
+  x2 = Aggcatch_NS_nat$bin,
+  xlab = "Natural spawners from natural-dominated populations (median)",
+  ylab = "Aggregate hatchery-origin catch (median)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = CM_Sgen, linetype = 3) + # SMSY
+  geom_vline(xintercept = CM_85SMSY, linetype = 4) + # SMSY
+  geom_point(size = 3)
+
+
 if(save.files){
   ggsave(file.path("figures", "SMSE", "Aggregate",
                    paste0("gto1_Agg", file_suffix, ".png")),
-         gto1, height = 9, width = 7)
+         gto1, height = 7, width = 7)
   ggsave(file.path("figures", "SMSE", "Aggregate",
                    paste0("gto2_Agg", file_suffix, ".png")),
-         gto2, height = 9, width = 7)
+         gto2, height = 7, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto3_Agg", file_suffix, ".png")),
+         gto3, height = 7, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto4_Agg", file_suffix, ".png")),
+         gto4, height = 7, width = 7)
 }
+
+

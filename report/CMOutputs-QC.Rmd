@@ -1,7 +1,7 @@
 ---
 title: "Appendix B: Outputs for conditioning model - Quinsam/Campbell"
 output: word_document
-date: "2026-08-10"
+date: "2026-09-03"
 ---
 <!--CH: repeat for Adam, Salmon, and Nimpkish-->
 
@@ -217,9 +217,9 @@ if (sum(FPT)) salmonMSE:::CM_ER(report, brood = FALSE, type = "PT", year1, r = d
 salmonMSE:::CM_maturity(report, d, year1, r = d$r_matt, brood = FALSE, rs_names = rs_names)
 ```
 
-Full results (to be) available on github repository: https://github.com/Pacific-salmon-assess/UpperSoG_Chinook
+<!--Full results (to be) available on github repository: https://github.com/Pacific-salmon-assess/UpperSoG_Chinook
 
-<!-- CH: Add results to CM folder once finalized, and make sure this code points to those files-->
+ CH: Add results to CM folder once finalized, and make sure this code points to those files-->
 
 ```{r table}
 
