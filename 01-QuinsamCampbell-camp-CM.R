@@ -325,20 +325,20 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                                stepsize = 0.01,
                                max_treedepth = 20))
 
-saveRDS(samp, file = "CM/QuinsamCampbell_09.11.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_09.19.26.rds")
 
 # saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
 #   } # end of for i in 1:length(Ryears)
 # } # end of RunRetro(years)
 
-samp <- readRDS(file = "CM/QuinsamCampbell_09.11.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_09.19.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-  dir = "CM", filename = "QuinsamCampbell_09.11"
+  dir = "CM", filename = "QuinsamCampbell_09.19"
 )
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file

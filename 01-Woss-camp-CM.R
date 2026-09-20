@@ -294,8 +294,10 @@ d <- list(
   finitPT = 0.4,
   finitT = 0.1,#,0.8,
   cwtExp = cwtExp,
-  so_mu =  mean(log(Srep_prior)),#log(3 * max(esc$escapement, na.rm = TRUE)), #prior on S0, reduce from default 3x to 1.5x
-  so_sd = round(logSrep_prior_sd, 2)# #SD of prior on S0, reduce from default 0.5 to 0.2. Change to uncertainty in logSmax from IWAM
+  so_mu =  NULL,# mean(log(Srep_prior)),#log(3 * max(esc$escapement, na.rm = TRUE)), #prior on S0, reduce from default 3x to 1.5x
+  so_sd = NULL, #round(logSrep_prior_sd, 2)# #SD of prior on S0, reduce from default 0.5 to 0.2. Change to uncertainty in logSmax from IWAM
+  smax_mu = log(med_Smax_prior), # To be updated by Tor
+  smax_sd = logSmax_prior_sd # To be updated by Tor
 
 )
 
@@ -331,9 +333,9 @@ fit <- fit_CM(d, start = start,  map = map, do_fit = TRUE)#lower = lower, upper 
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Woss_09.12.26.rds"))
+saveRDS(samp, file = paste0("CM/Woss_09.19.26.rds"))
 
-samp <- readRDS(file = "CM/Woss_09.12.26.rds")
+samp <- readRDS(file = "CM/Woss_09.19.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -342,5 +344,5 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Woss_09.12"
+  dir = "CM", filename = "Woss_09.19"
 )

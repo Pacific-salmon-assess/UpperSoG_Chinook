@@ -354,15 +354,15 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Salmon_09.18.26.rds")
+saveRDS(samp, file = "CM/Salmon_09.19.26.rds")
 
-samp <- readRDS(file = "CM/Salmon_09.18.26.rds")
+samp <- readRDS(file = "CM/Salmon_09.19.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
-  dir = "CM", filename = "Salmon_09.18"
+  dir = "CM", filename = "Salmon_09.19"
 )
 
