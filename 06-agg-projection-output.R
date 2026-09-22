@@ -7,9 +7,9 @@ library(patchwork)
 library(ggplot2)
 
 # Functions for plotting
-source("92-decision-table-plots.R") #for alternative version of decision tables
+#source("92-decision-table-plots.R") #for alternative version of decision tables
 
-save.files <- TRUE
+save.files <- FALSE
 scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
@@ -1152,7 +1152,7 @@ gto1 <- plot_tradeoff(
   ylab = "Aggregate catch (median)",
   x1lab = "Exploitation\nrate",
   x2lab = "Relative\nhatchery\nproduction"
-)
+) #+ scale_shape_manual(values = c(16, 1, 15, 0))
 
 
 # Tradeoff figure: aggregate hatchery-origin catch vs aggregate natural spawners

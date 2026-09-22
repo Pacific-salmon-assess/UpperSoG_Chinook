@@ -333,9 +333,9 @@ fit <- fit_CM(d, start = start,  map = map, do_fit = TRUE)#lower = lower, upper 
 samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5,
                   control=list(adapt_delta = 0.999, stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = paste0("CM/Woss_09.19.26.rds"))
+saveRDS(samp, file = paste0("CM/Woss_09.20.26.rds"))
 
-samp <- readRDS(file = "CM/Woss_09.19.26.rds")
+samp <- readRDS(file = "CM/Woss_09.20.26.rds")
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
 #shinystan::launch_shinystan(samp)
@@ -344,5 +344,5 @@ rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-  dir = "CM", filename = "Woss_09.19"
+  dir = "CM", filename = "Woss_09.20"
 )

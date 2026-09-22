@@ -232,8 +232,8 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1)) # CTC 23-06 p.9; CWT Exploitation 
 # ERM_tuned <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
 # ERM_tuned <- readRDS("CM/QuinsamCampbell_09.09.26.rds")
 # report_tuned <- salmonMSE:::get_report(ERM_tuned)
-mo <- sapply(report_tuned, function(x) x$mo[, 1]) %>%
-  quantile(probs = 0.5)
+# mo <- sapply(report_tuned, function(x) x$mo[, 1]) %>%
+#   quantile(probs = 0.5)
 # mo = 5.643  # First tuning
 # mo = 5.636 # Second Tunding
 M_CTC[1] <- 5.636 #4 # Need to tune this value for initial abundance
@@ -325,20 +325,20 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                                stepsize = 0.01,
                                max_treedepth = 20))
 
-saveRDS(samp, file = "CM/QuinsamCampbell_09.19.26.rds")
+saveRDS(samp, file = "CM/QuinsamCampbell_09.22.26.rds")
 
 # saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
 #   } # end of for i in 1:length(Ryears)
 # } # end of RunRetro(years)
 
-samp <- readRDS(file = "CM/QuinsamCampbell_09.19.26.rds")
+samp <- readRDS(file = "CM/QuinsamCampbell_09.22.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-  dir = "CM", filename = "QuinsamCampbell_09.19"
+  dir = "CM", filename = "QuinsamCampbell_09.22"
 )
 
 if (FALSE) { # Diagnostic figures do not run when sourcing file
