@@ -366,4 +366,4 @@ salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
   dir = "CM", filename = "Salmon_09.22"
-
+)
