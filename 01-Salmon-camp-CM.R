@@ -322,7 +322,9 @@ d <- list(
   so_mu =  NULL, #mean(log(Srep_prior)),# #prior on S0, reduce from default 3x to 1.5x
   so_sd = NULL,#round(logSrep_prior_sd, 2)# #SD of prior on S0, reduce from default 0.5 to 0.2. Change to uncertainty in logSmax from IWAM
   smax_mu = log(med_Smax_prior), # To be updated by Tor
-  smax_sd = logSmax_prior_sd # To be updated by Tor
+  smax_sd = logSmax_prior_sd, # To be updated by Tor
+  cr_mu = 0.87,
+  cr_sd = 0.46
 )
 
 # Fix these parameters
@@ -354,15 +356,15 @@ samp <- sample_CM(fit, chains = 4, cores = 4, iter = 10000, thin = 5, seed = 1,
                   control=list(adapt_delta = 0.999,
                                stepsize = 0.01,
                                max_treedepth = 20))
-saveRDS(samp, file = "CM/Salmon_09.19.26.rds")
+saveRDS(samp, file = "CM/Salmon_09.22.26.rds")
 
-samp <- readRDS(file = "CM/Salmon_09.19.26.rds")
+samp <- readRDS(file = "CM/Salmon_09.22.26.rds")
 
 year <- unique(full_matrix$RELEASE_YEAR)
 rs_names <- c("Smolt 0+")
 salmonMSE::report_CM(
   samp,
   rs_names = rs_names, name = "Salmon", year = year,
-  dir = "CM", filename = "Salmon_09.19"
+  dir = "CM", filename = "Salmon_09.22"
 )
 
