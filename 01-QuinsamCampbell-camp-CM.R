@@ -297,8 +297,8 @@ run_QC_CM <- function( prod = "base"){
     finitPT = 0.8, # Walters and Korman (2024)
     finitT = 0.2,
     cwtExp = cwtExp,
-    smax_mu = log(max(esc$escapement, na.rm = T))*3, # To force the smax parameterization with other populations
-    smax_sd = 0.5, # To force the smax parameterization for comparability with other populations
+    smax_mu = log(max(esc$escapement, na.rm = T)*2), # To force the smax parameterization with other populations
+    smax_sd = 1, # To force the smax parameterization for comparability with other populations
     cr_mu = cr_mu,
     cr_sd = 0.46
   )
@@ -325,7 +325,7 @@ run_QC_CM <- function( prod = "base"){
   # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
   map$lnE_sd <- factor(NA)
 
-  # start <- list(log_so = log(3 * max(d$obsescape, na.rm = TRUE)))
+  start <- list(NA)#list(log_so = log(3 * max(d$obsescape, na.rm = TRUE)))
 
   #### Fit with estimated productivity parameter (log_cr)
   fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf, log_cr = 0))
@@ -334,20 +334,20 @@ run_QC_CM <- function( prod = "base"){
                                  stepsize = 0.01,
                                  max_treedepth = 20))
 
-  saveRDS(samp, file = paste0("CM/QuinsamCampbell_09.28.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
 
   # saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
   #   } # end of for i in 1:length(Ryears)
   # } # end of RunRetro(years)
 
-  samp <- readRDS(file = paste0("CM/QuinsamCampbell_09.28.26.", prod, ".rds"))
+  samp <- readRDS(file = paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
 
   year <- unique(full_matrix$RELEASE_YEAR)
   rs_names <- c("Smolt 0+")
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = paste0("QuinsamCampbell_09.28.26.", prod)
+    dir = "CM", filename = paste0("QuinsamCampbell_09.29.26.", prod)
   )
 
 }

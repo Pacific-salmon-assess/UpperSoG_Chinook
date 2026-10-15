@@ -154,7 +154,8 @@ run_Adam_CM <- function( prod = "base"){
                 fishery_era_name %in% c("TAK TERM T",
                                         "TWCVI TERM N",
                                         "TNORTH FS",
-                                        "TJNST TERM S"))) %>%
+                                        "TJNST TERM S"
+                                        ))) %>%
     summarise(n = sum(adjusted_estimated_number), .by = c(RELEASE_YEAR, Age)) %>%
     right_join(full_matrix, by = c("RELEASE_YEAR", "Age")) %>%
     reshape2::acast(list("RELEASE_YEAR", "Age"), value.var = "n", fill = 0)
@@ -315,7 +316,7 @@ run_Adam_CM <- function( prod = "base"){
   # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
   map$lnE_sd <- factor(NA)
 
-  # start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
+  start <- list(NA)## start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
 
   #### Fit with estimated productivity parameter (log_cr)
   fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf, log_cr = 0))
@@ -323,16 +324,16 @@ run_Adam_CM <- function( prod = "base"){
                     control=list(adapt_delta = 0.999,
                                  stepsize = 0.01,
                                  max_treedepth = 20))
-  saveRDS(samp, file = paste0("CM/Adam_09.28.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/Adam_09.29.26.", prod, ".rds"))
 
-  samp <- readRDS(file =  paste0("CM/Adam_09.28.26.", prod, ".rds"))
+  samp <- readRDS(file =  paste0("CM/Adam_09.29.26.", prod, ".rds"))
 
   year <- unique(full_matrix$RELEASE_YEAR)
   rs_names <- c("Smolt 0+")
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Adam", year = year,
-    dir = "CM", filename =  paste0("Adam_09.28.26.", prod)
+    dir = "CM", filename =  paste0("Adam_09.29.26.", prod)
   )
 
 

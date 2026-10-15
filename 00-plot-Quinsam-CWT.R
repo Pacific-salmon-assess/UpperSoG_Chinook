@@ -135,3 +135,4 @@ g <- ggplot(rel_trad, aes(BROOD_YEAR, n_CWT)) +
 ggsave("figures/Quinsam_CWT_rel.png", g, height = 5, width = 4)
 
 
+

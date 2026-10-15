@@ -3,16 +3,24 @@
 #-------------------------------------------------------------------------------
 
 # INPUTS:
-# Conditioning model results
+# Conditioning models outputs from population-specific "01" files.
+# See "Input Conditioning Model results" section below.
 
-# Population productivity (logalpha): base, low or high
+# Population productivity (logalpha): base, low, high, or ensemble
 
 # Aggregated benchmarks for natural-dominated populations
-# UMSY: "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.csv"
+# UMSY:
+# "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv"
+# "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.low.csv"
+# "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.high.csv"
+# "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.ensemble.csv"
 
-# Aggregated lower benchmarks:   'medlBench_Nat'
+# Aggregated lower benchmarks:   'medlBench_Nat' (from 02-PopBenchFig.R)
 # Aggregated upper benchmarks from Equilibrium Trade-off Analysis in file:
-#   "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.csv"
+#   "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv"
+#   "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.low.csv"
+#   "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.high.csv"
+#   "tables/R-OUT_SMU_ref-pt_values_eq-trade-off.ensemble.csv"
 
 # OUTPUTS:
 # Empirical threshold for aggregate abundances
@@ -20,15 +28,18 @@
 # "tables/EmpiricalUSR.low.csv"
 # "tables/EmpiricalUSR.base.csv"
 # "tables/EmpiricalUSR.high.csv"
+# "tables/EmpiricalUSR.ensemble.csv"
 
 # Four-panel figure for FSAR
 # File names:
 # "figures/Fourpanel.base.png",
 # "figures/Fourpanel.low.png",
 # "figures/Fourpanel.high.png"
+# "figures/Fourpanel.ensemble.png"
 # time-series of empirical values for projection model
 # Files names: "Woss_timeseries.csv", "Salmon_timeseries.csv", "Adam_timeseries.csv"
-  # in folders: data/CMoutput/base, data/CMoutput/low, or data/CMoutput/high
+  # in folders: data/CMoutput/base, data/CMoutput/low, data/CMoutput/high, or
+  # data/CMoutput/ensemble
 
 #-------------------------------------------------------------------------------
 
@@ -42,7 +53,7 @@ library(here)
 #-------------------------------------------------------------------------------
 # INPUTS:
 
-prod <- "ensemble"#"base","low", "high", "ensemble"
+prod <- "base"#"base","low", "high", "ensemble"
 
 # Get aggregated lower benchmark:   'medlBench_Nat'
 # source(here("02-PopBenchFig.R"))
@@ -55,33 +66,45 @@ meduBench_Nat <- read.csv(
   )
 ) %>% filter(variable == "Smsy") %>% pull(mid)
 
+lwruBench_Nat <- read.csv(
+  here(
+    "tables",
+    paste0("R-OUT_SMU_ref-pt_values_eq-trade-off.", prod, ".csv")
+  )
+) %>% filter(variable == "Smsy") %>% pull(lwr)
 
+upruBench_Nat <- read.csv(
+  here(
+    "tables",
+    paste0("R-OUT_SMU_ref-pt_values_eq-trade-off.", prod, ".csv")
+  )
+) %>% filter(variable == "Smsy") %>% pull(upr)
 
 # Input Conditioning Model results
-if (prod!="ensemble"){
-  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.", prod, ".rds"))
+if (prod != "ensemble"){
+  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
   report_QC <- salmonMSE:::get_report(ERM_QC)
 
-  ERM_Adam <- readRDS(paste0("CM/Adam_09.26.26.", prod, ".rds"))
+  ERM_Adam <- readRDS(paste0("CM/Adam_09.29.26.", prod, ".rds"))
   report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.26.26.", prod, ".rds"))
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.29.26.", prod, ".rds"))
   report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-  ERM_Woss <- readRDS(paste0("CM/Woss_09.26.26.", prod, ".rds"))
+  ERM_Woss <- readRDS(paste0("CM/Woss_09.29.26.", prod, ".rds"))
   report_Woss <- salmonMSE:::get_report(ERM_Woss)
 }
 
 if(prod == "ensemble"){
   # Get number of MC trials (len)
-  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.base.rds"))
+  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.base.rds"))
   report_len <- salmonMSE:::get_report(ERM_len)
   len <- length(report_len)
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.low.rds"))
-  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.base.rds"))
-  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.high.rds"))
+  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.low.rds"))
+  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.base.rds"))
+  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_QC <- c(sample( get_report( ERM_QC_low), len * 0.25),
                  sample( get_report( ERM_QC_base), len * 0.5),
@@ -90,9 +113,9 @@ if(prod == "ensemble"){
   ERM_QC <- ERM_QC_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.26.26.low.rds"))
-  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.26.26.base.rds"))
-  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.26.26.high.rds"))
+  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.29.26.low.rds"))
+  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.29.26.base.rds"))
+  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Woss <- c(sample( get_report( ERM_Woss_low), len * 0.25),
                    sample( get_report( ERM_Woss_base), len * 0.5),
@@ -101,9 +124,9 @@ if(prod == "ensemble"){
   ERM_Woss <- ERM_Woss_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.26.26.low.rds"))
-  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.26.26.base.rds"))
-  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.26.26.high.rds"))
+  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.29.26.low.rds"))
+  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.29.26.base.rds"))
+  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Salmon <- c(sample( get_report( ERM_Salmon_low), len * 0.25),
                      sample( get_report( ERM_Salmon_base), len * 0.5),
@@ -112,9 +135,9 @@ if(prod == "ensemble"){
   ERM_Salmon <- ERM_Salmon_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.26.26.low.rds"))
-  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.26.26.base.rds"))
-  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.26.26.high.rds"))
+  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.29.26.low.rds"))
+  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.29.26.base.rds"))
+  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Adam <- c(sample( get_report( ERM_Adam_low), len * 0.25),
                    sample( get_report( ERM_Adam_base), len * 0.5),
@@ -481,7 +504,23 @@ gspawners <- ggplot(spawners, aes(x = year, y = med, group = label)) +
   ) +
   geom_hline(yintercept= medlBench_Nat/1000, colour= "darkred", linetype= "dotted", linewidth=0.7) +
   geom_hline(yintercept= meduBench_Nat/1000, colour= "darkgreen", linetype= "dashed", linewidth=0.7) +
-  geom_hline(yintercept= medspawners/1000, colour= "navyblue", linetype= "solid", linewidth=0.5, alpha=0.2)
+  geom_hline(yintercept= medspawners/1000, colour= "navyblue", linetype= "solid", linewidth=0.5, alpha=0.4) +
+  annotate(
+    "rect",
+    xmin = 2002, xmax = 2024,
+    ymin = lwrlBench_Nat/1000, ymax = uprlBench_Nat/1000,
+    fill = "darkred",
+    color = NA,
+    alpha = 0.1
+    ) +
+  annotate(
+    "rect",
+    xmin = 2002, xmax = 2024,
+    ymin = lwruBench_Nat/1000, ymax = upruBench_Nat/1000,
+    fill = "darkgreen",
+    color = NA,
+    alpha = 0.15
+  )
 
 
 
@@ -536,7 +575,7 @@ gER <- ggplot(ts_ER, aes(x = year, y = med, group = Pop, colour = Pop,
     ymin = UMSY_lwr, ymax = UMSY_upr,
     fill = "darkgrey",
     color = NA,
-    alpha = 0.2
+    alpha = 0.3
   )
 
 

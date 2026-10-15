@@ -336,7 +336,7 @@ run_Woss_CM <- function( prod = "base"){
   # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
   map$lnE_sd <- factor(NA)
 
-  # start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
+  start <- list(NA)## start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
 
   # lower <- list(log_cr = 0)
   # upper <- list(log_cr = 5)
@@ -347,9 +347,9 @@ run_Woss_CM <- function( prod = "base"){
                     control=list(adapt_delta = 0.999,
                                  stepsize = 0.01,
                                  max_treedepth = 20))
-  saveRDS(samp, file = paste0("CM/Woss_09.28.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/Woss_09.29.26.", prod, ".rds"))
 
-  samp <- readRDS(file = paste0("CM/Woss_09.28.26.", prod, ".rds"))
+  samp <- readRDS(file = paste0("CM/Woss_09.29.26.", prod, ".rds"))
   report <- salmonMSE:::get_report(samp)
   d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
   #shinystan::launch_shinystan(samp)
@@ -358,7 +358,7 @@ run_Woss_CM <- function( prod = "base"){
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-    dir = "CM", filename = paste0("Woss_09.28.26.", prod)
+    dir = "CM", filename = paste0("Woss_09.29.26.", prod)
   )
 
 }

@@ -6,13 +6,13 @@ library(here)
 library(patchwork)
 library(ggplot2)
 
-# Functions for plotting
-source("92-decision-table-plots.R") #for alternative version of decision tables
+# # Functions for plotting
+# source("92-decision-table-plots.R") #for alternative version of decision tables
 
 
 
 # Get CM output for current PT and T ERs
-samp <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
+samp <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
 year1 <- 1984 # For Quinsam/Campbell
 save.files <- TRUE
 scenario <- "base"
@@ -194,13 +194,13 @@ if(FALSE){ # Not use for QC
   # Set pop!
   pop <- "Adam"
   SMSY85 <- read.csv( here(
-    "data",
-    "Benchmarks_NatPops.csv")) %>%
+    "tables",
+    "Benchmarks_NatPops.base.csv")) %>%
     filter(Benchmark == "85% SMSY") %>%
     filter(Pop == pop) %>% select(med) %>% pull()
   Sgen <- read.csv( here(
-    "data",
-    "Benchmarks_NatPops.csv")) %>%
+    "tables",
+    "Benchmarks_NatPops.base.csv")) %>%
     filter(Benchmark == "Sgen") %>%
     filter(Pop == pop) %>% select(med) %>% pull()
 
@@ -597,9 +597,8 @@ UPTmed <- UPTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>%
   mean()
 
 Umsy <- read.csv(  here(
-  "data",
-  "Equilibrium trade-off analysis",
-  "R-OUT_SMU_ref-pt_values_eq-trade-off.csv"
+  "tables",
+  "R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv"
 ) ) %>%
   filter(variable == "Umsy") %>%
   pull(mid)
@@ -644,25 +643,24 @@ if(save.files){
   ggsave(file.path("figures", "SMSE", pop, paste0("icecream_PNI_QC", file_suffix,".png")), gPNI, width = 5, height = 5)
 }
 
-# Option of icecream plot without legend and numbers on the plot:
-
-g <- val_sim %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "PNI") %>%
-  select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  decision_table_grid(
-    ncol = 3,
-    title = "Median PNI",
-    fill_scheme =
-      scale_fill_gradientn(
-        values = c(0, 0.7, 1),
-        colours = c("deeppink", "lightgreen", "green4")
-      )
-  )
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_PNI_QC.png"), g, width = 5, height = 5)
+# # Option of icecream plot without legend and numbers on the plot:
+# g <- val_sim %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "PNI") %>%
+#   select(u_preterminal, n_yearling, median, n) %>%
+#   rename(value = median) %>%
+#   decision_table_grid(
+#     ncol = 3,
+#     title = "Median PNI",
+#     fill_scheme =
+#       scale_fill_gradientn(
+#         values = c(0, 0.7, 1),
+#         colours = c("deeppink", "lightgreen", "green4")
+#       )
+#   )
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# # ggsave(file.path("figures", "SMSE", "decisiontable_PNI_QC.png"), g, width = 5, height = 5)
 
 
 # Option of icecream plot with legend:
@@ -705,26 +703,25 @@ if(save.files){
   ggsave(file.path("figures", "SMSE", pop, paste0("icecream_probPNI_QC", file_suffix, ".png")), gPNIprob, width = 5, height = 5)
 }
 
-# Option of icecream plot without legend and numbers on the plot:
-
-val <- seq(0, 1, 0.01)
-cols <- ifelse(val >= 0.5, "lightgreen", "deeppink")
-g <- val_prob %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "P_PNI50") %>%
-  select(u_preterminal, n_yearling, value, n) %>%
-  decision_table_grid(
-    ncol = 3,
-    title = "Probability PNI > 0.5",
-    fill_scheme =
-      scale_fill_gradientn(
-        values = val,
-        colours = cols
-      )
-  )
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_PNI50_QC.png"), g, width = 5, height = 5)
+# # Option of icecream plot without legend and numbers on the plot:
+# val <- seq(0, 1, 0.01)
+# cols <- ifelse(val >= 0.5, "lightgreen", "deeppink")
+# g <- val_prob %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "P_PNI50") %>%
+#   select(u_preterminal, n_yearling, value, n) %>%
+#   decision_table_grid(
+#     ncol = 3,
+#     title = "Probability PNI > 0.5",
+#     fill_scheme =
+#       scale_fill_gradientn(
+#         values = val,
+#         colours = cols
+#       )
+#   )
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# # ggsave(file.path("figures", "SMSE", "decisiontable_PNI50_QC.png"), g, width = 5, height = 5)
 
 ### Natural spawners decision tables
 # Option of icecream plot with legend:
@@ -789,39 +786,39 @@ if(save.files){
        gSp, width = 5, height = 5)
 }
 
-# option for icream plot with numbers on plot (no legend)
-g <- val_sim %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "Natural Spawners") %>%
-  select(u_preterminal, n_yearling, median, n) %>%
-  mutate(value = round(median)) %>%
-  decision_table_grid(ncol = 3, title = "Natural spawners",
-                      fill_scheme = scale_fill_gradient2(low = "deeppink",
-                                                         high = "green4",
-                                                         mid = "white",
-                                                         midpoint = 1500))
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_sp_QC.png"), g, width = 5, height = 5)
+# # option for icream plot with numbers on plot (no legend)
+# g <- val_sim %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "Natural Spawners") %>%
+#   select(u_preterminal, n_yearling, median, n) %>%
+#   mutate(value = round(median)) %>%
+#   decision_table_grid(ncol = 3, title = "Natural spawners",
+#                       fill_scheme = scale_fill_gradient2(low = "deeppink",
+#                                                          high = "green4",
+#                                                          mid = "white",
+#                                                          midpoint = 1500))
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# # ggsave(file.path("figures", "SMSE", "decisiontable_sp_QC.png"), g, width = 5, height = 5)
 
-### NS <1500 prob decision tables
-# Option of icecream plot without legend:
-g <- val_prob %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "P_1500_NS") %>%
-  select(u_preterminal, n_yearling, value, n) %>%
-  decision_table_grid(
-    ncol = 3,
-    title = "Probabilty > 1500 natural spawners",
-    fill_scheme =
-      scale_fill_gradientn(
-        values = c(0, 0.7, 1),
-        colours = c("deeppink", "lightgreen", "green4")
-      )
-  )
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_P_1500_QC.png"), g, width = 5, height = 5)
+# ### NS <1500 prob decision tables
+# # Option of icecream plot without legend:
+# g <- val_prob %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "P_1500_NS") %>%
+#   select(u_preterminal, n_yearling, value, n) %>%
+#   decision_table_grid(
+#     ncol = 3,
+#     title = "Probabilty > 1500 natural spawners",
+#     fill_scheme =
+#       scale_fill_gradientn(
+#         values = c(0, 0.7, 1),
+#         colours = c("deeppink", "lightgreen", "green4")
+#       )
+#   )
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# # ggsave(file.path("figures", "SMSE", "decisiontable_P_1500_QC.png"), g, width = 5, height = 5)
 
 # Option of icecream plot with legend:
 g <- val_prob %>%
@@ -1000,17 +997,16 @@ if(save.files){
 }
 
 ### Hatchery releases
-# Option of icecream plot without legend:
-
-g <- val_sim %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "Releases") %>%
-  select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  decision_table_grid(ncol = 3, "Hatchery releases\n(100,000s)")
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-#ggsave(file.path("figures", "SMSE", "decisiontable_rel.png"), g, width = 5, height = 5)
+# # Option of icecream plot without legend:
+# g <- val_sim %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "Releases") %>%
+#   select(u_preterminal, n_yearling, median, n) %>%
+#   rename(value = median) %>%
+#   decision_table_grid(ncol = 3, "Hatchery releases\n(100,000s)")
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# #ggsave(file.path("figures", "SMSE", "decisiontable_rel.png"), g, width = 5, height = 5)
 
 
 # Option of icecream plot with legend:

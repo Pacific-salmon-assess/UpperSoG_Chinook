@@ -1,10 +1,34 @@
 
-# Make OM
+#------------------------------------------------------------------------------
+# Set up Operating Model (OM) inputs for Quinsam/Campbell Rivers
+#------------------------------------------------------------------------------
 
+# INPUTS:
+
+# Conditioning models outputs from population-specific "01" files.
+# See "Input Conditioning Model results" section below.
+
+# Total hatchery releases from Quinsam and Campbell release sites, all release types
+# "data/Quinsam/2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx"
+
+# Non-brood removals from the spawning grounds (p_remove), e.g., CWT sampling
+# "data/Quinsam/2026-02-11-QuinsamRiverChinook-RiverReturns-1981-2023.xlsx"
+
+# As provided below, OM specifications and all biological, harvest, hatchery and habitat parameter inputs
+# Including a choice of base, low or high first-year marine survival scenarios
+
+# OUTPUTS:
+# SOM object, for each of 3 marine survival scenarios
+# SOM/SOM_QC_base.rds
+# SOM/SOM_QC_low.rds
+# SOM/SOM_QC_high.rds
+
+#-------------------------------------------------------------------------------
 # Libraries
 library(tidyverse)
 library(salmonMSE)
 
+#-------------------------------------------------------------------------------
 # OM specifications
 maxage <- 5
 nsim <- 500
@@ -16,19 +40,25 @@ msurv <- "base"#"base" #"low" #"high"
 # also used for file name of SOM
 som_name <- "QC base" #"QC base" #"QC low msurv" # "QC high msurv" # for internal naming
 
-# Load exploitation rate model - Quinsam/Campbell
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
+# Load conditioning model results - Quinsam/Campbell
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
+
 report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 set.seed(24)
 sim_samp <- sample(seq(1, length(report)), nsim)
 d <- salmonMSE:::get_CMdata(ERM_QuinsamCampbell@.MISC$CMfit)
 pars <- rstan::extract(ERM_QuinsamCampbell)
 
+
+#-------------------------------------------------------------------------------
+#### Biological inputs
+
 # Take maturity average from the 5 most recent brood years (2020-2024)
 # Consider changing to earlier/longer period if recent ppns are less reliable
 matt <- sapply(report, getElement, "matt", simplify = "array") %>%
   aperm(c(1, 2, 4, 3))
 matt_avg <- apply(matt[seq((d$Ldyr-4), d$Ldyr), , ,1], c(2,3), mean)
+# matt_avg <- apply(matt[seq(1, 5), , ,1], c(2,3), mean)
 # apply (matt_avg,1,median)
 
 
@@ -55,10 +85,12 @@ df.mean <- apply(df, 2, mean)[sim_samp]
 df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
 #exp(-range(apply(df, 1, median, na.rm=T)))
 set.seed(23)
-sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
-m1_sample <- df[sim_samp_long]
-exp(-quantile(df[sim_samp_long], prob = c(0.025, 0.5, 0.975)))
-exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
+# sim_samp_long <- sample(seq(1, length(report)) * d$Ldyr, nsim)
+sim_samp_long <- sample(seq(1, length(report) * d$Ldyr), nsim*proyears)
+
+m1_sample_long <- df[sim_samp_long]
+
+# exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
 
 # Plot distribution of survival first year at sea, with sens analysis values
 if(FALSE){
@@ -75,7 +107,8 @@ if(FALSE){
 }
 
 
-# Alternative approach: making a parametric distribution from all years
+# Under alternative mo assumptions (low and high): making a parametric
+# distribution from all years
 if(msurv %in% c("low", "high")){
   df <- sapply(report, getElement, "mo", simplify = "array") %>%
     apply(1:2, quantile, probs = c(0.025, 0.5, 0.975)) %>%
@@ -93,11 +126,11 @@ if(msurv %in% c("low", "high")){
   s1_sim  <- matrix(rnorm(nsim * proyears, s1_mu, s1_sd), nsim, proyears)
   # Back transform ERs to % and then to instantaneous mortality
   s1_sim_trans <- plogis(s1_sim)
-  m1_sample <- -log(s1_sim_trans)
+  m1_sample_long <- -log(s1_sim_trans)
 }
 
-
-Mjuv_NOS[, 1, , 1] <- m1_sample
+# Mortality during the first year in the ocean
+Mjuv_NOS[, 1, , 1] <- m1_sample_long
 
 
 # Age 2-5
@@ -123,7 +156,7 @@ p_mature[] <- matt_avg[, sim_samp] %>% t() %>%
 # Eggs/total spawner: Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
 fec_QC <- c(0, 0, 800, 2000, 2500)
 # This is assumed to already account for ppn female as age-3 fecundity is so low
-# Accounts for pre-spawn mortality (5%)
+# Account for pre-spawn mortality (5%)
 fec <- fec_QC * 0.95
 
 
@@ -138,6 +171,15 @@ kappa <- as.numeric(exp(pars$log_cr[sim_samp]))
 #quantile(Smax, c(0.25, 0.5, 0.75))
 #quantile(kappa, c(0.25, 0.5, 0.75))
 
+
+# Egg to smolt annual deviations
+# wt <- pars$wt[sim_samp,]
+wt <- pars$wt
+wt <- wt[sim_samp_long]
+length(wt)
+wt_mat <- matrix(wt, nsim, proyears)
+
+# Create the BIO object for salmonMSE
 Bio <- new(
   "Bio",
   maxage = maxage,
@@ -148,6 +190,7 @@ Bio <- new(
   SRrel = "Ricker",
   kappa = kappa,# Includes random variability
   Smax = Smax,# Includes random variability
+  SRdev =wt_mat, # Matrix of egg-smolt annual deviations from Ricker curve
   phi = phi,
   tau = tau,
   Mjuv_NOS = Mjuv_NOS, # Includes random variability in 1st year M
@@ -156,7 +199,9 @@ Bio <- new(
   s_enroute = (1 - 0.1)# M.  Clarke pers. comm. (2025), same as CM
 )
 
-### Harvest, fishery vulnerability ----
+#-------------------------------------------------------------------------------
+### Harvest, fishery vulnerability
+
 # To estimate AEQ ERs, borrow information on population parameters
 # for the last generation
 year <- year1 + seq(1, d$Ldyr) - 1
@@ -168,7 +213,8 @@ UPT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "PT",  r = 1,
 UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
                          index_AEQ = match(year_borrow, year)) %>% t()
 
-# Take median AEQ UPT and UT in the last 5 years, and take the average of those values to project forward
+# Take median AEQ UPT and UT in the last 5 years, and take the average of those
+# values to project forward
 UPTrange <-  UPT %>%
   apply(2, quantile, probs = c(0.025, 0.5, 0.975), na.rm=T) %>%
   t()
@@ -180,8 +226,9 @@ UTrange <-  UT %>%
 UTmed <- UTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>%
   mean()
 
-u_preterminal <- matrix(UPTmed, nrow=nsim, ncol=proyears) #No random variability included
-u_terminal <- matrix(UTmed, nrow=nsim, ncol=proyears) #No random variability included
+# No random variability included
+u_preterminal <- matrix(UPTmed, nrow=nsim, ncol=proyears)
+u_terminal <- matrix(UTmed, nrow=nsim, ncol=proyears)
 
 vulPT <- sapply(report[sim_samp], getElement, "vulPT")
 vulT <- sapply(report[sim_samp], getElement, "vulT")
@@ -199,13 +246,14 @@ Harvest <- new(
   u_terminal = u_terminal,
   MSF_PT = FALSE,
   MSF_T = FALSE,
-  release_mort = c(0.1,0.1), # mark-selective fishery not included for this stock
+  release_mort = c(0.1,0.1), #mark-selective fishery not included for this stock
   vulPT = t(vulPT),
   vulT = t(vulT)
 )
 
 
-### Hatchery ----
+#-------------------------------------------------------------------------------
+### Hatchery
 # Number of release groups
 n_r <- 1
 
@@ -284,7 +332,7 @@ rem_Quinsam <- rem_Quinsam.x %>%
   group_by(year) %>% summarise(OtherRemovals_Sum= sum(OtherRemovals, na.rm=T))
 
 # # What ppn are non-brood removals to natural spawners?
-# # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)
+# # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapement)
 # # First get total escapement (used in CM), and 'natural spawners' which account for all removals
 # pop <- c("Quinsam", "Campbell")
 # pop.cap <- str_to_upper(pop)
@@ -397,8 +445,8 @@ Hatchery <- new(
   heritability = h2,
   fitness_floor = 0.01
 )
-
-### Historical object ----
+#-------------------------------------------------------------------------------
+### Historical object
 
 # Calculate Initial Njuv
 # Sample abundance from final year with complete brood life cycle
@@ -420,10 +468,13 @@ Historical <- new(
 
 
 
-### Habitat ----
+#-------------------------------------------------------------------------------
+### Habitat
 
 # megg is realized egg-smolt mortality rate, and exp(-megg) is egg-smolt survival
 megg <- sapply(report[sim_samp], getElement, 'megg')
+alpha <- sapply(report[sim_samp], getElement, 'alpha')
+beta <- sapply(report[sim_samp], getElement, 'beta')
 fry_sdev <- exp(-megg)
 
 # # set.seed(234)
@@ -452,17 +503,18 @@ fry_sdev <- exp(-megg)
 
 Habitat <- new(
   "Habitat",
-  use_habitat = FALSE, # Habitat optoin not used
+  use_habitat = FALSE, # Habitat option not used
   prespawn_rel = "BH",
   prespawn_prod = 1,# 5% pre-spawn mortality already accounted for in fecundity
   prespawn_capacity = Inf,
-  fry_rel = "BH",
+  fry_rel = "Ricker",
   fry_prod = 1,# To confirm with Quang that fry_surv_sim_trans will include average fw surv
   fry_capacity = Inf,
   fry_sdev = fry_sdev
 )
 
-
+# ------------------------------------------------------------------------------
+# Combine slots into SOM object
 SOM <- new("SOM",
            Name = som_name,
            nsim = nsim,

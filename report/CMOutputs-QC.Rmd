@@ -30,7 +30,7 @@ theme_set(theme_bw())
 ```{r}
 pop <- "Q/C"
 if(pop=="Q/C") {
-  ERM <- readRDS(here::here("CM/QuinsamCampbell_07.29.26.rds"))
+  ERM <- readRDS(here::here("CM/QuinsamCampbell_09.29.26.base.rds"))
   year1 <- 1984
 }
 
@@ -72,9 +72,9 @@ df_pars <- rstan::summary(ERM)$summary %>%
 # kable(df_pars[, c("mean", "sd", "2.5%", "50%", "97.5%", "n_eff", "Rhat")])
 
 
-df_summary <- df_pars[c("log_cr", "log_so", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"),
+df_summary <- df_pars[c("log_cr", "log_smax", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"),
         c("mean", "sd", "2.5%", "50%", "97.5%", "n_eff", "Rhat")]
-row.names(df_summary) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*", "*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
+row.names(df_summary) <- c("*log(κ)*", "*log(S^max^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*", "*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
 kable(df_summary, escape=FALSE, caption = "Table B2. Parameter estimates from the conditioning model: mean, standard deviation, 2.5th percentile, 50th percentile, 97.5th percentile, effective sample size and Rhat values")
 
 # ft <- flextable(df_summary) |>
@@ -107,9 +107,9 @@ kable(df_summary, escape=FALSE, caption = "Table B2. Parameter estimates from th
 
 ```{r legend }
 
-df_legend <- data.frame(Names= c("log_cr", "log_so", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"))
+df_legend <- data.frame(Names= c("log_cr", "log_smax", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"))
 
-row.names(df_legend) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*","*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
+row.names(df_legend) <- c("*log(κ)*", "*log(S^max^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*","*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
 
 kable(df_legend, caption = "Table B3. Legend for names of parameter values used in code, for reference for output figures")
 ```
@@ -119,7 +119,7 @@ kable(df_legend, caption = "Table B3. Legend for names of parameter values used 
 
 ```{r trace-cr, fig.cap="Figure B1. Wormplots of productivity parameters, scaling parameters and the log-posterior from MCMC iterations after thinning and warmup.", dpi = 800}
 # log-posterior from MCMC iterations after thinning and warmup."}
-pars_core <- c("cr", "log_so", "moadd", "log_FbasePT", "log_FbaseT", "lp")
+pars_core <- c("cr", "log_smax", "moadd", "log_FbasePT", "log_FbaseT", "lp")
 salmonMSE:::CM_trace(ERM, pars_core)
 
 ```
@@ -192,8 +192,25 @@ salmonMSE:::CM_fit_CWTesc(report, d, year1, rs_names)
 # Model outputs
 
 
-```{r SRR, fig.cap="Figure B14. Estimated stock-recruit relationship (medians and 95% prediction interval). Numbers correspond to years of egg production (predicts juvenile production for the following calendar year). Points show annual smolt production (medians).", warning=FALSE}
-salmonMSE:::CM_SRR(report, year1)
+```{r SRR, fig.cap="Figure B14. Estimated egg and associated smolt abundances (annual medians). Dashed line is the median smolt production.", warning=FALSE}
+# salmonMSE:::CM_SRR(report, year1)
+
+egg <- sapply(report, getElement, "egg") %>% apply(1, median)
+smolt <- sapply(report, function(x) x$N[-1, 1, 1]) %>% apply(1, median)
+year <- year1 + seq(1, length(egg)) - 1
+
+df <- data.frame(
+    year = year,
+    egg = egg,
+    smolt = smolt
+    )
+
+gSRR <- ggplot(df, aes(.data$egg, .data$smolt)) +
+    geom_point(shape = 1) +
+    labs(x = "Egg production", y = "Smolt production") +
+    expand_limits(x = 0, y = 0) +
+    geom_hline(yintercept = median(smolt), linetype = "dashed") 
+gSRR  
 ```
 
 

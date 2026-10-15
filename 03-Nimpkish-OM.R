@@ -17,7 +17,7 @@ msurv <- "base"#"base" #"low" #"high"
 som_name <- "Nimpkish base"#"Nimpkish base" #"low msurv" # "high msurv" # for internal naming
 
 # Load exploitation rate model - Woss River
-ERM <- readRDS("CM/Woss_07.22.26.prior.rds")
+ERM <- readRDS("CM/Woss_09.29.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM)
 set.seed(24)
@@ -46,7 +46,9 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
 df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
 #exp(-range(apply(df, 1, median, na.rm=T)))
 set.seed(23)
-sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
+# sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
+sim_samp_long <- sample(seq(1, length(report) * d$Ldyr), nsim*proyears)
+
 m1_sample <- df[sim_samp_long]
 #exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
 

@@ -25,7 +25,7 @@ library(kableExtra)
 
 
 ```{r benchmarks, echo=FALSE}
-BenchFull <- read.csv(file = here("tables", "BenchmarksFull_NatPops.csv"))
+BenchFull <- read.csv(file = here("tables", "BenchmarksFull_NatPops.base.csv"))
 
 kable(BenchFull, 
       caption = "Table 1. Populaton-level benchmarks, with SMAX estimated from the conditioning model", booktabs = TRUE) %>% 
@@ -33,10 +33,10 @@ kable(BenchFull,
   kable_styling(full_width = FALSE)
 
 # Alternative
-BenchSimple <- read.csv(file = here("tables", "BenchmarksSimple_NatPops.csv"))
+BenchSimple <- read.csv(file = here("tables", "BenchmarksSimple_NatPops.base.csv"))
 
 kable(BenchSimple, 
-      caption = "Table 1. Populaton-level benchmarks", booktabs = TRUE) %>% 
+      caption = "Table 1. Population-level benchmarks", booktabs = TRUE) %>% 
   collapse_rows(columns = 1, valign = "top") %>% 
   kable_styling(full_width = FALSE)
 
@@ -54,35 +54,35 @@ kable(BenchSimple,
 #   values_to = "Value") %>% 
 #   select("Stock", "WA", "Benchmark", "Value")
 
-
-
-Srep_hab <- as.data.frame(
-  read.csv(
-    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
-)  %>%  select("Stock", "WA", "SREP_median", "SREP_lwr5", "SREP_upr95") %>% 
-  rename(Population = "Stock", WatershedArea = "WA", SREP = "SREP_median", 
-         lwr = "SREP_lwr5", upr = "SREP_upr95")
-
-colnames(Srep_hab) <- c("Population", "Watershed area (km2)", "SREP", "lower CI", "upper CI")
-
-
-# Smax_hab <- as.data.frame(
+# 
+# 
+# Srep_hab <- as.data.frame(
 #   read.csv(
 #     here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
-# )  %>%  select("Stock", "WA", "SMAX_median", "SMAX_lwr5", "SMAX_upr95") %>% 
-#   rename(Population = "Stock", WatershedArea = "WA", SREP = "SMAX_median", 
-#          lwr = "SMAX_lwr5", upr = "SMAX_upr95")
+# )  %>%  select("Stock", "WA", "SREP_median", "SREP_lwr5", "SREP_upr95") %>% 
+#   rename(Population = "Stock", WatershedArea = "WA", SREP = "SREP_median", 
+#          lwr = "SREP_lwr5", upr = "SREP_upr95")
 # 
-# colnames(Smax_hab) <- c("Population", "Watershed area (km2)", "SMAX", "lower CI", "upper CI")
+# colnames(Srep_hab) <- c("Population", "Watershed area (km2)", "SREP", "lower CI", "upper CI")
 # 
-
-kable(Srep_hab,
-      caption = "Table 2. Integrated accesible watershed-area model estimates of SREP",
-      booktabs = TRUE,
-      escape = FALSE) %>%
-  collapse_rows(columns = 1, valign = "top") %>%
-  kable_styling(full_width = FALSE)
-
+# 
+# # Smax_hab <- as.data.frame(
+# #   read.csv(
+# #     here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
+# # )  %>%  select("Stock", "WA", "SMAX_median", "SMAX_lwr5", "SMAX_upr95") %>% 
+# #   rename(Population = "Stock", WatershedArea = "WA", SREP = "SMAX_median", 
+# #          lwr = "SMAX_lwr5", upr = "SMAX_upr95")
+# # 
+# # colnames(Smax_hab) <- c("Population", "Watershed area (km2)", "SMAX", "lower CI", "upper CI")
+# # 
+# 
+# kable(Srep_hab,
+#       caption = "Table 2. Integrated accesible watershed-area model estimates of SREP",
+#       booktabs = TRUE,
+#       escape = FALSE) %>%
+#   collapse_rows(columns = 1, valign = "top") %>%
+#   kable_styling(full_width = FALSE)
+# 
 
 ```
 
@@ -91,60 +91,72 @@ kable(Srep_hab,
 
 Smax_hab <- as.data.frame(
   read.csv(
-    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))) %>% 
-  select("Stock", "WA", "SMAX_median", "SMAX_lwr5", "SMAX_upr95") %>% 
-  rename(Population = "Stock", WatershedArea = "WA", SMAX = "SMAX_median", 
-         lwr = "SMAX_lwr5", upr = "SMAX_upr95") %>% 
+    here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter1.csv"))) %>% 
+  select("Stock", "WA", "logSMAX_median", "SMAX_lwr025", "SMAX_upr975") %>% 
+  rename(Population = "Stock", WatershedArea = "WA", SMAX = "logSMAX_median", 
+         lwr = "SMAX_lwr025", upr = "SMAX_upr975") %>% 
+  mutate(SMAX = exp(SMAX), lwr = exp(lwr), upr = exp(upr)) %>% 
   filter(Population %in% c("Adam/Eve", "Nimpkish", "Salmon"))
 
-# Productivity for Cowichan Chinook (= mean prod for Fraser river, 3 stocks)
-# (Greenberg et al. in prep, Table S4)
-mean_logalpha <- 0.87
-logalpha_sig <- 0.23
+# # Productivity for Cowichan Chinook (= mean prod for Fraser river, 3 stocks)
+# # (Greenberg et al. in prep, Table S4)
+# mean_logalpha <- 0.87
+# logalpha_sig <- 0.23 * 2
+# 
+# 
+# for(pop in c("Adam", "Woss", "Salmon")){
+#   pop.prior <- pop
+#   if(pop=="Adam") pop.prior <- "Adam/Eve"
+#   if(pop=="Woss") pop.prior <- "Nimpkish"
+# 
+#   data_Smax_prior <- as.data.frame( read.csv(
+#     here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter1.csv"))
+#   )
+#   med_Smax_prior <- data_Smax_prior %>% filter(Stock == pop.prior) %>% pull(logSMAX_median)
+#   mean_Smax_prior <- data_Smax_prior %>% filter(Stock == pop.prior) %>% pull(logSMAX_mean)
+#   Smax_lwr025 <- data_Smax_prior %>% filter(Stock == pop.prior) %>% pull(SMAX_lwr025)
+#   Smax_upr975 <- data_Smax_prior %>% filter(Stock == pop.prior) %>% pull(SMAX_upr975)
+#   # logSmax_prior_sd <- data_Smax_prior %>% filter(Stock == pop.prior) %>%
+#   #   mutate(sigma=(SMAX_upr975-logSMAX_median)/2) %>%
+#   #   pull(sigma)
+#   # 
+#   # logalpha <- rnorm(2000, mean_logalpha, logalpha_sig)
+#   # logSmax <- rnorm(2000, med_Smax_prior, logSmax_prior_sd)
+#   # # Srep_prior <-  logalpha * exp(logSmax) # Srep = log(alpha)/beta, beta = 1/Smax  
+#   # med_Srep_prior <- quantile(Srep_prior, prob=0.5)
+#   # lwr_Srep_prior <- quantile(Srep_prior, prob=0.025)
+#   # upr_Srep_prior <- quantile(Srep_prior, prob=0.975)
+# 
+#   
+#   # assign(paste0("medSmax_", pop), med_Smax_prior)
+#   # assign(paste0("lwrSmax_", pop), lwr_Smax_prior)
+#   # assign(paste0("uprSmax_", pop), upr_Smax_prior)
+#   assign(paste0("medSmax_", pop), med_Smax_prior)
+#   assign(paste0("lwrSmax_", pop), Smax_lwr025)
+#   assign(paste0("uprSmax_", pop), Smax_upr975)
+# 
+# }
+# 
+# 
+# # logalpha <- rnorm(2000, mean_logalpha, logalpha_sig)
+# # logSmax <- rnorm(2000, log(med_Smax_prior), logSmax_prior_sd)
+# # Srep_prior <-  logalpha * exp(logSmax) # Srep = log(alpha)/beta, beta = 1/Smax
+# # logSrep_prior_sd <- sd(log(Srep_prior))
+# 
+# 
+# # Smax_hab$SREP <- round( c(medSrep_Woss, medSrep_Adam, medSrep_Salmon), 0)
+# # Smax_hab$SREPlwr <- round( c(lwrSrep_Woss, lwrSrep_Adam, lwrSrep_Salmon), 0)
+# # Smax_hab$SREPupr <- round( c(uprSrep_Woss, uprSrep_Adam, uprSrep_Salmon), 0)
+# 
+# Smax_hab$SMAX <- round( c(medSmax_Woss, medSmax_Adam, medSmax_Salmon), 0)
+# Smax_hab$SMAXlwr <- round( c(lwrSmax_Woss, lwrSmax_Adam, lwrSmax_Salmon), 0)
+# Smax_hab$SMAXupr <- round( c(uprSmax_Woss, uprSmax_Adam, uprSmax_Salmon), 0)
 
-
-for(pop in c("Adam", "Woss", "Salmon")){
-  pop.prior <- pop
-  if(pop=="Adam") pop.prior <- "Adam/Eve"
-  if(pop=="Woss") pop.prior <- "Nimpkish"
-
-  data_Smax_prior <- as.data.frame( read.csv(
-    here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
-  # ("data/UpperSoGChinook_out_posteriorpredictive_UPDATEDAWA_Aug18.csv"))
-  )
-  med_Smax_prior <- data_Smax_prior %>% filter(Stock == pop.prior) %>% pull(SMAX_median)
-  mean_Smax_prior <- data_Smax_prior %>% filter(Stock == pop.prior) %>% pull(SMAX_mean)
-  logSmax_prior_sd <- data_Smax_prior %>% filter(Stock == pop.prior) %>%
-    mutate(sigma=(log(SMAX_upr95)-log(SMAX_median))/2) %>%
-    pull(sigma)
-  logalpha <- rnorm(2000, mean_logalpha, logalpha_sig)
-  logSmax <- rnorm(2000, log(med_Smax_prior), logSmax_prior_sd)
-  Srep_prior <-  logalpha * exp(logSmax) # Srep = log(alpha)/beta, beta = 1/Smax  
-  med_Srep_prior <- quantile(Srep_prior, prob=0.5)
-  lwr_Srep_prior <- quantile(Srep_prior, prob=0.025)
-  upr_Srep_prior <- quantile(Srep_prior, prob=0.975)
-
-  
-  assign(paste0("medSrep_", pop), med_Srep_prior)
-  assign(paste0("lwrSrep_", pop), lwr_Srep_prior)
-  assign(paste0("uprSrep_", pop), upr_Srep_prior)
-
-}
-
-
-# logalpha <- rnorm(2000, mean_logalpha, logalpha_sig)
-# logSmax <- rnorm(2000, log(med_Smax_prior), logSmax_prior_sd)
-# Srep_prior <-  logalpha * exp(logSmax) # Srep = log(alpha)/beta, beta = 1/Smax
-# logSrep_prior_sd <- sd(log(Srep_prior))
-
-
-Smax_hab$SREP <- round( c(medSrep_Woss, medSrep_Adam, medSrep_Salmon), 0)
-Smax_hab$SREPlwr <- round( c(lwrSrep_Woss, lwrSrep_Adam, lwrSrep_Salmon), 0)
-Smax_hab$SREPupr <- round( c(uprSrep_Woss, uprSrep_Adam, uprSrep_Salmon), 0)
 
 colnames(Smax_hab) <- c("Population", "Watershed area (km2)", "SMAX", 
-                        "lower CI", "upper CI", "SREP", 
-                        "lower CI", "upper CI")
+                        "lower CI", "upper CI") 
+                        # "SREP", 
+                        # "lower CI", "upper CI")
 
 kable(Smax_hab,
       caption = "Table 2. Integrated accesible watershed-area model estimates of SMAX and SREP", 
@@ -159,7 +171,7 @@ kable(Smax_hab,
 
 USR <- as.data.frame(read.csv( here(
   "tables",
-  "USR.csv")))
+  "USR.base.csv")))
 
 kable(USR,
       caption = "Table 3. Alternative Upper Stock References, USRs", 

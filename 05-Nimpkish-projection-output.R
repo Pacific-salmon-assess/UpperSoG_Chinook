@@ -10,13 +10,13 @@ library(ggplot2)
 # Note: Update Sgen and 85%SMSY values below if the CM changes
 #---------------------------------------------------------------------------
 
-# Functions for plotting
-source("92-decision-table-plots.R")
+# # Functions for plotting
+# source("92-decision-table-plots.R")
 
 pop <- "Nimpkish"
 
 # Get CM output for current PT and T ERs
-samp <- readRDS("CM/Woss_07.22.26.prior.rds")
+samp <- readRDS("CM/Woss_09.29.26.base.rds")
 year1 <- 2001 # For Nimpkish/Woss
 save.files <- TRUE
 scenario <- "base"
@@ -194,34 +194,34 @@ val_sim <- val_sim_all %>%
 
 # Probability (end of projection) ----
   SMSY85 <- read.csv( here(
-    "data",
-    "BenchmarksSimple_NatPops.csv")) %>%
+    "tables",
+    "BenchmarksSimple_NatPops.base.csv")) %>%
     filter(Benchmark == "85% SMSY") %>%
     filter(Pop == pop) %>% select(med) %>% pull()
   Sgen <- read.csv( here(
-    "data",
-    "BenchmarksSimple_NatPops.csv")) %>%
+    "tables",
+    "BenchmarksSimple_NatPops.base.csv")) %>%
     filter(Benchmark == "Sgen") %>%
     filter(Pop == pop) %>% select(med) %>% pull()
 
-#Sgen = 784
-  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 784) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 784
+#Sgen = 1645
+  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 1645) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 1645
     mean(val)
   })
-#SMSY85 =1760
-  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 1760) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 1760
-    mean(val)
-  })
-
-  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 7384) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 784
+#SMSY85 = 2569
+  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 2569) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 2569
     mean(val)
   })
 
-  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 1760) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  1760
+  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 1645) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 1645
+    mean(val)
+  })
+
+  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 2569) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  2569
     mean(val)
   })
 
@@ -526,6 +526,14 @@ CcolSp <- c("0-2000" = '#d01c8b', "2001-4000" = '#f1b6da',
             "4001-6000" = '#f7f7f7', "6001-8000" = '#b8e186',
             ">8000" = '#4dac26')
 
+Ccol4000 <- c("0-1000" = '#d01c8b', "1001-2000" = '#f1b6da',
+              "2001-3000" = '#f7f7f7', "3001-4000" = '#b8e186',
+              ">4000" = '#4dac26')
+
+Ccol6000 <- c("0-1500" = '#d01c8b', "1501-3000" = '#f1b6da',
+              "3001-4500" = '#f7f7f7', "4501-6000" = '#b8e186',
+              ">6000" = '#4dac26')
+
 
 CcolRel <- c("0-1" = '#d01c8b',
             "1.1-2" = '#f1b6da',
@@ -553,6 +561,10 @@ Ccol1000 <- c("0-250" = '#d01c8b', "251-500" = '#f1b6da',
              "501-750" = '#f7f7f7', "751-1000" = '#b8e186',
              ">1000" = '#4dac26')
 
+Ccol1200 <- c("0-300" = '#d01c8b', "301-600" = '#f1b6da',
+              "601-900" = '#f7f7f7', "901-1200" = '#b8e186',
+              ">1200" = '#4dac26')
+
 Ccol200 <- c("0-50" = '#d01c8b', "51-100" = '#f1b6da',
               "101-150" = '#f7f7f7', "151-200" = '#b8e186',
               ">200" = '#4dac26')
@@ -560,6 +572,10 @@ Ccol200 <- c("0-50" = '#d01c8b', "51-100" = '#f1b6da',
 Ccol100 <- c("0-25" = '#d01c8b', "26-50" = '#f1b6da',
              "51-75" = '#f7f7f7', "76-100" = '#b8e186',
              ">100" = '#4dac26')
+
+Ccol600 <- c("0-150" = '#d01c8b', "151-300" = '#f1b6da',
+             "301-450" = '#f7f7f7', "451-600" = '#b8e186',
+             ">600" = '#4dac26')
 
 Ccol1600 <- c("0-400" = '#d01c8b', "401-800" = '#f1b6da',
               "801-1200" = '#f7f7f7', "1201-1600" = '#b8e186',
@@ -592,9 +608,8 @@ UPTmed <- UPTrange[seq((d$Ldyr - 4),d$Ldyr), "50%"] %>%
   mean()
 
 Umsy <- read.csv(  here(
-  "data",
-  "Equilibrium trade-off analysis",
-  "R-OUT_SMU_ref-pt_values_eq-trade-off.csv"
+  "tables",
+  "R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv"
 ) ) %>%
   filter(variable == "Umsy") %>%
   pull(mid)
@@ -730,14 +745,14 @@ g <- val_sim %>%
 
 if(scenario == "base"|scenario == "high"){
   g <- g %>%
-    mutate(value = ifelse(value < 2000, "0-2000",
-                        ifelse(value >= 2000 & value <= 4000, "2001-4000",
-                               ifelse(value > 4000 & value < 6000, "4001-6000",
-                                      ifelse(value >= 6000 & value < 8000, "6001-8000",
-                                             ">8000")))))
-  g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
-                                        "6001-8000", ">8000"))
-  col <- CcolSp
+    mutate(value = ifelse(value <= 1000, "0-1000",
+                        ifelse(value > 1000 & value <= 2000, "1001-2000",
+                               ifelse(value > 2000 & value <= 3000, "2001-3000",
+                                      ifelse(value >= 3000 & value <= 4000, "3001-4000",
+                                             ">4000")))))
+  g$value <- factor(g$value, levels = c("0-1000", "1001-2000", "2001-3000",
+                                        "3001-4000", ">4000"))
+  col <- Ccol4000
 }
 if(scenario == "low"){
   g <- g %>%
@@ -778,39 +793,39 @@ if(save.files){
        gSp, width = 5, height = 5)
 }
 
-# option for icream plot with numbers on plot (no legend)
-g <- val_sim %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "Natural Spawners") %>%
-  select(u_preterminal, n_yearling, median, n) %>%
-  mutate(value = round(median)) %>%
-  decision_table_grid(ncol = 3, title = "Natural spawners",
-                      fill_scheme = scale_fill_gradient2(low = "deeppink",
-                                                         high = "green4",
-                                                         mid = "white",
-                                                         midpoint = 1500))
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_sp_QC.png"), g, width = 5, height = 5)
+# # option for icream plot with numbers on plot (no legend)
+# g <- val_sim %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "Natural Spawners") %>%
+#   select(u_preterminal, n_yearling, median, n) %>%
+#   mutate(value = round(median)) %>%
+#   decision_table_grid(ncol = 3, title = "Natural spawners",
+#                       fill_scheme = scale_fill_gradient2(low = "deeppink",
+#                                                          high = "green4",
+#                                                          mid = "white",
+#                                                          midpoint = 1500))
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# # ggsave(file.path("figures", "SMSE", "decisiontable_sp_QC.png"), g, width = 5, height = 5)
 
-### NS <1500 prob decision tables
-# Option of icecream plot without legend:
-g <- val_prob %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "P_1500_NS") %>%
-  select(u_preterminal, n_yearling, value, n) %>%
-  decision_table_grid(
-    ncol = 3,
-    title = "Probabilty > 1500 natural spawners",
-    fill_scheme =
-      scale_fill_gradientn(
-        values = c(0, 0.7, 1),
-        colours = c("deeppink", "lightgreen", "green4")
-      )
-  )
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-# ggsave(file.path("figures", "SMSE", "decisiontable_P_1500_QC.png"), g, width = 5, height = 5)
+# ### NS <1500 prob decision tables
+# # Option of icecream plot without legend:
+# g <- val_prob %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "P_1500_NS") %>%
+#   select(u_preterminal, n_yearling, value, n) %>%
+#   decision_table_grid(
+#     ncol = 3,
+#     title = "Probabilty > 1500 natural spawners",
+#     fill_scheme =
+#       scale_fill_gradientn(
+#         values = c(0, 0.7, 1),
+#         colours = c("deeppink", "lightgreen", "green4")
+#       )
+#   )
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# # ggsave(file.path("figures", "SMSE", "decisiontable_P_1500_QC.png"), g, width = 5, height = 5)
 
 # Option of icecream plot with legend:
 g <- val_prob %>%
@@ -937,15 +952,15 @@ g <- val_sim %>%
 
 if(scenario == "base"|scenario == "high") {
   g <- g %>%
-    mutate(value = ifelse(value < 2000, "0-2000",
-                        ifelse(value >= 2000 & value <= 4000, "2001-4000",
-                               ifelse(value > 4000 & value < 6000, "4001-6000",
-                                      ifelse(value >= 6000 & value < 8000, "6001-8000",
-                                             ">8000")))))
+    mutate(value = ifelse(value <= 1500, "0-1500",
+                        ifelse(value > 1500 & value <= 3000, "1501-3000",
+                               ifelse(value > 3000 & value <= 4500, "3001-4500",
+                                      ifelse(value > 4500 & value <= 6000, "4501-6000",
+                                             ">6000")))))
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-2000", "2001-4000", "4001-6000",
-                                        "6001-8000", ">8000"))
-  col <- CcolSp
+  g$value <- factor(g$value, levels = c("0-1500", "1501-3000", "3001-4500",
+                                        "4501-6000", ">6000"))
+  col <- Ccol6000
 }
 
 if(scenario == "low") {
@@ -988,17 +1003,16 @@ if(save.files){
 }
 
 ### Hatchery releases
-# Option of icecream plot without legend:
-
-g <- val_sim %>%
-  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
-  filter(variable == "Releases") %>%
-  select(u_preterminal, n_yearling, median, n) %>%
-  rename(value = median) %>%
-  decision_table_grid(ncol = 3, "Hatchery releases\n(100,000s)")
-g$facet$params$free$y <- TRUE
-g$facet$params$free$x <- TRUE
-#ggsave(file.path("figures", "SMSE", "decisiontable_rel.png"), g, width = 5, height = 5)
+# # Option of icecream plot without legend:
+# g <- val_sim %>%
+#   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+#   filter(variable == "Releases") %>%
+#   select(u_preterminal, n_yearling, median, n) %>%
+#   rename(value = median) %>%
+#   decision_table_grid(ncol = 3, "Hatchery releases\n(100,000s)")
+# g$facet$params$free$y <- TRUE
+# g$facet$params$free$x <- TRUE
+# #ggsave(file.path("figures", "SMSE", "decisiontable_rel.png"), g, width = 5, height = 5)
 
 
 # Option of icecream plot with legend:
@@ -1122,16 +1136,16 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario == "high"){
   g <- g %>%
-    mutate(value = ifelse(value <= 200, "0-200",
-                          ifelse(value > 200 & value <= 400, "201-400",
-                                 ifelse(value > 400 & value <= 600, "401-600",
-                                        ifelse(value > 600 & value <= 800, "601-800",
-                                               ">800")))))
+    mutate(value = ifelse(value <= 150, "0-150",
+                          ifelse(value > 150 & value <= 300, "151-300",
+                                 ifelse(value > 300 & value <= 450, "301-450",
+                                        ifelse(value > 450 & value <= 600, "451-600",
+                                               ">600")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
-                                        "601-800", ">800"))
-  col <- Ccolhoc
+  g$value <- factor(g$value, levels = c("0-150", "151-300", "301-450",
+                                        "451-600", ">600"))
+  col <- Ccol600
 }
 
 if(scenario == "low"){
@@ -1186,16 +1200,16 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario =="high") {
   g <- g %>%
-    mutate(value = ifelse(value < 500, "0-500",
-                          ifelse(value >= 500 & value <= 1000, "501-1000",
-                                 ifelse(value > 1000 & value < 1500, "1001-1500",
-                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                               ">2000")))))
+    mutate(value = ifelse(value <= 300, "0-300",
+                          ifelse(value > 300 & value <= 600, "301-600",
+                                 ifelse(value > 600 & value <= 900, "601-900",
+                                        ifelse(value > 900 & value <= 1200, "901-1200",
+                                               ">1200")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                        "1501-2000", ">2000"))
-  col <- Ccolc
+  g$value <- factor(g$value, levels = c("0-300", "301-600", "601-900",
+                                        "901-1200", ">1200"))
+  col <- Ccol1200
 
 }
 
@@ -1250,16 +1264,16 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario == "high") {
   g <- g %>%
-    mutate(value = ifelse(value < 500, "0-500",
-                          ifelse(value >= 500 & value <= 1000, "501-1000",
-                                 ifelse(value > 1000 & value < 1500, "1001-1500",
-                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
-                                               ">2000")))))
+    mutate(value = ifelse(value <= 250, "0-250",
+                          ifelse(value > 250 & value <= 500, "251-500",
+                                 ifelse(value > 500 & value <= 750, "501-750",
+                                        ifelse(value > 750 & value <= 1000, "751-1000",
+                                               ">1000")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
-                                        "1501-2000", ">2000"))
-  col <- Ccolc
+  g$value <- factor(g$value, levels = c("0-250", "251-500", "501-750",
+                                        "751-1000", ">1000"))
+  col <- Ccol1000
 
 }
 
@@ -1412,6 +1426,63 @@ PNI_NS <- val_sim %>%
       include.lowest = TRUE, right = TRUE
     )
   )
+
+# pm1 <-  PNI_NS$`Natural Spawners`
+# pm2 <-  PNI_NS$PNI
+# x1 <-  factor(PNI_NS$u_preterminal)
+# x2 <-  PNI_NS$bin
+# # x2 = PNI_NS$n_yearling,
+# xlab <-  "Natural spawners (median)"
+# ylab <-  "PNI (median)"
+# x1lab <-  "Exploitation\nrate"
+# x2lab <-  "Relative\nhatchery\nproduction"
+#
+# #if (is.numeric(x1)) x1 <- factor(x1)
+# if (is.numeric(x2)) x2 <- factor(x2)
+# dt <- data.frame(
+#   pm1 = if (is.matrix(pm1)) pm1[, 2] else pm1,
+#   pm2 = if (is.matrix(pm1)) pm2[, 2] else pm2,
+#   pm1_lower = if (is.matrix(pm1)) pm1[, 1] else pm1,
+#   pm2_lower = if (is.matrix(pm1)) pm2[, 1] else pm2,
+#   pm1_upper = if (is.matrix(pm1)) pm1[, 3] else pm1,
+#   pm2_upper = if (is.matrix(pm1)) pm2[, 3] else pm2,
+#   x1 = x1,
+#   x2 = x2
+# )
+#
+# if (!missing(scenario)) {
+#   dt$scenario <- scenario
+# } else if (!missing(scenario_rows) && !missing(scenario_cols)) {
+#   dt$scenario_rows <- scenario_rows
+#   dt$scenario_cols <- scenario_cols
+# }
+#
+# # Initial ggplot call
+# g <- ggplot(dt, aes(pm1, pm2, colour = x1, shape = x2))
+#
+# # Add points, i.e., the results to figure
+# g <- g +
+#   geom_point() +
+#   theme_bw() +
+#   theme(panel.grid = element_blank())
+#
+# # Add errorbars
+# if (is.matrix(pm1)) {
+#   g <- g + geom_linerange(aes(xmin = .data$pm1_lower, xmax = .data$pm1_upper), linewidth = 0.25)
+# }
+# if (is.matrix(pm2)) {
+#   g <- g + geom_linerange(aes(ymin = .data$pm2_lower, ymax = .data$pm2_upper), linewidth = 0.25)
+# }
+#
+# # Remove legends if needed
+# if (length(unique(x1)) == 1) {
+#   g <- g + guides(colour = "none")
+# }
+# if (length(unique(x2)) == 1) {
+#   g <- g + guides(shape = "none")
+# }
+
+
 gto <- plot_tradeoff(
   pm1 = PNI_NS$`Natural Spawners`,
   pm2 = PNI_NS$PNI,
@@ -1426,7 +1497,9 @@ gto <- plot_tradeoff(
   geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
   geom_vline(xintercept = Sgen, linetype = 3) + # SMSY
   geom_vline(xintercept = SMSY85, linetype = 4) + # SMSY
-  geom_point(size = 3)
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
+
 
 ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, ".png")), gto,
        height = 7, width = 7)

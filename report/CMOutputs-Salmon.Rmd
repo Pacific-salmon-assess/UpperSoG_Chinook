@@ -27,7 +27,7 @@ theme_set(theme_bw())
 ```{r}
 pop <- "Salmon"
 if(pop=="Salmon") {
-  ERM <- readRDS(here("CM/Salmon_08.18.26.prior.rds"))
+  ERM <- readRDS(here("CM/Salmon_09.29.26.base.rds"))
   # ERM <- readRDS(here("CM/Salmon_08.22.26.altprior.rds"))
   year1 <- 2002
 }
@@ -47,9 +47,9 @@ df_pars <- rstan::summary(ERM)$summary %>%
 # kable(df_pars[, c("mean", "sd", "2.5%", "50%", "97.5%", "n_eff", "Rhat")])
 
 
-df_summary <- df_pars[c("log_cr", "log_so", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"),
+df_summary <- df_pars[c("log_cr", "log_smax", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"),
         c("mean", "sd", "2.5%", "50%", "97.5%", "n_eff", "Rhat")]
-row.names(df_summary) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*", "*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
+row.names(df_summary) <- c("*log(κ)*", "*log(S^max^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*", "*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
 kable(df_summary, escape=FALSE, caption = "Table D2. Parameter estimates from the conditioning model: mean, standard deviation, 2.5th percentile, 50th percentile, 97.5th percentile, effective sample size and Rhat values")
 
 # Replace parameter names with greek symbols
@@ -61,9 +61,9 @@ kable(df_summary, escape=FALSE, caption = "Table D2. Parameter estimates from th
 
 ```{r legend }
 
-df_legend <- data.frame(Names= c("log_cr", "log_so", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"))
+df_legend <- data.frame(Names= c("log_cr", "log_smax", "moadd", "logit_vulPT[1]", "logit_vulPT[2]", "logit_vulPT[3]", "log_FbasePT", "sd_matt[1]", "sd_matt[2]", "sd_matt[3]", "wt_sd", "wto_sd", "fanomalyPT_sd"))
 
-row.names(df_legend) <- c("*log(κ)*", "*log(S^rep^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*","*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
+row.names(df_legend) <- c("*log(κ)*", "*log(S^max^)*", "*M^add^*", "*logit(μ^vPT^~a=1~)*", "*logit(μ^vPT^~a=2~)*", "*logit(μ^vPT^~a=3~)*", "*log(a^PT^)*", "*σ^m^~a=1~*", "*σ^m^~a=2~*", "*σ^m^~a=3~*","*σ~δ~*", "*σ~M~*", "*σ~FPT~*")
 
 kable(df_legend, caption = "Table D3. Legend for names of parameter values used in code, for reference for output figures")
 ```
@@ -73,7 +73,7 @@ kable(df_legend, caption = "Table D3. Legend for names of parameter values used 
 
 ```{r trace-cr, fig.cap="Figure D1. Wormplots of productivity parameters, scaling parameters and the log-posterior from MCMC iterations after thinning and warmup.", dpi = 800}
 # log-posterior from MCMC iterations after thinning and warmup."}
-pars_core <- c("cr", "log_so", "moadd", "log_FbasePT", "log_FbaseT", "lp")
+pars_core <- c("cr", "log_smax", "moadd", "log_FbasePT", "log_FbaseT", "lp")
 salmonMSE:::CM_trace(ERM, pars_core)
 
 ```
@@ -151,7 +151,7 @@ salmonMSE:::CM_SRR(report, year1)
 ```
 
 
-```{r SrepPriorPost, fig.cap="Figure D15. Prior and posterior estimates of Srep, unfished equilibrium spawner abundances at replacement."}
+```{r SrepPriorPost, fig.cap="Figure D15. Prior and posterior estimates of Smax, spawner abundances at maximum recruitment."}
 file <-  paste0(pop, "_priorpost.png")
 # file <-  paste0(pop, "_priorpost_altprior.png")
 
@@ -167,19 +167,19 @@ knitr::include_graphics(here(
 
 
 ```{r SmaxPriorPost, fig.cap="Figure D16. Habitat-based estimates of Smax with posterior estimates of Smax, spawner abundances at maximum recruitment."}
-file <-  paste0(pop, "_Smax_IWAM-post.png")
-# file <-  paste0(pop, "_Smax_IWAM-post_altprior.png")
-
-knitr::include_graphics(here(
-  "figures", file
- )
- )
+# file <-  paste0(pop, "_Smax_IWAM-post.png")
+# # file <-  paste0(pop, "_Smax_IWAM-post_altprior.png")
+# 
+# knitr::include_graphics(here(
+#   "figures", file
+#  )
+#  )
 
 
 
 ```
 
-```{r prod, fig.cap="Figure D17. Estimate of life-cycle productivity, recuits/spawner."}
+```{r prod, fig.cap="Figure D16. Prior and posterior estimates of life-cycle productivity, recuits/spawner."}
 file <-  paste0(pop, "_prod.png")
 # file <-  paste0(pop, "_prod_altprior.png")
 
@@ -194,23 +194,23 @@ knitr::include_graphics(here(
 
 
 
-```{r Megg, fig.cap="Figure D18. Estimated egg-smolt instantaneous mortality rate (medians and 95% prediction interval)."}
+```{r Megg, fig.cap="Figure D17. Estimated egg-smolt instantaneous mortality rate (medians and 95% prediction interval)."}
 salmonMSE:::CM_Megg(report, year1, ci = TRUE, surv = FALSE)
 ```
 
 
 
-```{r vulPT, fig.cap="Figure D19. Posterior estimates of preterminal vulnerability at age (medians and 95% prediction interval)."}
+```{r vulPT, fig.cap="Figure D18. Posterior estimates of preterminal vulnerability at age (medians and 95% prediction interval)."}
 FPT <- sapply(report, getElement, "FPT")
 if (sum(FPT)) salmonMSE:::CM_vul(report, type = "vulPT")
 ```
 
-```{r CYER-PT, fig.cap="Figure D20. Return year preterminal exploitation rate at age (medians and 95% prediction interval)."}
+```{r CYER-PT, fig.cap="Figure D19. Return year preterminal exploitation rate at age (medians and 95% prediction interval)."}
 if (sum(FPT)) salmonMSE:::CM_ER(report, brood = FALSE, type = "PT", year1, r = d$r_matt)
 ```
 
 
-```{r matt-RY, fig.cap="Figure D21. Posterior estimates of maturity by age and return year (medians and 95% prediction interval). Dashed, horizontal lines represent prior means."}
+```{r matt-RY, fig.cap="Figure D20. Posterior estimates of maturity by age and return year (medians and 95% prediction interval). Dashed, horizontal lines represent prior means."}
 salmonMSE:::CM_maturity(report, d, year1, r = d$r_matt, brood = FALSE, rs_names = rs_names)
 ```
 

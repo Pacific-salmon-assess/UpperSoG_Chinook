@@ -87,7 +87,7 @@ if(plot.base.case == TRUE){
 
   SMSE <- salmonMSE(SOM)
   report(SMSE , dir = "SMSE")
-  saveRDS(SMSE , file = file.path("SMSE", paste0("QC_08.18.26.rds")))
+  saveRDS(SMSE , file = file.path("SMSE", paste0("QC_10.06.26.rds")))
 
   png(here("figures", "QC_projections_ts.png"),
       width = 6, height = 8, units = "in", res = 300)
@@ -151,7 +151,7 @@ if(plot.base.case == TRUE){
   library(parallel)
   sfInit(TRUE, nOM, cpus=(parallel::detectCores()-1))
   # Define brood function for parallel process
-  f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {
+  f_brood <- function(NO, HO, stray, m = 0, pmax_esc = 0.7) {#0.8
 
     NOB <- array(0, dim(NO))
     HOB_marked <- HOB_unmarked <- array(0, dim(HO))
@@ -182,7 +182,7 @@ if(plot.base.case == TRUE){
     SMSE <- salmonMSE(SOM)
 
     saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC", i, ".rds")))
-    # saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC_basecase.rds")))
+    # saveRDS(SMSE, file = file.path("SMSE", "QC", paste0("QC_annualmo.rds")))
 
     invisible()
 
@@ -190,3 +190,6 @@ if(plot.base.case == TRUE){
   tictoc::toc()
 
 #------------------------------------------------------------------------------
+
+# SMSE <-  readRDS(file.path("SMSE", "archived", "QC hatchrel 50-150", "QC151.rds"))
+# report(SMSE, dir = "SMSE", filename = "QC_base")

@@ -105,3 +105,49 @@ g <- hatchrel_combined %>%
   theme(legend.position = 'bottom')
 
 ggsave("figures/total_hatchery_releases.png", g, height = 6, width = 7)
+
+
+#-------------------------------------------------------------------------------
+
+# Plot total hatchery release, adding 2025 year
+# This needs to fixed
+
+
+png(here("figures", "hatchrel.png"))
+par(mfrow = c(2, 2))
+
+ERM <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
+report <- salmonMSE:::get_report(ERM)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+year1 <- 1984 # from conditioning model
+year <- year1 + seq(1, d$Ldyr + 1) - 1
+
+plot(year, d$hatchrelease[-length(d$hatchrelease)], type = "o", pch = 16, xlim = range(year),
+     ylim = c(0, 1.1) * range(obs, na.rm = TRUE), xlab = "", ylab = "")
+mtext("(a) Quinsam/Cambpell Rivers", side = 3, adj = 0, line = 0.5)
+
+ERM <- readRDS("CM/Woss_09.29.26.base.rds")
+report <- salmonMSE:::get_report(ERM)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+year1 <- 2002 # from conditioning model
+year <- year1 + seq(1, d$Ldyr) +1
+
+plot(year, d$hatchrelease[-length(d$hatchrelease)], type = "o", pch = 16, xlim = range(year),
+     ylim = c(0, 1.1) * range(obs, na.rm = TRUE), xlab = "", ylab = "")
+mtext("(b) Woss River", side = 3, adj = 0, line = 0.5)
+
+ERM <- readRDS("CM/Salmon_09.29.26.base.rds")
+report <- salmonMSE:::get_report(ERM)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+year1 <- 2001 # from conditioning model
+year <- year1 + seq(1, d$Ldyr)
+mtext("(c) Salmon River", side = 3, adj = 0, line = 0.5)
+
+plot(year, d$hatchreleasee[-length(d$hatchrelease)], type = "o", pch = 16, xlim = range(year),
+     ylim = c(0, 1.1) * range(obs, na.rm = TRUE), xlab = "", ylab = "")
+
+mtext("Release Year", side = 1, outer = TRUE, line = -1)
+mtext("Hatchery Releases", side = 2, outer = TRUE, line = -1)
+
+
+dev.off()

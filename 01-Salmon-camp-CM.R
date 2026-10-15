@@ -361,7 +361,7 @@ run_Salmon_CM <- function( prod = "base"){
   # Fix observation error of Sarita escapement (needed, otherwise model can't separate process from obs error)
   map$lnE_sd <- factor(NA)
 
-  # start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
+  start <- list(NA)## start <- list(log_so = log(2 * max(d$obsescape, na.rm = TRUE)))
 
   #### Fit with estimated productivity parameter (log_cr)
   fit <- fit_CM(d, start = start, map = map, do_fit = TRUE, lower = list(moadd = -Inf, log_cr = 0))
@@ -369,16 +369,16 @@ run_Salmon_CM <- function( prod = "base"){
                     control=list(adapt_delta = 0.999,
                                  stepsize = 0.01,
                                  max_treedepth = 20))
-  saveRDS(samp, file = paste0("CM/Salmon_09.28.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/Salmon_09.29.26.", prod, ".rds"))
 
-  samp <- readRDS(file = paste0("CM/Salmon_09.28.26.", prod, ".rds"))
+  samp <- readRDS(file = paste0("CM/Salmon_09.29.26.", prod, ".rds"))
 
   year <- unique(full_matrix$RELEASE_YEAR)
   rs_names <- c("Smolt 0+")
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Salmon", year = year,
-    dir = "CM", filename = paste0("Salmon_09.28.26.", prod)
+    dir = "CM", filename = paste0("Salmon_09.29.26.", prod)
   )
 
 

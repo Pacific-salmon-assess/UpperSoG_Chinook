@@ -46,7 +46,7 @@ library(here)
 library(knitr)
 library(patchwork)
 
-prod <- "ensemble"#"base","low", "high" # "ensemble"
+prod <- "base"#"base","low", "high" # "ensemble"
 
 # Create folders for output figures
 if(prod == "base") folder_path <- "figures/CM/"
@@ -58,33 +58,33 @@ if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
-
+write_figures <- TRUE #Toggle to true to write figures to file
 
 # Input Conditioning Model results
 if (prod!="ensemble"){
-  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.", prod, ".rds"))
+  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
   report_QC <- salmonMSE:::get_report(ERM_QC)
 
-  ERM_Adam <- readRDS(paste0("CM/Adam_09.26.26.", prod, ".rds"))
+  ERM_Adam <- readRDS(paste0("CM/Adam_09.29.26.", prod, ".rds"))
   report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.26.26.", prod, ".rds"))
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.29.26.", prod, ".rds"))
   report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-  ERM_Woss <- readRDS(paste0("CM/Woss_09.26.26.", prod, ".rds"))
+  ERM_Woss <- readRDS(paste0("CM/Woss_09.29.26.", prod, ".rds"))
   report_Woss <- salmonMSE:::get_report(ERM_Woss)
 }
 
 if(prod == "ensemble"){
   # Get number of MC trials (len)
-  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.base.rds"))
+  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.base.rds"))
   report_len <- salmonMSE:::get_report(ERM_len)
   len <- length(report_len)
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.low.rds"))
-  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.base.rds"))
-  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.high.rds"))
+  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.low.rds"))
+  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.base.rds"))
+  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_QC <- c(sample( get_report( ERM_QC_low), len * 0.25),
                  sample( get_report( ERM_QC_base), len * 0.5),
@@ -93,9 +93,9 @@ if(prod == "ensemble"){
   ERM_QC <- ERM_QC_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.26.26.low.rds"))
-  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.26.26.base.rds"))
-  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.26.26.high.rds"))
+  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.29.26.low.rds"))
+  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.29.26.base.rds"))
+  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Woss <- c(sample( get_report( ERM_Woss_low), len * 0.25),
                  sample( get_report( ERM_Woss_base), len * 0.5),
@@ -104,9 +104,9 @@ if(prod == "ensemble"){
   ERM_Woss <- ERM_Woss_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.26.26.low.rds"))
-  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.26.26.base.rds"))
-  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.26.26.high.rds"))
+  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.29.26.low.rds"))
+  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.29.26.base.rds"))
+  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Salmon <- c(sample( get_report( ERM_Salmon_low), len * 0.25),
                    sample( get_report( ERM_Salmon_base), len * 0.5),
@@ -115,9 +115,9 @@ if(prod == "ensemble"){
   ERM_Salmon <- ERM_Salmon_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.26.26.low.rds"))
-  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.26.26.base.rds"))
-  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.26.26.high.rds"))
+  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.29.26.low.rds"))
+  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.29.26.base.rds"))
+  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Adam <- c(sample( get_report( ERM_Adam_low), len * 0.25),
                    sample( get_report( ERM_Adam_base), len * 0.5),
@@ -140,8 +140,6 @@ for (pop in c("Adam", "Salmon", "Woss")){
 
   year <- year1 + seq(1, d$Ldyr) - 1
   year_borrow <- seq(max(year) - 9, max(year) - 5)
-
-  write_figures <- TRUE #Toggle to true to write figures to file
 
   theme_set(theme_bw())
 
@@ -494,8 +492,12 @@ for (pop in c("Adam", "Salmon", "Woss")){
 # Sum benchmarks
 # Need to assign medSMSY and medSgen values above first
 
-  meduBench_Nat <- 0.85* (medSMSY_Adam + medSMSY_Salmon + medSMSY_Woss)
   medlBench_Nat <- (medSgen_Adam + medSgen_Salmon + medSgen_Woss)
+  lwrlBench_Nat <- (lwrSgen_Adam + lwrSgen_Salmon + lwrSgen_Woss)
+  uprlBench_Nat <- (uprSgen_Adam + uprSgen_Salmon + uprSgen_Woss)
+  meduBench_Nat <- 0.85 * (medSMSY_Adam + medSMSY_Salmon + medSMSY_Woss)
+  lwruBench_Nat <- 0.85 * (lwrSMSY_Adam + lwrSMSY_Salmon + lwrSMSY_Woss)
+  upruBench_Nat <- 0.85 * (uprSMSY_Adam + uprSMSY_Salmon + uprSMSY_Woss)
 
   df_bench_SR <- data.frame(Pop = c(rep("Adam",2),
                                  rep("Salmon", 2),
@@ -570,9 +572,6 @@ for (pop in c("Adam", "Salmon", "Woss")){
 Smax_hab <- as.data.frame( read.csv(
   here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter1.csv"))
   # here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter3.csv"))
-  # here("data", "UpperSoGChinook_out_posteriorpredictive_NEWWArev.csv"))
-  # here("data", "UpperSoGChinook_out_posteriorpredictive_UPDATEDAWA_Aug18.csv"))
-
 )
 
 
@@ -620,7 +619,7 @@ if(write_figures) {
 #------------------------------------------------------------------------------
 # Get additional outputs from CM for population assessment
 
-for (pop in c("Adam", "Salmon", "Woss")){
+for (pop in c("Adam", "Salmon", "Woss", "QC")){
   samp <- get(paste0("ERM_", pop))
   d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
   if(pop == "QC") year1 <- 1984
@@ -781,9 +780,9 @@ for (pop in c("Adam", "Salmon", "Woss")){
   # age5
 
   # Plot productivity with horizontal line at zero
-  prod <- salmonMSE:::.CM_prod(report, d)
+  productivity <- salmonMSE:::.CM_prod(report, d)
 
-  prod_q <- apply(prod, 1, quantile, probs = c(0.025, 0.5, 0.975),
+  prod_q <- apply(productivity, 1, quantile, probs = c(0.025, 0.5, 0.975),
                   na.rm = TRUE) %>%
     reshape2::melt() %>%
     mutate(Year = Var2 + year1 - 1) %>%
@@ -938,11 +937,11 @@ for (pop in c("Adam", "Salmon", "Woss")){
 if (all( vapply(
   c("prod_QC", "prod_Woss", "prod_Salmon", "prod_Adam"), exists, logical(1)))
   ) {
-  prod_QC$pop <- "Quinsam/Campbell"
+  prod_QC$pop <- "Quinsam/Campbell" #scale of QC productivity estimates unreliable, not used for benchmarks
   prod_Woss$pop <- "Nimpkish"
-  prod_Adam$pop <- "Adam"
+  prod_Adam$pop <- "Adam/Eve"
   prod_Salmon$pop <- "Salmon"
-  df <- rbind(prod_QC, prod_Woss, prod_Adam, prod_Salmon)
+  df <- rbind( prod_QC, prod_Woss, prod_Adam, prod_Salmon)
   gProdAll <- ggplot(df, aes(.data$Year, .data$`50%`, group=pop, colour=pop)) +
     geom_line() +
     labs(x = "Year", y = "Productivity (recruits/spawner)") +

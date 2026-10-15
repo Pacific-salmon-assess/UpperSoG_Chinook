@@ -18,7 +18,7 @@ som_name <- "Salmon base"#"Salmon base" #"low msurv" # "high msurv" # for intern
 
 # Load exploitation rate model - Salmon River
 # ERM <- readRDS("CM/Salmon_08.06.26.prior.rds")
-ERM <- readRDS("CM/Salmon_08.18.26.prior.rds")
+ERM <- readRDS("CM/Salmon_09.29.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM)
 set.seed(24)
@@ -45,7 +45,8 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
 df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
 #exp(-range(apply(df, 1, median, na.rm=T)))
 set.seed(23)
-sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
+# sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
+sim_samp_long <- sample(seq(1, length(report) * d$Ldyr), nsim*proyears)
 m1_sample <- df[sim_samp_long]
 exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
 

@@ -17,7 +17,7 @@ msurv <- "base"#"base" #"low" #"high"
 som_name <- "Adam base"#"Adam base" #"low msurv" # "high msurv" # for internal naming
 
 # Load exploitation rate model - Adam
-ERM_Adam <- readRDS("CM/Adam_08.06.26.prior.rds")
+ERM_Adam <- readRDS("CM/Adam_09.29.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM_Adam)
 set.seed(24)
@@ -26,7 +26,7 @@ d <- salmonMSE:::get_CMdata(ERM_Adam@.MISC$CMfit)
 pars <- rstan::extract(ERM_Adam)
 
 # For Adam, use ERs from Salmon CM
-ERM_Salmon <- readRDS("CM/Salmon_08.18.26.prior.rds")
+ERM_Salmon <- readRDS("CM/Salmon_09.29.26.base.rds")
 report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
 
@@ -49,7 +49,8 @@ M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
 df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
 #exp(-range(apply(df, 1, median, na.rm=T)))
 set.seed(23)
-sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
+# sim_samp_long <- sample(seq(1, length(report))*d$Ldyr, nsim)
+sim_samp_long <- sample(seq(1, length(report) * d$Ldyr), nsim*proyears)
 m1_sample <- df[sim_samp_long]
 exp(-quantile(df[sim_samp_long], prob = c(0.25, 0.5, 0.75)))
 
@@ -262,6 +263,7 @@ rem_Quinsam <- rem_Quinsam.x %>%
                                  na.rm=TRUE)) %>%
   rename("year" = "Recovery Year") %>%
   group_by(year) %>% summarise(OtherRemovals_Sum= sum(OtherRemovals, na.rm=T))
+
 
 # # What ppn are non-brood removals to natural spawners?
 # # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)

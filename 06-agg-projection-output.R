@@ -9,7 +9,7 @@ library(ggplot2)
 # Functions for plotting
 #source("92-decision-table-plots.R") #for alternative version of decision tables
 
-save.files <- FALSE
+save.files <- TRUE
 scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
@@ -32,19 +32,19 @@ nOM <- nrow(gr)
 for (pop in c("QC", "Nimpkish", "Salmon", "Adam")){
 
 if(pop == "QC") {
-  samp <- readRDS("CM/QuinsamCampbell_07.29.26.rds")
+  samp <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
   year1 <- 1984 # For Quinsam/Campbell
 }
 if(pop == "Nimpkish") {
-  samp <- readRDS("CM/Woss_07.22.26.prior.rds")
+  samp <- readRDS("CM/Woss_09.29.26.base.rds")
   year1 <- 2001
 }
 if(pop == "Salmon") {
-  samp <- readRDS("CM/Salmon_08.18.26.prior.rds")
+  samp <- readRDS("CM/Salmon_09.29.26.base.rds")
   year1 <- 2002
 }
 if(pop == "Adam") {
-  samp <- readRDS("CM/Adam_08.06.26.prior.rds")
+  samp <- readRDS("CM/Adam_09.29.26.base.rds")
   year1 <- 2002
   }
 
@@ -268,15 +268,15 @@ val_sim_nat <- val_sim_all_nat %>%
 # MSY ref points from conditioning model
 
 CM_85SMSY <- read.csv( here(
-  "data",
-  "BenchmarksSimple_NatPops.csv")) %>%
+  "tables",
+  "BenchmarksSimple_NatPops.base.csv")) %>%
   filter(Benchmark == "85% SMSY") %>%
   summarize (RP = sum(med)) %>%
   pull()
 
 CM_Sgen <- read.csv( here(
-  "data",
-  "BenchmarksSimple_NatPops.csv")) %>%
+  "tables",
+  "BenchmarksSimple_NatPops.base.csv")) %>%
   filter(Benchmark == "Sgen") %>%
   summarize (RP = sum(med)) %>%
   pull()
@@ -315,9 +315,8 @@ if(save.files) {
 UPTmed <- (UPTmed_QC + UPTmed_Nimpkish + UPTmed_Salmon)/3
 
 Umsy <- read.csv(  here(
-  "data",
-  "Equilibrium trade-off analysis",
-  "R-OUT_SMU_ref-pt_values_eq-trade-off.csv"
+  "tables",
+  "R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv"
 ) ) %>%
   filter(variable == "Umsy") %>%
   pull(mid)
@@ -452,7 +451,7 @@ gSp_tot<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
   scale_fill_manual(values = col,
-                    name = "Natural spawners\n(all pops)") +
+                    name = "Natural\nspawners\n(all pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
   guides(fill = guide_legend(ncol = 2), title.position = "top") +
@@ -527,7 +526,7 @@ gSp_nat<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
   scale_fill_manual(values = col,
-                    name = "Natural spawners\n(natural-dominated pops)") +
+                    name = "Natural spawners\n(natural-\ndominated pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
   guides(fill = guide_legend(ncol = 2), title.position = "top") +
@@ -604,7 +603,7 @@ gSmsy85<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal,  fill = value, z =
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
   scale_fill_manual(values = Ccols,
-                    name = "Probability natural\nspawners > 85%Smsy\n(natural-dominated pops)") +
+                    name = "Probability natural\nspawners > 85%Smsy\n(natural-\ndominated pops)") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
   guides(fill = guide_legend(ncol = 2), title.position = "top") +
@@ -1152,8 +1151,8 @@ gto1 <- plot_tradeoff(
   ylab = "Aggregate catch (median)",
   x1lab = "Exploitation\nrate",
   x2lab = "Relative\nhatchery\nproduction"
-) #+ scale_shape_manual(values = c(16, 1, 15, 0))
-
+) +  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  geom_point(size=2)
 
 # Tradeoff figure: aggregate hatchery-origin catch vs aggregate natural spawners
 AggHOcatch_NS <- val_sim_tot %>%
@@ -1176,14 +1175,15 @@ gto2 <- plot_tradeoff(
   ylab = "Aggregate hatchery-origin catch (median)",
   x1lab = "Exploitation\nrate",
   x2lab = "Relative\nhatchery\nproduction"
-)
-
+) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  geom_point(size=2)
 
 
 # Tradeoff figure 3: aggregate total catch vs natural spawners from natural-
 # dominated systems ----
 
-medAggCatch <- read.csv("data/CatchAgg.csv") %>% pull(catch)
+medAggCatch <- read.csv("data/CatchAgg.base.csv") %>% pull(catch)
 sum_medAggCatch <- sum(medAggCatch)
 
 Aggcatch_NS_nat <- val_sim_tot %>% # from val_sim_tot (all populations)
@@ -1211,12 +1211,13 @@ gto3 <- plot_tradeoff(
   geom_hline(yintercept = sum_medAggCatch, linetype = 2) + # PNI target
   geom_vline(xintercept = CM_Sgen, linetype = 3) + # SMSY
   geom_vline(xintercept = CM_85SMSY, linetype = 4) + # SMSY
-  geom_point(size = 3)
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
 
 # Tradeoff figure 4: aggregate HO catch vs natural spawners from natural-
 # dominated systems ----
 
-medAggCatch <- read.csv("data/CatchAgg.csv") %>% pull(catch)
+medAggCatch <- read.csv("data/CatchAgg.base.csv") %>% pull(catch)
 sum_medAggCatch <- sum(medAggCatch)
 
 Aggcatch_NS_nat <- val_sim_tot %>% # from val_sim_tot (all populations)
@@ -1243,7 +1244,8 @@ gto4 <- plot_tradeoff(
 ) +
   geom_vline(xintercept = CM_Sgen, linetype = 3) + # SMSY
   geom_vline(xintercept = CM_85SMSY, linetype = 4) + # SMSY
-  geom_point(size = 3)
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
 
 
 if(save.files){

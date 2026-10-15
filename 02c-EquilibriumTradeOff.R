@@ -11,16 +11,18 @@
 # Conditioning models outputs from population-specific "01" files.
 # See "Input Conditioning Model results" section below.
 #
-# Population productivity (logalpha): base, low or high
+# Population productivity (logalpha): base, low, high, or ensemble
 
 
 # OUTPUTS:
-# figures/R-PLOT_equilibrium_harvest_curves.base.png, #currently basecase omits 'base' from title
+# figures/R-PLOT_equilibrium_harvest_curves.base.png,
 # figures/R-PLOT_equilibrium_harvest_curves.low.png,
 # figures/R-PLOT_equilibrium_harvest_curves.high.png,
+# figures/R-PLOT_equilibrium_harvest_curves.ensemble.png,
 # tables/R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv,
 # tables/R-OUT_SMU_ref-pt_values_eq-trade-off.low.csv,
 # tables/R-OUT_SMU_ref-pt_values_eq-trade-off.high.csv,
+# tables/R-OUT_SMU_ref-pt_values_eq-trade-off.ensemble.csv,
 
 # Packages & libraries----------------------------------------------------------
 pkgs <- c("tidyverse", "here", "readxl", "janitor", "gsl")
@@ -45,40 +47,27 @@ prod <- "ensemble"#"base","low", "high # "ensemble
 
 # Input Conditioning Model results
 if (prod != "ensemble"){
-  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.", prod, ".rds"))
-  report_QC <- salmonMSE:::get_report(ERM_QC)
-
-  ERM_Adam <- readRDS(paste0("CM/Adam_09.26.26.", prod, ".rds"))
+  ERM_Adam <- readRDS(paste0("CM/Adam_09.29.26.", prod, ".rds"))
   report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.26.26.", prod, ".rds"))
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.29.26.", prod, ".rds"))
   report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-  ERM_Woss <- readRDS(paste0("CM/Woss_09.26.26.", prod, ".rds"))
+  ERM_Woss <- readRDS(paste0("CM/Woss_09.29.26.", prod, ".rds"))
   report_Woss <- salmonMSE:::get_report(ERM_Woss)
 }
 
 if(prod == "ensemble"){
   # Get number of MC trials (len)
-  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.base.rds"))
+  ERM_len <- readRDS(paste0("CM/Woss_09.29.26.base.rds"))
   report_len <- salmonMSE:::get_report(ERM_len)
   len <- length(report_len)
 
-  # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.low.rds"))
-  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.base.rds"))
-  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_09.22.26.high.rds"))
-  # Combine reports, 25% low, 50% base, and 25% high productivity
-  report_QC <- c(sample( get_report( ERM_QC_low), len * 0.25),
-                 sample( get_report( ERM_QC_base), len * 0.5),
-                 sample( get_report( ERM_QC_high), len * 0.25)
-  )
-  ERM_QC <- ERM_QC_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.26.26.low.rds"))
-  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.26.26.base.rds"))
-  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.26.26.high.rds"))
+  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.29.26.low.rds"))
+  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.29.26.base.rds"))
+  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Woss <- c(sample( get_report( ERM_Woss_low), len * 0.25),
                    sample( get_report( ERM_Woss_base), len * 0.5),
@@ -87,9 +76,9 @@ if(prod == "ensemble"){
   ERM_Woss <- ERM_Woss_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.26.26.low.rds"))
-  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.26.26.base.rds"))
-  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.26.26.high.rds"))
+  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.29.26.low.rds"))
+  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.29.26.base.rds"))
+  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Salmon <- c(sample( get_report( ERM_Salmon_low), len * 0.25),
                      sample( get_report( ERM_Salmon_base), len * 0.5),
@@ -98,9 +87,9 @@ if(prod == "ensemble"){
   ERM_Salmon <- ERM_Salmon_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.26.26.low.rds"))
-  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.26.26.base.rds"))
-  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.26.26.high.rds"))
+  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.29.26.low.rds"))
+  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.29.26.base.rds"))
+  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.29.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Adam <- c(sample( get_report( ERM_Adam_low), len * 0.25),
                    sample( get_report( ERM_Adam_base), len * 0.5),
@@ -249,6 +238,20 @@ umsy_vals <- pop_params |>
     ugen_upr = quantile(ugen, 0.75)
   )
 
+# Calculate CU-level pars percentiles
+par_vals <- pop_params |>
+  unnest(data) |>
+  distinct(pop, log_a, beta) |>
+  summarise(
+    .by = pop,
+    log_a_mid = median(log_a),
+    log_a_lwr = quantile(log_a, 0.025),
+    log_a_upr = quantile(log_a, 0.975),
+    beta_mid = median(beta),
+    beta_lwr = quantile(beta, 0.025),
+    beta_upr = quantile(beta, 0.975)
+  )
+
 
 # Unpack and summarize data
 eq_sum_data <- pop_params |>
@@ -379,7 +382,7 @@ U_lab <- eq_sum_data |>
       fill = "red",
       alpha = 0.2
     ) +
-    # # # Add stepped CI corresponding to the stepped line, for Ugen
+    # # Add stepped CI corresponding to the stepped line, for Ugen
     # geom_rect(
     #   aes(
     #     xmin = Seq,
