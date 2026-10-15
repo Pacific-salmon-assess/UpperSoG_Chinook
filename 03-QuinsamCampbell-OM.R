@@ -177,7 +177,7 @@ kappa <- as.numeric(exp(pars$log_cr[sim_samp]))
 wt <- pars$wt
 wt <- wt[sim_samp_long]
 length(wt)
-wt_mat <- matrix(wt, nsim, proyears)
+wt_mat <- matrix(exp(-wt), nsim, proyears)
 
 # Create the BIO object for salmonMSE
 Bio <- new(
