@@ -1,3 +1,9 @@
+#-------------------------------------------------------------------------------
+# Code to plot projection outputs: contour (ice-cream) plots and trade-off plots
+# For Nimpkish/Woss River
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
 # Libraries
 library(salmonMSE)
 library(tidyverse)

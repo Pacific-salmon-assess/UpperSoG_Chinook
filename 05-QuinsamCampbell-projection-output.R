@@ -1,3 +1,33 @@
+#-------------------------------------------------------------------------------
+# Code to plot projection outputs: contour (ice-cream) plots and trade-off plots
+# For Quinsam/Campbell Rivers
+#-------------------------------------------------------------------------------
+
+# INPUTS:
+# Conditioning model outputs
+# file: CM/QuinsamCampbell_09.29.26.base.rds
+
+# Harvest and hatchery scenarios
+# file: tables/scenarios.csv"
+
+# SMSE objects for each management scenario across 416 combinations of
+# preterminal ERs and hatchery production levels, labeled 1:416
+# file: SMSE/Salmon/QC1.rds to Salmon416.rds
+
+# UMSY
+# file: tables/R-OUT_SMU_ref-pt_values_eq-trade-off.base.csv
+
+# OUTPUTS:
+# State variables for all simulations: tables/QC_outcomes_sim.csv
+# Probabilistic outcomes for all simulations; tables/QC_outcomes_prob.csv
+
+# Contour "ice-cream plots"
+# folder: figure/SMSE/QC/
+# File for each performance metric, plus seeral combined plots
+# gic1_QC.png, gic2_png
+
+
+#-------------------------------------------------------------------------------
 # Libraries
 library(salmonMSE)
 library(tidyverse)

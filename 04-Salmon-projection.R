@@ -1,4 +1,22 @@
+#-------------------------------------------------------------------------------
 # Run projections for Salmon River
+#-------------------------------------------------------------------------------
+
+# INPUTS:
+# Total hatchery releases:
+# file: data/Quinsam/2025-10-08-SalmonRiverChinookReleases-AllYears.xlsxx
+
+# SOM object, for base case productivity
+# (other productivities can be run by changing input SOM, and output location)
+# file: SOM/SOM_Salmon_base.rds
+
+# OUTPUTS:
+# SMSE objects for each model run, across 416 combinations of preterminal ERs
+# and hatchery production levels, labeled 1:416
+# file: SMSE/Salmon/QC1.rds to Salmon416.rds
+
+#-------------------------------------------------------------------------------
+
 # Libraries
 library(tidyverse)
 library(salmonMSE)

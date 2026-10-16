@@ -1,4 +1,21 @@
-# Run projections for Nimpkish
+#-------------------------------------------------------------------------------
+# Run projections for Nimpkish/Woss
+#-------------------------------------------------------------------------------
+
+# INPUTS:
+# Total hatchery releases:
+# file: data/Quinsam/2025-07-23-NimpkishWoss_Chinook_Releases_1970-2024.xlsx
+
+# SOM object, for base case productivity
+# (other productivities can be run by changing input SOM, and output location)
+# file: SOM/SOM_Nimpkish_base.rds
+
+# OUTPUTS:
+# SMSE objects for each model run, across 416 combinations of preterminal ERs
+# and hatchery production levels, labeled 1:416
+# file: SMSE/Nimpkish/QC1.rds to Nimpkish416.rds
+
+#-------------------------------------------------------------------------------
 
 # Libraries
 library(tidyverse)

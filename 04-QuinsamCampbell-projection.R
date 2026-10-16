@@ -1,5 +1,21 @@
+#-------------------------------------------------------------------------------
 # Run projections for Quinsam/Campbell
+#-------------------------------------------------------------------------------
 
+# INPUTS:
+# Total hatchery releases:
+# file: data/Quinsam/2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx
+
+# SOM object, for base case productivity
+# (other productivities can be run by changing input SOM, and output location)
+# file: SOM/SOM_QC_base.rds
+
+# OUTPUTS:
+# SMSE objects for each model run, across 416 combinations of preterminal ERs
+# and hatchery production levels, labeled 1:416
+# file: SMSE/QC/QC1.rds to QC416.rds
+
+#-------------------------------------------------------------------------------
 #libraries
 library(tidyverse)
 library(readxl)

@@ -1,4 +1,20 @@
+#-------------------------------------------------------------------------------
 # Run projections for Adam River
+#-------------------------------------------------------------------------------
+
+# INPUTS:
+# SOM object, for base case productivity
+# (other productivities can be run by changing input SOM, and output location)
+# file: SOM/SOM_Adam_base.rds
+
+# OUTPUTS:
+# SMSE objects for each model run, across 416 combinations of preterminal ERs
+# and hatchery production levels, labeled 1:416
+# file: SMSE/Adam/QC1.rds to Adam416.rds
+
+#-------------------------------------------------------------------------------
+
+# Libraries
 # Libraries
 library(tidyverse)
 library(salmonMSE)

@@ -1,3 +1,10 @@
+#-------------------------------------------------------------------------------
+# Code to plot projection outputs: contour (ice-cream) plots and trade-off plots
+# For Adam/Eve River
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
 # Libraries
 library(salmonMSE)
 library(tidyverse)
