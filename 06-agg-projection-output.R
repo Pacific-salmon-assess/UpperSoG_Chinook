@@ -237,7 +237,7 @@ val_sim_all_tot <- list(NS_tot, Ret_tot, Tcatch_tot,
   # rename(Option = Option_name) %>%
   reshape2::melt(id.vars = c("n", "Simulation"))#, "Option"
 if(save.files){
-  readr::write_csv(val_sim_all, file = paste0("tables/Agg_outcomes_tot_sim", file_suffix, ".csv")) # Save for Slick object
+  readr::write_csv(val_sim_all_tot, file = paste0("tables/Agg_outcomes_tot_sim", file_suffix, ".csv")) # Save for Slick object
 }
 
 # Median and range for state variables across simulations
@@ -258,7 +258,7 @@ val_sim_all_nat <- list(NS_nat, Ret_nat, Tcatch_nat,
   # rename(Option = Option_name) %>%
   reshape2::melt(id.vars = c("n", "Simulation"))#, "Option"
 if(save.files){
-  readr::write_csv(val_sim_all, file = paste0("tables/Agg_outcomes_nat_sim", file_suffix, ".csv")) # Save for Slick object
+  readr::write_csv(val_sim_all_nat, file = paste0("tables/Agg_outcomes_nat_sim", file_suffix, ".csv")) # Save for Slick object
 }
 
 # Median and range for state variables across simulations
@@ -1182,7 +1182,8 @@ gto2 <- plot_tradeoff(
   x2lab = "Relative\nhatchery\nproduction"
 ) +
   scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
-  geom_point(size=2)
+  geom_point(size=2) +
+  geom_point()
 
 
 # Tradeoff figure 3: aggregate total catch vs natural spawners from natural-

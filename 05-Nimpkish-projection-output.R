@@ -1488,6 +1488,13 @@ PNI_NS <- val_sim %>%
 #   g <- g + guides(shape = "none")
 # }
 
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("PNI", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = PNI, x = 'Natural Spawners') %>% select(x, y)
 
 gto <- plot_tradeoff(
   pm1 = PNI_NS$`Natural Spawners`,
@@ -1497,16 +1504,18 @@ gto <- plot_tradeoff(
   # x2 = PNI_NS$n_yearling,
   xlab = "Natural spawners (median)",
   ylab = "PNI (median)",
-  x1lab = "Exploitation\nrate",
+  x1lab = "Pre-terminal\nexploitation\nrate",
   x2lab = "Relative\nhatchery\nproduction"
 ) +
   geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
   geom_vline(xintercept = Sgen, linetype = 3) + # SMSY
   geom_vline(xintercept = SMSY85, linetype = 4) + # SMSY
   geom_point(size = 3) +
-  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
 
-
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
 ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, ".png")), gto,
        height = 7, width = 7)
 
