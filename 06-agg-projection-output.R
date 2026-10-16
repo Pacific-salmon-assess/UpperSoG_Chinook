@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------
+# Code to plot projection outputs: contour (ice-cream) plots and trade-off plots
+# For Aggregate of all populations
+#-------------------------------------------------------------------------------
+
 # Libraries
 library(salmonMSE)
 library(tidyverse)
