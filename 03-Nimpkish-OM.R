@@ -1,6 +1,26 @@
+#------------------------------------------------------------------------------
+# Set up Operating Model (OM) inputs for Nimpkish/Woss River
+#------------------------------------------------------------------------------
 
-# Make OM
+# INPUTS:
 
+# Conditioning models outputs from population-specific "01" files.
+# See "Input Conditioning Model results" section below.
+
+# Total hatchery releases from Salmon River release sites, all release types
+# "data/Quinsam/2025-07-23-NimpkishWoss_Chinook_Releases_1970-2024.xlsx
+
+
+# As provided below, OM specifications and all biological, harvest, hatchery and habitat parameter inputs
+# Including a choice of base, low or high first-year marine survival scenarios
+
+# OUTPUTS:
+# SOM object, for each of 3 marine survival scenarios
+# SOM/SOM_Nimpkish_base.rds
+# SOM/SOM_Nimpkish_low.rds
+# SOM/SOM_Nimpkish_high.rds
+
+#-------------------------------------------------------------------------------
 # Libraries
 library(tidyverse)
 library(salmonMSE)
@@ -16,7 +36,7 @@ msurv <- "base"#"base" #"low" #"high"
 # also used for file name of SOM
 som_name <- "Nimpkish base"#"Nimpkish base" #"low msurv" # "high msurv" # for internal naming
 
-# Load exploitation rate model - Woss River
+# Input Conditioning Model results
 ERM <- readRDS("CM/Woss_09.29.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM)

@@ -1,4 +1,30 @@
+#-------------------------------------------------------------------------------
+# Function to run conditioning model for Adam/Eve River
+#-------------------------------------------------------------------------------
+# INPUTS:
 
+# Choice of mean of prior for productivity: base base, low, or high
+
+# Escapement time-series
+# file: data/SOG_N_Escapement-Salmon_Adam_Nimpkish.xlsx
+
+
+# CWT releases
+# file: data/Quinsam/2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx
+
+# CWT recoveries
+# file: data/Quinsam/QUI_camp_recovery_wfisheries.csv
+
+
+# OUTPUT:
+# Conditioning model results, labeled by productivity scenario (base, low, or high)
+# file:
+# CM/Adam_09.29.26.base.rds
+# CM/Adam_09.29.26.low.rds
+# CM/Adam_09.29.26.high.rds
+
+#-------------------------------------------------------------------------------
+# Libraries
 library(tidyverse)
 library(readxl)
 library(salmonMSE)

@@ -1,6 +1,22 @@
+#------------------------------------------------------------------------------
+# Set up Operating Model (OM) inputs for Adam/Eve River
+#------------------------------------------------------------------------------
 
-# Make OM
+# INPUTS:
 
+# Conditioning models outputs from population-specific "01" files.
+# See "Input Conditioning Model results" section below.
+
+# As provided below, OM specifications and all biological, harvest, hatchery and habitat parameter inputs
+# Including a choice of base, low or high first-year marine survival scenarios
+
+# OUTPUTS:
+# SOM object, for each of 3 marine survival scenarios
+# SOM/SOM_Adam_base.rds
+# SOM/SOM_Adam_low.rds
+# SOM/SOM_Adam_high.rds
+
+#-------------------------------------------------------------------------------
 # Libraries
 library(tidyverse)
 library(salmonMSE)
@@ -205,33 +221,33 @@ Mjuv_HOS[, 2, , ] <- M_CTC[2]
 Mjuv_HOS[, 3, , ] <- M_CTC[3]
 Mjuv_HOS[, 4, , ] <- M_CTC[4]
 
-# Total hatchery releases from Quinsam and Campbell release sites, all release types
-rel_Quinsam.x <- readxl::read_excel(
-  file.path("data", "Quinsam", "2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx"),
-  sheet = "Actual Release"
-)
-
-# Suggestion from Brendan Zoehner, SEP, to include all Quinsam sites and Cold
-# Creek (for Quinsam River) and Campbell sites, Elk R Chanel sites and Second Is
-# (for Campbell River). Discovery Pass and Orange Pt are seapen releases, likely
-# impacting both Quinsam and Campbell (8 Oct 2025)
-rel_Quinsam <- rel_Quinsam.x %>%
-  filter(str_starts(RELEASE_SITE_NAME, "Quinsam") |
-           str_starts(RELEASE_SITE_NAME, "Cold") |
-           str_starts(RELEASE_SITE_NAME, "Campbell") |
-           str_starts(RELEASE_SITE_NAME, "Elk") |
-           str_starts(RELEASE_SITE_NAME, "Second") |
-           str_starts(RELEASE_SITE_NAME, "Discovery") |
-           str_starts(RELEASE_SITE_NAME, "Orange")) %>%
-  filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
-  summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
-  arrange(RELEASE_YEAR)
-
-# Average hatchery releases from Q/C over last 6 years
-hatch_rel <- rel_Quinsam %>%
-  filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(5, 0))) %>%
-  pull(n_rel) %>%
-  mean()
+# # Total hatchery releases from Quinsam and Campbell release sites, all release types
+# rel_Quinsam.x <- readxl::read_excel(
+#   file.path("data", "Quinsam", "2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx"),
+#   sheet = "Actual Release"
+# )
+#
+# # Suggestion from Brendan Zoehner, SEP, to include all Quinsam sites and Cold
+# # Creek (for Quinsam River) and Campbell sites, Elk R Chanel sites and Second Is
+# # (for Campbell River). Discovery Pass and Orange Pt are seapen releases, likely
+# # impacting both Quinsam and Campbell (8 Oct 2025)
+# rel_Quinsam <- rel_Quinsam.x %>%
+#   filter(str_starts(RELEASE_SITE_NAME, "Quinsam") |
+#            str_starts(RELEASE_SITE_NAME, "Cold") |
+#            str_starts(RELEASE_SITE_NAME, "Campbell") |
+#            str_starts(RELEASE_SITE_NAME, "Elk") |
+#            str_starts(RELEASE_SITE_NAME, "Second") |
+#            str_starts(RELEASE_SITE_NAME, "Discovery") |
+#            str_starts(RELEASE_SITE_NAME, "Orange")) %>%
+#   filter(RELEASE_STAGE_NAME %in% c("Smolt 0+", "Seapen 0+")) %>%
+#   summarise(n_rel = sum(TotalRelease), .by = c(RELEASE_YEAR)) %>%
+#   arrange(RELEASE_YEAR)
+#
+# # Average hatchery releases from Q/C over last 6 years
+# hatch_rel <- rel_Quinsam %>%
+#   filter(RELEASE_YEAR %in% c(max(RELEASE_YEAR) - seq(5, 0))) %>%
+#   pull(n_rel) %>%
+#   mean()
 
 ## Strays removed
 # stray <- c(0, 0, 7, 28,  17) #Annual strays,"45 (Age-2:0, Age 3: 7, Age 4: 28, Age 5: 17)",Hatchery,Weil et al. 2025; Proportions mean age-at-maturity Quinsam/Campbell 2018-2023,,,,,,,,,
@@ -244,87 +260,87 @@ hatch_rel <- rel_Quinsam %>%
 # By default, an identity matrix is used (no straying).
 
 
-# Removals for other purposes (p_remove), e.g., CWT sampling
-# Non-brood removals are primarily HO fish. Assume 100% HOS
-# Non-brood removals are also selective for older male fish, but this is not accounted for
-rem_Quinsam.x <- readxl::read_excel(
-  file.path("data", "Quinsam", "2026-02-11-QuinsamRiverChinook-RiverReturns-1981-2023.xlsx"),
-  sheet = "River Returns"
-)
-names(rem_Quinsam.x)[names(rem_Quinsam.x)=="Sex/Maturity"] <- "SexMaturity"
-
-# Sum removals for non-brood purposes (Brendan Zoehner pers. comm. 12 Feb 26)
-rem_Quinsam <- rem_Quinsam.x %>%
-  filter(SexMaturity == "Male"| SexMaturity == "Female") %>%
-  mutate(OtherRemovals = rowSums(across(c("04Excess To Spawning Req (ESSR)",
-                                          "05Sold",
-                                          "06Holding Mortalities",
-                                          "07Used For Other Purposes/Other Mortalities")),
-                                 na.rm=TRUE)) %>%
-  rename("year" = "Recovery Year") %>%
-  group_by(year) %>% summarise(OtherRemovals_Sum= sum(OtherRemovals, na.rm=T))
-
-
-# # What ppn are non-brood removals to natural spawners?
-# # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)
-# # First get total escapement (used in CM), and 'natural spawners' which account for all removals
-# pop <- c("Quinsam", "Campbell")
-# pop.cap <- str_to_upper(pop)
-# esc_all <- readxl::read_excel(
-#   file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds_2025.xlsx"),
-#   sheet = "Data") %>%
-#   filter(StAD_Use == 1) %>%
-#   rename(WaterbodyName = "Waterbody Name") %>%
-#   filter(str_starts(WaterbodyName, pop.cap[1]) |
-#            str_starts(WaterbodyName, pop.cap[2])) %>%
-#   rename(year = "Analysis Year") %>%
-#   rename(esc.x = "Max Estimate") %>%
-#   mutate(nat_spawners =
-#            ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
-#   summarise(
-#     escapement = sum(esc.x),
-#     nat_spawners = sum(nat_spawners),
-#     .by = c(year)
-#   ) %>%
-#   select (year, escapement, nat_spawners)
-
-## Calculate the ppn removed from the total natural spawners
-# esc_rem <- left_join(rem_Quinsam, esc_all) %>%
-#   mutate(nat_spawners_wOR = OtherRemovals_Sum + nat_spawners) %>%
-#   mutate(ppnOR = OtherRemovals_Sum/nat_spawners_wOR)
-# ppnRemove <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
-# 0.102
-# However, removals should be applied to HOS, not total spawners
-
-
-# What ppn are non-brood removals to hatchery-origin spawners?
-# (these removals are selectively taken from marked fish for CWT purposes)
-# Get HOS from syear[,,2]: Array slice 1 = natural origin fish, 2 = hatchery fish
-syear <- sapply(report, getElement, "syear")
-splitrow <- function(x){array(x, dim=c(d$Ldyr, d$Nages, 2))}
-
-hos <- seq_len(ncol(syear)) %>%
-  map(~ splitrow(syear[,.x])) %>%
-  # map (~ .x[,,1] + .x[,,2]) %>% # Sum HO and NO
-  map(~ .x[,1,] + .x[,2,] + .x[,3,] + .x[,4,] + .x[,5,] )  %>% # Sum over ages
-  map(~ .x[,2]) %>% # Take only hatchery-origin fish
-  simplify2array() %>%
-  apply(FUN = quantile, MARGIN = 1, probs = c(0.025, 0.5, 0.975)) %>% # Extract quantiles
-  t() %>% as.data.frame() %>% select("50%") %>%
-  mutate(year=seq(year1, year1+d$Ldyr-1)) %>%
-  rename(HOS = '50%')
-
-
-## Calculate the ppn removed from the hatchery-origin natural spawners from the
-## last 6 years, assuming mark selectivity for removals
-esc_rem <- left_join(rem_Quinsam, hos) %>%
-  mutate(HOS_wOR = OtherRemovals_Sum + HOS) %>%
-  mutate(ppnOR = OtherRemovals_Sum/HOS_wOR)
-ppnRemove_HOS <-
-  mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
-# 0.137
-# Apply ppnRemove_HOS value to  hatchery object below, or in a
-# premove_HOS function in script 4
+# # Removals for other purposes (p_remove), e.g., CWT sampling
+# # Non-brood removals are primarily HO fish. Assume 100% HOS
+# # Non-brood removals are also selective for older male fish, but this is not accounted for
+# rem_Quinsam.x <- readxl::read_excel(
+#   file.path("data", "Quinsam", "2026-02-11-QuinsamRiverChinook-RiverReturns-1981-2023.xlsx"),
+#   sheet = "River Returns"
+# )
+# names(rem_Quinsam.x)[names(rem_Quinsam.x)=="Sex/Maturity"] <- "SexMaturity"
+#
+# # Sum removals for non-brood purposes (Brendan Zoehner pers. comm. 12 Feb 26)
+# rem_Quinsam <- rem_Quinsam.x %>%
+#   filter(SexMaturity == "Male"| SexMaturity == "Female") %>%
+#   mutate(OtherRemovals = rowSums(across(c("04Excess To Spawning Req (ESSR)",
+#                                           "05Sold",
+#                                           "06Holding Mortalities",
+#                                           "07Used For Other Purposes/Other Mortalities")),
+#                                  na.rm=TRUE)) %>%
+#   rename("year" = "Recovery Year") %>%
+#   group_by(year) %>% summarise(OtherRemovals_Sum= sum(OtherRemovals, na.rm=T))
+#
+#
+# # # What ppn are non-brood removals to natural spawners?
+# # # (assuming taken after brood removals and enroute M, so ppn is the ppn of removals to natural spawners not total escapaement)
+# # # First get total escapement (used in CM), and 'natural spawners' which account for all removals
+# # pop <- c("Quinsam", "Campbell")
+# # pop.cap <- str_to_upper(pop)
+# # esc_all <- readxl::read_excel(
+# #   file.path("data", "Quinsam", "fsar-sog-cn-cq-nuseds_2025.xlsx"),
+# #   sheet = "Data") %>%
+# #   filter(StAD_Use == 1) %>%
+# #   rename(WaterbodyName = "Waterbody Name") %>%
+# #   filter(str_starts(WaterbodyName, pop.cap[1]) |
+# #            str_starts(WaterbodyName, pop.cap[2])) %>%
+# #   rename(year = "Analysis Year") %>%
+# #   rename(esc.x = "Max Estimate") %>%
+# #   mutate(nat_spawners =
+# #            ifelse(is.na(`Natural Spawners Adult`), `Natural Spawners Total`, `Natural Spawners Adult`)) %>%
+# #   summarise(
+# #     escapement = sum(esc.x),
+# #     nat_spawners = sum(nat_spawners),
+# #     .by = c(year)
+# #   ) %>%
+# #   select (year, escapement, nat_spawners)
+#
+# ## Calculate the ppn removed from the total natural spawners
+# # esc_rem <- left_join(rem_Quinsam, esc_all) %>%
+# #   mutate(nat_spawners_wOR = OtherRemovals_Sum + nat_spawners) %>%
+# #   mutate(ppnOR = OtherRemovals_Sum/nat_spawners_wOR)
+# # ppnRemove <- mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
+# # 0.102
+# # However, removals should be applied to HOS, not total spawners
+#
+#
+# # What ppn are non-brood removals to hatchery-origin spawners?
+# # (these removals are selectively taken from marked fish for CWT purposes)
+# # Get HOS from syear[,,2]: Array slice 1 = natural origin fish, 2 = hatchery fish
+# syear <- sapply(report, getElement, "syear")
+# splitrow <- function(x){array(x, dim=c(d$Ldyr, d$Nages, 2))}
+#
+# hos <- seq_len(ncol(syear)) %>%
+#   map(~ splitrow(syear[,.x])) %>%
+#   # map (~ .x[,,1] + .x[,,2]) %>% # Sum HO and NO
+#   map(~ .x[,1,] + .x[,2,] + .x[,3,] + .x[,4,] + .x[,5,] )  %>% # Sum over ages
+#   map(~ .x[,2]) %>% # Take only hatchery-origin fish
+#   simplify2array() %>%
+#   apply(FUN = quantile, MARGIN = 1, probs = c(0.025, 0.5, 0.975)) %>% # Extract quantiles
+#   t() %>% as.data.frame() %>% select("50%") %>%
+#   mutate(year=seq(year1, year1+d$Ldyr-1)) %>%
+#   rename(HOS = '50%')
+#
+#
+# ## Calculate the ppn removed from the hatchery-origin natural spawners from the
+# ## last 6 years, assuming mark selectivity for removals
+# esc_rem <- left_join(rem_Quinsam, hos) %>%
+#   mutate(HOS_wOR = OtherRemovals_Sum + HOS) %>%
+#   mutate(ppnOR = OtherRemovals_Sum/HOS_wOR)
+# ppnRemove_HOS <-
+#   mean(esc_rem$ppnOR[(length(esc_rem$ppnOR-6)):length(esc_rem$ppnOR)])
+# # 0.137
+# # Apply ppnRemove_HOS value to  hatchery object below, or in a
+# # premove_HOS function in script 4
 
 h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
 Hatchery <- new(
@@ -346,7 +362,7 @@ Hatchery <- new(
   ptarget_NOB = NA_real_,  # TBD
   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
   hatchery_MSF = FALSE,
-  premove_HOS = ppnRemove_HOS, #0, Fish removed for non-brood purposes, e.g. CWT. Alternative option in a function described in script 4.
+  premove_HOS = 0, #Fish removed for non-brood purposes, e.g. CWT. Alternative option in a function described in script 4.
   premove_NOS = 0,
   fec_brood = fec, #Assume the same age-specific fecundity in brood as in escapement
   fitness_type = c("Ford", "none"),

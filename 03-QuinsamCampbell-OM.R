@@ -40,7 +40,7 @@ msurv <- "base"#"base" #"low" #"high"
 # also used for file name of SOM
 som_name <- "QC base" #"QC base" #"QC low msurv" # "QC high msurv" # for internal naming
 
-# Load conditioning model results - Quinsam/Campbell
+# Input Conditioning Model results
 ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM_QuinsamCampbell)

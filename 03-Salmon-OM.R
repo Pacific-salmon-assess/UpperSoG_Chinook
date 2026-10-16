@@ -1,5 +1,26 @@
+#------------------------------------------------------------------------------
+# Set up Operating Model (OM) inputs for Salmon River
+#------------------------------------------------------------------------------
 
-# Make OM
+# INPUTS:
+
+# Conditioning models outputs from population-specific "01" files.
+# See "Input Conditioning Model results" section below.
+
+# Total hatchery releases from Salmon River release sites, all release types
+# "data/Quinsam/2025-10-08-SalmonRiverChinookReleases-AllYears.xlsx
+
+
+# As provided below, OM specifications and all biological, harvest, hatchery and habitat parameter inputs
+# Including a choice of base, low or high first-year marine survival scenarios
+
+# OUTPUTS:
+# SOM object, for each of 3 marine survival scenarios
+# SOM/SOM_Salmon_base.rds
+# SOM/SOM_Salmon_low.rds
+# SOM/SOM_Salmon_high.rds
+
+#-------------------------------------------------------------------------------
 
 # Libraries
 library(tidyverse)
@@ -16,8 +37,7 @@ msurv <- "base"#"base" #"low" #"high"
 # also used for file name of SOM
 som_name <- "Salmon base"#"Salmon base" #"low msurv" # "high msurv" # for internal naming
 
-# Load exploitation rate model - Salmon River
-# ERM <- readRDS("CM/Salmon_08.06.26.prior.rds")
+# Input Conditioning Model results
 ERM <- readRDS("CM/Salmon_09.29.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM)

@@ -1,3 +1,34 @@
+#-------------------------------------------------------------------------------
+# Function to run conditioning model for Quinsam/Campbell Rivers
+#-------------------------------------------------------------------------------
+# INPUTS:
+
+# Choice of mean of prior for productivity: base base, low, or high
+
+# Escapement time-series
+# file: data/Quinsam/fsar-sog-cn-cq-nuseds_2025.xlsx
+
+# PNI (for diagnostic purposes only)
+# file: data/2025-10-09-UpperSOGChinook-PNI.xlsx
+
+# CWT releases
+# file: data/Quinsam/2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx
+
+# CWT recoveries
+# file: data/Quinsam/QUI_camp_recovery_wfisheries.csv
+
+# Total hatchery releases:
+# file: data/Quinsam/2025-07-23-Quinsam_Chinook_Releases_1970-2024.xlsx
+
+# OUTPUT:
+# Conditioning model results, labeled by productivity scenario (base, low, or high)
+# file:
+  # CM/QuinsamCampbell_09.29.26.base.rds
+  # CM/QuinsamCampbell_09.29.26.low.rds
+  # CM/QuinsamCampbell_09.29.26.high.rds
+
+#-------------------------------------------------------------------------------
+# Libraries
 library(tidyverse)
 library(readxl)
 library(salmonMSE)
@@ -271,7 +302,7 @@ run_QC_CM <- function( prod = "base"){
     Ldyr = Ldyr,
     lht = 1,
     n_r = 1,
-    s_enroute = 0.9, # From  M. Clarke life-cycle table = 10% return migration M followed by 15% terminal ER #0.765
+    s_enroute = 0.9, # From  M. Clarke life-cycle table = 10% return migration M
     cwtrelease = as.vector(cwt_rel$n_CWT),#Aligned by RY
     cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)), #Algined by RY
     cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)), #Algined by RY
