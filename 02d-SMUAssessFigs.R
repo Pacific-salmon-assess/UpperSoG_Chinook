@@ -503,7 +503,7 @@ gspawners <- ggplot(spawners, aes(x = year, y = med, group = label)) +
       )
   ) +
   geom_hline(yintercept= medlBench_Nat/1000, colour= "darkred", linetype= "dotted", linewidth=0.7) +
-  geom_hline(yintercept= meduBench_Nat/1000, colour= "darkgreen", linetype= "dashed", linewidth=0.7) +
+  geom_hline(yintercept= 0.85*meduBench_Nat/1000, colour= "darkgreen", linetype= "dashed", linewidth=0.7) +
   geom_hline(yintercept= medspawners/1000, colour= "navyblue", linetype= "solid", linewidth=0.5, alpha=0.4) +
   annotate(
     "rect",
@@ -516,7 +516,7 @@ gspawners <- ggplot(spawners, aes(x = year, y = med, group = label)) +
   annotate(
     "rect",
     xmin = 2002, xmax = 2024,
-    ymin = lwruBench_Nat/1000, ymax = upruBench_Nat/1000,
+    ymin = 0.85*lwruBench_Nat/1000, ymax = 0.85*upruBench_Nat/1000,
     fill = "darkgreen",
     color = NA,
     alpha = 0.15

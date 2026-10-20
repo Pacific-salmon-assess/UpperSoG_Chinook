@@ -58,7 +58,7 @@ if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
-write_figures <- TRUE #Toggle to true to write figures to file
+write_figures <- FALSE #Toggle to true to write figures to file
 
 # Input Conditioning Model results
 if (prod!="ensemble"){
@@ -571,7 +571,7 @@ for (pop in c("Adam", "Salmon", "Woss")){
 # Get Habitat based estimates of Smax
 Smax_hab <- as.data.frame( read.csv(
   here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter1.csv"))
-  # here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter3.csv"))
+  # here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter3.csv")) # Alternative prior for Salmon R
 )
 
 
