@@ -38,7 +38,7 @@ msurv <- "base"#"base" #"low" #"high"
 som_name <- "Salmon base"#"Salmon base" #"low msurv" # "high msurv" # for internal naming
 
 # Input Conditioning Model results
-ERM <- readRDS("CM/Salmon_09.29.26.base.rds")
+ERM <- readRDS("CM/Salmon_10.22.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM)
 set.seed(24)
@@ -138,6 +138,14 @@ kappa <- as.numeric(exp(pars$log_cr[sim_samp]))
 # quantile(Smax, c(0.25, 0.5, 0.75))
 # quantile(kappa, c(0.25, 0.5, 0.75))
 
+# Egg to smolt annual deviations
+# wt <- pars$wt[sim_samp,]
+wt <- pars$wt
+wt <- wt[sim_samp_long]
+length(wt)
+wt_mat <- matrix(exp(-wt), nsim, proyears)
+
+
 Bio <- new(
   "Bio",
   maxage = maxage,
@@ -148,6 +156,7 @@ Bio <- new(
   SRrel = "Ricker",
   kappa = kappa,# Includes random variability
   Smax = Smax,# Includes random variability
+  SRdev = wt_mat, # Matrix of egg-smolt annual deviations from Ricker curve
   phi = phi,
   tau = tau,
   Mjuv_NOS = Mjuv_NOS, # Includes random variability in 1st year M
@@ -263,8 +272,9 @@ Hatchery <- new(
   n_yearling = hatch_rel, # Quinsam traditionals
   n_subyearling = 0,
   s_prespawn = 1, # Fecundity already adjusted for pre-spawn survival from M. Clarke life-cycle table, both hatchery and natural origin (M. Clarke DFO Science pers. comm.)
-  s_egg_smolt = 0.75411, # B. Zoehner pers. comm. 16.21% mortality release-smolt x 20% mortality release-smolt: (1-0.1621)*(1 - 0.1) = 0.75411 surv
+  s_egg_smolt = 0.8379, # B. Zoehner pers. comm. 16.21% mortality egg-release x 10% mortality release-smolt: (1-0.1621)*(1 - 0.1) = 0.75411 surv
   s_egg_subyearling = 1,
+  s_year_smolt = 0.9, #B. Zoehner & M. Clarke pers. comm. 10% mortality release-smolt
   Mjuv_HOS = Mjuv_HOS,
   p_mature_HOS = p_mature, # Assume same maturity at NOS
   # stray_external = matrix(c(rep(0, 5), stray), maxage, 2),

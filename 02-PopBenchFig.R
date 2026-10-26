@@ -58,33 +58,34 @@ if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
-write_figures <- FALSE #Toggle to true to write figures to file
+write_figures <- TRUE #Toggle to true to write figures to file
 
 # Input Conditioning Model results
 if (prod!="ensemble"){
-  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
+  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.", prod, ".rds"))
   report_QC <- salmonMSE:::get_report(ERM_QC)
 
-  ERM_Adam <- readRDS(paste0("CM/Adam_09.29.26.", prod, ".rds"))
+  ERM_Adam <- readRDS(paste0("CM/Adam_10.22.26.", prod, ".rds"))
   report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.29.26.", prod, ".rds"))
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_10.22.26.", prod, ".rds"))
   report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-  ERM_Woss <- readRDS(paste0("CM/Woss_09.29.26.", prod, ".rds"))
+  ERM_Woss <- readRDS(paste0("CM/Woss_10.22.26.", prod, ".rds"))
   report_Woss <- salmonMSE:::get_report(ERM_Woss)
 }
 
 if(prod == "ensemble"){
   # Get number of MC trials (len)
-  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.base.rds"))
+  set.seed(10)
+  ERM_len <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.base.rds"))
   report_len <- salmonMSE:::get_report(ERM_len)
   len <- length(report_len)
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.low.rds"))
-  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.base.rds"))
-  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.high.rds"))
+  ERM_QC_low <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.low.rds"))
+  ERM_QC_base <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.base.rds"))
+  ERM_QC_high <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_QC <- c(sample( get_report( ERM_QC_low), len * 0.25),
                  sample( get_report( ERM_QC_base), len * 0.5),
@@ -93,9 +94,9 @@ if(prod == "ensemble"){
   ERM_QC <- ERM_QC_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Woss_low <- readRDS(paste0("CM/Woss_09.29.26.low.rds"))
-  ERM_Woss_base <- readRDS(paste0("CM/Woss_09.29.26.base.rds"))
-  ERM_Woss_high <- readRDS(paste0("CM/Woss_09.29.26.high.rds"))
+  ERM_Woss_low <- readRDS(paste0("CM/Woss_10.22.26.low.rds"))
+  ERM_Woss_base <- readRDS(paste0("CM/Woss_10.22.26.base.rds"))
+  ERM_Woss_high <- readRDS(paste0("CM/Woss_10.22.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Woss <- c(sample( get_report( ERM_Woss_low), len * 0.25),
                  sample( get_report( ERM_Woss_base), len * 0.5),
@@ -104,9 +105,9 @@ if(prod == "ensemble"){
   ERM_Woss <- ERM_Woss_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_09.29.26.low.rds"))
-  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_09.29.26.base.rds"))
-  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_09.29.26.high.rds"))
+  ERM_Salmon_low <- readRDS(paste0("CM/Salmon_10.22.26.low.rds"))
+  ERM_Salmon_base <- readRDS(paste0("CM/Salmon_10.22.26.base.rds"))
+  ERM_Salmon_high <- readRDS(paste0("CM/Salmon_10.22.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Salmon <- c(sample( get_report( ERM_Salmon_low), len * 0.25),
                    sample( get_report( ERM_Salmon_base), len * 0.5),
@@ -115,9 +116,9 @@ if(prod == "ensemble"){
   ERM_Salmon <- ERM_Salmon_base
 
   # Pull reports for individual runs, for low, base, and high prod scenarios
-  ERM_Adam_low <- readRDS(paste0("CM/Adam_09.29.26.low.rds"))
-  ERM_Adam_base <- readRDS(paste0("CM/Adam_09.29.26.base.rds"))
-  ERM_Adam_high <- readRDS(paste0("CM/Adam_09.29.26.high.rds"))
+  ERM_Adam_low <- readRDS(paste0("CM/Adam_10.22.26.low.rds"))
+  ERM_Adam_base <- readRDS(paste0("CM/Adam_10.22.26.base.rds"))
+  ERM_Adam_high <- readRDS(paste0("CM/Adam_10.22.26.high.rds"))
   # Combine reports, 25% low, 50% base, and 25% high productivity
   report_Adam <- c(sample( get_report( ERM_Adam_low), len * 0.25),
                    sample( get_report( ERM_Adam_base), len * 0.5),
@@ -290,31 +291,46 @@ for (pop in c("Adam", "Salmon", "Woss")){
 
   # Get average SMSY, Sgen and Smax values
   medianSMSY <- median(SMSY_avg)#SMSY_s_q %>% filter(label== "SMSY") %>% summarize(mean=mean(median)) %>% pull(mean)
-  lwrSMSY <- quantile(SMSY_avg, prob=0.0025)
+  lwrSMSY <- quantile(SMSY_avg, prob=0.025)
+  lwrSMSY2 <- quantile(SMSY_avg, prob=0.25)
   if(lwrSMSY < 0) lwrSMSY <- 0
+  if(lwrSMSY2 < 0) lwrSMSY2 <- 0
   uprSMSY <- quantile(SMSY_avg, prob=0.975)
+  uprSMSY2 <- quantile(SMSY_avg, prob=0.75)
   medianSgen <- median(Sgen_avg)#Sgen_s_q %>% filter(label== "Sgen") %>% summarize(mean=mean(median)) %>% pull(mean)
-  lwrSgen <- quantile(Sgen_avg, prob=0.005)
+  lwrSgen <- quantile(Sgen_avg, prob=0.025)
+  lwrSgen2 <- quantile(Sgen_avg, prob=0.25)
   if(lwrSgen < 0) lwrSgen <- 0
-  uprSgen <- quantile(Sgen_avg, prob=0.985)
+  if(lwrSgen2 < 0) lwrSgen2 <- 0
+  uprSgen <- quantile(Sgen_avg, prob=0.975)
+  uprSgen2 <- quantile(Sgen_avg, prob=0.75)
   cat("median SMSY", medianSMSY)
   cat("median Sgen", medianSgen)
   medianSMAX <- median(SMAX_avg)
   lwrSMAX <- quantile(SMAX_avg, prob=0.025)
+  lwrSMAX2 <- quantile(SMAX_avg, prob=0.25)
   if(lwrSMAX < 0) lwrSMAX <- 0
+  if(lwrSMAX2 < 0) lwrSMAX2 <- 0
   uprSMAX <- quantile(SMAX_avg, prob=0.975)
+  uprSMAX2 <- quantile(SMAX_avg, prob=0.75)
 
 
   assign(paste0("medSMSY_", pop), medianSMSY)
   assign(paste0("medSgen_", pop), medianSgen)
   assign(paste0("lwrSMSY_", pop), lwrSMSY)
   assign(paste0("uprSMSY_", pop), uprSMSY)
+  assign(paste0("lwrSMSY2_", pop), lwrSMSY2)
+  assign(paste0("uprSMSY2_", pop), uprSMSY2)
   assign(paste0("lwrSgen_", pop), lwrSgen)
   assign(paste0("uprSgen_", pop), uprSgen)
+  assign(paste0("lwrSgen2_", pop), lwrSgen2)
+  assign(paste0("uprSgen2_", pop), uprSgen2)
 
   assign(paste0("medSMAX_", pop), medianSMAX)
   assign(paste0("lwrSMAX_", pop), lwrSMAX)
   assign(paste0("uprSMAX_", pop), uprSMAX)
+  assign(paste0("lwrSMAX2_", pop), lwrSMAX2)
+  assign(paste0("uprSMAX2_", pop), uprSMAX2)
   # meanSMSY <- SMSY_s_q %>% filter(label== "SMSY") %>% summarize(mean=mean(median)) %>% pull(mean)
   # meanSgen <- Sgen_s_q %>% filter(label== "Sgen") %>% summarize(mean=mean(median)) %>% pull(mean)
 
@@ -339,12 +355,12 @@ for (pop in c("Adam", "Salmon", "Woss")){
     rename(median='50%', lower='2.5%', upper='97.5%') %>%
     mutate(lower = rep(NA, length(Year)), upper = rep(NA, length(Year))) %>%
     mutate(label="85%SMSY")#
-  SMSYAve_s_q <- data.frame(Year = year, median = 0.85 * median(SMSY_avg),
+  SMSYAve_s_q <- data.frame(Year = year, median = 0.85 * median(SMSY_avg), # For ave SMSY show interquartile ranges instead of 95% range
                             lower = as.numeric(apply(0.85 * SMSY_avg,1,
-                                                     quantile,probs=c( 0.025),
+                                                     quantile,probs=c( 0.25),
                                                      na.rm=T)),
                             upper = as.numeric(apply(0.85 * SMSY_avg,1,
-                                                     quantile,probs=c( 0.975),
+                                                     quantile,probs=c( 0.75),
                                                      na.rm=T)),
                             label="85%SMSY-ave")
 
@@ -358,12 +374,12 @@ for (pop in c("Adam", "Salmon", "Woss")){
     rename(median='50%', lower='2.5%', upper='97.5%') %>%
     mutate(lower = rep(NA, length(Year)), upper = rep(NA, length(Year))) %>%
     mutate(label="Sgen")#
-  SgenAve_s_q <- data.frame(Year = year, median = median(Sgen_avg),
+  SgenAve_s_q <- data.frame(Year = year, median = median(Sgen_avg),# For ave Sgen show interquartile ranges instead of 95% range
                             lower = apply(Sgen_avg,1,
-                                          quantile,probs=c( 0.025),
+                                          quantile,probs=c( 0.25),
                                           na.rm=T),
                             upper = apply(Sgen_avg,1,
-                                          quantile,probs=c( 0.975),
+                                          quantile,probs=c( 0.75),
                                           na.rm=T),
                             label = "Sgen-ave")
   Sgen_s_q <- rbind(Sgen_s_q, SgenAve_s_q)
@@ -436,12 +452,12 @@ for (pop in c("Adam", "Salmon", "Woss")){
     mutate(lower = rep(NA, length(Year)), upper = rep(NA, length(Year))) %>%
     mutate(label="UMSY")
 
-  UMSYAve_s_q <- data.frame(Year = year, median = median(UMSY_avg),
+  UMSYAve_s_q <- data.frame(Year = year, median = median(UMSY_avg),# For ave UMSY show interquartile ranges instead of 95% range
                             lower = apply(UMSY_avg,1,
-                                          quantile,probs=c( 0.025),
+                                          quantile,probs=c( 0.25),
                                           na.rm=T),
                             upper = apply(UMSY_avg,1,
-                                          quantile,probs=c( 0.975),
+                                          quantile,probs=c( 0.75),
                                           na.rm=T),
                             label = "UMSY-ave")
   UMSY_s_q <- rbind(UMSY_s_q, UMSYAve_s_q)
@@ -495,9 +511,13 @@ for (pop in c("Adam", "Salmon", "Woss")){
   medlBench_Nat <- (medSgen_Adam + medSgen_Salmon + medSgen_Woss)
   lwrlBench_Nat <- (lwrSgen_Adam + lwrSgen_Salmon + lwrSgen_Woss)
   uprlBench_Nat <- (uprSgen_Adam + uprSgen_Salmon + uprSgen_Woss)
+  lwrlBench_Nat2 <- (lwrSgen2_Adam + lwrSgen2_Salmon + lwrSgen2_Woss) #Interquartile range
+  uprlBench_Nat2 <- (uprSgen2_Adam + uprSgen2_Salmon + uprSgen2_Woss)
   meduBench_Nat <- 0.85 * (medSMSY_Adam + medSMSY_Salmon + medSMSY_Woss)
   lwruBench_Nat <- 0.85 * (lwrSMSY_Adam + lwrSMSY_Salmon + lwrSMSY_Woss)
   upruBench_Nat <- 0.85 * (uprSMSY_Adam + uprSMSY_Salmon + uprSMSY_Woss)
+  lwruBench_Nat2 <- 0.85 * (lwrSMSY2_Adam + lwrSMSY2_Salmon + lwrSMSY2_Woss)
+  upruBench_Nat2 <- 0.85 * (uprSMSY2_Adam + uprSMSY2_Salmon + uprSMSY2_Woss)
 
   df_bench_SR <- data.frame(Pop = c(rep("Adam",2),
                                  rep("Salmon", 2),
@@ -515,12 +535,25 @@ for (pop in c("Adam", "Salmon", "Woss")){
                                  round(0.85 * lwrSMSY_Salmon),
                                  round(lwrSgen_Woss),
                                  round(0.85 * lwrSMSY_Woss)),
+                         lwr_quart = c(round(lwrSgen2_Adam),
+                                 round(0.85 * lwrSMSY2_Adam),
+                                 round(lwrSgen2_Salmon),
+                                 round(0.85 * lwrSMSY2_Salmon),
+                                 round(lwrSgen2_Woss),
+                                 round(0.85 * lwrSMSY2_Woss)),
                          upr = c(round(uprSgen_Adam),
                                  round(0.85 * uprSMSY_Adam),
                                  round(uprSgen_Salmon),
                                  round(0.85 * uprSMSY_Salmon),
                                  round(uprSgen_Woss),
-                                 round(0.85 * uprSMSY_Woss))
+                                 round(0.85 * uprSMSY_Woss)),
+                         upr_quart = c(round(uprSgen2_Adam),
+                                 round(0.85 * uprSMSY2_Adam),
+                                 round(uprSgen2_Salmon),
+                                 round(0.85 * uprSMSY2_Salmon),
+                                 round(uprSgen2_Woss),
+                                 round(0.85 * uprSMSY2_Woss))
+
                          )
 
 
@@ -540,12 +573,24 @@ for (pop in c("Adam", "Salmon", "Woss")){
                                     round(lwrSMAX_Salmon) * 0.4,
                                     round(lwrSMAX_Woss) * 0.2,
                                     round(lwrSMAX_Woss) * 0.4),
+                            lwr_quart = c(round(lwrSMAX2_Adam) * 0.2,
+                                    round(lwrSMAX2_Adam) * 0.4,
+                                    round(lwrSMAX2_Salmon) * 0.2,
+                                    round(lwrSMAX2_Salmon) * 0.4,
+                                    round(lwrSMAX2_Woss) * 0.2,
+                                    round(lwrSMAX2_Woss) * 0.4),
                             upr = c(round(uprSMAX_Adam) * 0.2,
                                     round(uprSMAX_Adam) * 0.4,
                                     round(uprSMAX_Salmon) * 0.2,
                                     round(uprSMAX_Salmon) * 0.4,
                                     round(uprSMAX_Woss) * 0.2,
-                                    round(uprSMAX_Woss) * 0.4)
+                                    round(uprSMAX_Woss) * 0.4),
+                            upr_quart = c(round(uprSMAX2_Adam) * 0.2,
+                                    round(uprSMAX2_Adam) * 0.4,
+                                    round(uprSMAX2_Salmon) * 0.2,
+                                    round(uprSMAX2_Salmon) * 0.4,
+                                    round(uprSMAX2_Woss) * 0.2,
+                                    round(uprSMAX2_Woss) * 0.4)
                             )
 
   order.pop <- c("Adam", "Salmon", "Nimpkish")
@@ -571,7 +616,7 @@ for (pop in c("Adam", "Salmon", "Woss")){
 # Get Habitat based estimates of Smax
 Smax_hab <- as.data.frame( read.csv(
   here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter1.csv"))
-  # here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter3.csv")) # Alternative prior for Salmon R
+  #here("data", "UpperSoGChinook_posteriorpredictive_Sept25_iter3.csv")) # Alternative prior for Salmon R
 )
 
 
@@ -604,7 +649,7 @@ df_bench_hab$upr <- round(df_bench_hab$upr)
 order.pop <- c("Adam", "Salmon", "Nimpkish")
 order.bench <- c("Sgen", "85% SMSY", "20% SMAX", "40%SMAX")
 
-df_bench <- rbind(df_bench_SR, df_bench_hab) %>%
+df_bench <- df_bench_hab %>% #rbind(df_bench_SR, df_bench_hab) %>%
   arrange(match(Pop, order.pop), match(Benchmark, order.bench))
 kable(df_bench)
 
@@ -1264,3 +1309,44 @@ if(FALSE){
 
 }
 
+if(FALSE){# Get estimated spawner abundances for Rapid Status Assessment
+
+  prod <- "base" #"base"
+
+  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.", prod, ".rds"))
+  report_QC <- salmonMSE:::get_report(ERM_QC)
+
+  ERM_Adam <- readRDS(paste0("CM/Adam_10.22.26.", prod, ".rds"))
+  report_Adam <- salmonMSE:::get_report(ERM_Adam)
+
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_10.22.26.", prod, ".rds"))
+  report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
+
+  ERM_Woss <- readRDS(paste0("CM/Woss_10.22.26.", prod, ".rds"))
+  report_Woss <- salmonMSE:::get_report(ERM_Woss)
+
+  for (pop in c("QC", "Adam", "Salmon", "Woss")){
+    samp <- get(paste0("ERM_", pop))
+    d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
+    if(pop == "QC") year1 <- 1984
+    if(pop == "Woss") year1 <- 2001
+    if(pop == "Salmon") year1 <- 2002
+    if(pop == "Adam") year1 <- 2002
+
+    report <- get(paste0("report_", pop))
+
+    year <- year1 + seq(1, d$Ldyr) - 1
+
+
+    # sp <- exp(sapply(report, getElement, "logpredesc")) %>%
+    sp <- sapply(report, getElement, "spawners") %>%
+      apply(1, quantile, probs = c(0.025, 0.5, 0.975))
+    sp_save <- t(sp)
+    rownames(sp_save) <- year
+    write.table(sp_save, file= paste0("data/", pop, "est_sp.csv"),
+                row.names = TRUE, col.names = TRUE)
+
+
+  }
+
+}

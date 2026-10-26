@@ -293,6 +293,7 @@ run_Adam_CM <- function( prod = "base"){
     lht = 1,
     n_r = 1,
     s_enroute = 0.9,
+    s_enroute_CWT = 0.9,
     cwtrelease = as.vector(cwt_rel$n_CWT),
     cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
     cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)),
@@ -350,16 +351,16 @@ run_Adam_CM <- function( prod = "base"){
                     control=list(adapt_delta = 0.999,
                                  stepsize = 0.01,
                                  max_treedepth = 20))
-  saveRDS(samp, file = paste0("CM/Adam_09.29.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/Adam_10.22.26.", prod, ".rds"))
 
-  samp <- readRDS(file =  paste0("CM/Adam_09.29.26.", prod, ".rds"))
+  samp <- readRDS(file =  paste0("CM/Adam_10.22.26.", prod, ".rds"))
 
   year <- unique(full_matrix$RELEASE_YEAR)
   rs_names <- c("Smolt 0+")
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Adam", year = year,
-    dir = "CM", filename =  paste0("Adam_09.29.26.", prod)
+    dir = "CM", filename =  paste0("Adam_10.22.26.", prod)
   )
 
 

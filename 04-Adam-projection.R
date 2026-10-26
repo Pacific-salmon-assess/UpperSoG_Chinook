@@ -36,10 +36,11 @@ if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
-  g <- expand.grid(
-    u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
-    n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
-  )
+  # g <- expand.grid(
+
+g <- data.frame(u_preterminal = seq(0, 0.5, 0.02)#,# Add in FMSY
+    # n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
+   )
 
   nOM <- nrow(g)
 

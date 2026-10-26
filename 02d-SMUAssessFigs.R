@@ -82,16 +82,16 @@ upruBench_Nat <- read.csv(
 
 # Input Conditioning Model results
 if (prod != "ensemble"){
-  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
+  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.", prod, ".rds"))
   report_QC <- salmonMSE:::get_report(ERM_QC)
 
-  ERM_Adam <- readRDS(paste0("CM/Adam_09.29.26.", prod, ".rds"))
+  ERM_Adam <- readRDS(paste0("CM/Adam_10.22.26.", prod, ".rds"))
   report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.29.26.", prod, ".rds"))
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_10.22.26.", prod, ".rds"))
   report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-  ERM_Woss <- readRDS(paste0("CM/Woss_09.29.26.", prod, ".rds"))
+  ERM_Woss <- readRDS(paste0("CM/Woss_10.22.26.", prod, ".rds"))
   report_Woss <- salmonMSE:::get_report(ERM_Woss)
 }
 

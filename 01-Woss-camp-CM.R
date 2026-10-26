@@ -313,6 +313,7 @@ run_Woss_CM <- function( prod = "base"){
     lht = 1,
     n_r = 1,
     s_enroute = 0.9,
+    s_enroute_CWT = 0.9,
     cwtrelease = as.vector(cwt_rel$n_CWT),
     cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)),
     cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)),
@@ -376,9 +377,9 @@ run_Woss_CM <- function( prod = "base"){
                     control=list(adapt_delta = 0.999,
                                  stepsize = 0.01,
                                  max_treedepth = 20))
-  saveRDS(samp, file = paste0("CM/Woss_09.29.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/Woss_10.22.26.", prod, ".rds"))
 
-  samp <- readRDS(file = paste0("CM/Woss_09.29.26.", prod, ".rds"))
+  samp <- readRDS(file = paste0("CM/Woss_10.22.26.", prod, ".rds"))
   report <- salmonMSE:::get_report(samp)
   d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
   #shinystan::launch_shinystan(samp)
@@ -387,7 +388,7 @@ run_Woss_CM <- function( prod = "base"){
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Woss", year = unique(full_matrix$RELEASE_YEAR),
-    dir = "CM", filename = paste0("Woss_09.29.26.", prod)
+    dir = "CM", filename = paste0("Woss_10.22.26.", prod)
   )
 
 }

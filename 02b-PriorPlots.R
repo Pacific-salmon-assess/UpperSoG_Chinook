@@ -29,7 +29,7 @@ library(patchwork)
 
 # Plot priors and posteriors from all prod scenarios together, otherwise
 # plotted for a single population and single scenario
-meta.plot <- FALSE
+meta.plot <- TRUE
 
 theme_set(
   theme_bw() +
@@ -45,16 +45,16 @@ theme_set(
 
 for (prod in c("low", "base", "high")){
   # Input Conditioning Model results
-  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
+  ERM_QC <- readRDS(paste0("CM/QuinsamCampbell_10.22.26.", prod, ".rds"))
   report_QC <- salmonMSE:::get_report(ERM_QC)
 
-  ERM_Adam <- readRDS(paste0("CM/Adam_09.29.26.", prod, ".rds"))
+  ERM_Adam <- readRDS(paste0("CM/Adam_10.22.26.", prod, ".rds"))
   report_Adam <- salmonMSE:::get_report(ERM_Adam)
 
-  ERM_Salmon <- readRDS(paste0("CM/Salmon_09.29.26.", prod, ".rds"))
+  ERM_Salmon <- readRDS(paste0("CM/Salmon_10.22.26.", prod, ".rds"))
   report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
 
-  ERM_Woss <- readRDS(paste0("CM/Woss_09.29.26.", prod, ".rds"))
+  ERM_Woss <- readRDS(paste0("CM/Woss_10.22.26.", prod, ".rds"))
   report_Woss <- salmonMSE:::get_report(ERM_Woss)
 
 
@@ -67,7 +67,7 @@ for (prod in c("low", "base", "high")){
     dir.create(here::here(folder_path), recursive = TRUE)
   }
 
-  for (pop in c("Adam", "Salmon", "Woss")){
+  for (pop in c("Adam", "Salmon", "Woss")){# Must also run for QC for Output.Rmd
     pop.prior <- pop
     if(pop=="Adam") pop.prior <- "Adam/Eve"
     if(pop=="Woss") pop.prior <- "Nimpkish"
@@ -327,12 +327,13 @@ for (prod in c("low", "base", "high")){
 
 
     if(!meta.plot) ggsave(paste0(folder_path, pop, "_prod.png"), gPP, height = 4, width = 10)
+    # ggsave(paste0(folder_path, pop, "_prod.png"), gProdPP, height = 4, width = 6)
 
   }
 
 }
 
-if(!meta.plot){
+if(meta.plot){
   gSmaxPP_meta <-
     (gSmaxPP_Wosslow + gSmaxPP_Wossbase + gSmaxPP_Wosshigh)/
     (gSmaxPP_Salmonlow + gSmaxPP_Salmonbase + gSmaxPP_Salmonhigh)/

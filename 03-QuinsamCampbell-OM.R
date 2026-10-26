@@ -41,7 +41,7 @@ msurv <- "base"#"base" #"low" #"high"
 som_name <- "QC base" #"QC base" #"QC low msurv" # "QC high msurv" # for internal naming
 
 # Input Conditioning Model results
-ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
+ERM_QuinsamCampbell <- readRDS("CM/QuinsamCampbell_10.22.26.base.rds")
 
 report <- salmonMSE:::get_report(ERM_QuinsamCampbell)
 set.seed(24)
@@ -190,7 +190,7 @@ Bio <- new(
   SRrel = "Ricker",
   kappa = kappa,# Includes random variability
   Smax = Smax,# Includes random variability
-  SRdev =wt_mat, # Matrix of egg-smolt annual deviations from Ricker curve
+  SRdev = wt_mat, # Matrix of egg-smolt annual deviations from Ricker curve
   phi = phi,
   tau = tau,
   Mjuv_NOS = Mjuv_NOS, # Includes random variability in 1st year M
@@ -420,7 +420,8 @@ Hatchery <- new(
   n_yearling = hatch_rel, # Quinsam traditionals
   n_subyearling = 0,
   s_prespawn = 1, # Fecundity already adjusted for pre-spawn survival from M. Clarke life-cycle table, both hatchery and natural origin (M. Clarke DFO Science pers. comm.)
-  s_egg_smolt = 0.882, # Brown et al. (2026) & B. Zoehner pers. comm. 2% mortality release-smolt x 10% mortality release-smolt   (1 - 0.98 x 0.9)=11.8% or 88.2%surv
+  s_egg_smolt = 0.9, # Brown et al. (2026) &  B. Zoehner 10% mortality egg-release = 1-0.1   #(1 - 0.98 x 0.9)=11.8% or 88.2%surv when combined with below
+  s_year_smolt = 0.98,# B.Zoehner & M. Clarke pers. comm. 2% mortality release-smolt for QC
   s_egg_subyearling = 1,
   Mjuv_HOS = Mjuv_HOS,
   p_mature_HOS = p_mature, # Assume same maturity at NOS

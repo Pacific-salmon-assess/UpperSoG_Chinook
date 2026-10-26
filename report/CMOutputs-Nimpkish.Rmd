@@ -29,7 +29,7 @@ theme_set(theme_bw())
 ```{r}
 pop <- "Woss"
 if(pop=="Woss") {
-  ERM <- readRDS(here::here("CM/Woss_09.29.26.base.rds"))
+  ERM <- readRDS(here::here("CM/Woss_10.22.26.base.rds"))
   year1 <- 2001
 }
 
@@ -155,13 +155,13 @@ salmonMSE:::CM_SRR(report, year1)
 
 
 ```{r SrepPriorPost, fig.cap="Figure E15. Prior and posterior estimates of Smax, spawner abundances at maximum recruitment."}
-# (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
-file <-  paste0(pop, "_priorpost.png")
-
-knitr::include_graphics(here(
-  "figures", file
- )
- )
+# # (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
+# file <-  paste0(pop, "_priorpost.png")
+# 
+# knitr::include_graphics(here(
+#   "figures", file
+#  )
+#  )
 
 
 
@@ -181,12 +181,12 @@ knitr::include_graphics(here(
 
 ```
 
-```{r prod, fig.cap="Figure E16. Prior and posterior estimates of life-cycle productivity, recuits/spawner."}
+```{r prod, fig.cap="Figure E15. Prior and posterior estimates of Smax and life-cycle productivity, recuits/spawner."}
 # (paste("figures/", pop, "_priorpost.png", sep=""), g, height = 3.5, width = 6)
 file <-  paste0(pop, "_prod.png")
 
 knitr::include_graphics(here(
-  "figures", file
+  "figures", "CM", file
  )
  )
 
@@ -196,23 +196,23 @@ knitr::include_graphics(here(
 
 
 
-```{r Megg, fig.cap="Figure E17. Estimated egg-smolt instantaneous mortality rate (medians and 95% prediction interval)."}
+```{r Megg, fig.cap="Figure E16. Estimated egg-smolt instantaneous mortality rate (medians and 95% prediction interval)."}
 salmonMSE:::CM_Megg(report, year1, ci = TRUE, surv = FALSE)
 ```
 
 
 
-```{r vulPT, fig.cap="Figure E18. Posterior estimates of preterminal vulnerability at age (medians and 95% prediction interval)."}
+```{r vulPT, fig.cap="Figure E17. Posterior estimates of preterminal vulnerability at age (medians and 95% prediction interval)."}
 FPT <- sapply(report, getElement, "FPT")
 if (sum(FPT)) salmonMSE:::CM_vul(report, type = "vulPT")
 ```
 
-```{r CYER-PT, fig.cap="Figure E19. Return year preterminal exploitation rate at age (medians and 95% prediction interval)."}
+```{r CYER-PT, fig.cap="Figure E18. Return year preterminal exploitation rate at age (medians and 95% prediction interval)."}
 if (sum(FPT)) salmonMSE:::CM_ER(report, brood = FALSE, type = "PT", year1, r = d$r_matt)
 ```
 
 
-```{r matt-RY, fig.cap="Figure E20. Posterior estimates of maturity by age and return year (medians and 95% prediction interval). Dashed, horizontal lines represent prior means."}
+```{r matt-RY, fig.cap="Figure E19. Posterior estimates of maturity by age and return year (medians and 95% prediction interval). Dashed, horizontal lines represent prior means."}
 salmonMSE:::CM_maturity(report, d, year1, r = d$r_matt, brood = FALSE, rs_names = rs_names)
 ```
 

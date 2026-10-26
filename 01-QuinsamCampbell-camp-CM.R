@@ -303,6 +303,7 @@ run_QC_CM <- function( prod = "base"){
     lht = 1,
     n_r = 1,
     s_enroute = 0.9, # From  M. Clarke life-cycle table = 10% return migration M
+    s_enroute_CWT = 0.9, # From  M. Clarke life-cycle table = 10% return migration M
     cwtrelease = as.vector(cwt_rel$n_CWT),#Aligned by RY
     cwtesc = array(round(cwt_esc/cwtExp), c(Ldyr, Nages, 1)), #Algined by RY
     cwtcatPT = array(round(cwt_pt/cwtExp), c(Ldyr, Nages, 1)), #Algined by RY
@@ -365,20 +366,20 @@ run_QC_CM <- function( prod = "base"){
                                  stepsize = 0.01,
                                  max_treedepth = 20))
 
-  saveRDS(samp, file = paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
+  saveRDS(samp, file = paste0("CM/QuinsamCampbell_10.22.26.", prod, ".rds"))
 
   # saveRDS(samp, file = paste("CM/QuinsamCampbell_06.19.26.", Ryears[i], ".rds", sep=""))
   #   } # end of for i in 1:length(Ryears)
   # } # end of RunRetro(years)
 
-  samp <- readRDS(file = paste0("CM/QuinsamCampbell_09.29.26.", prod, ".rds"))
+  samp <- readRDS(file = paste0("CM/QuinsamCampbell_10.22.26.", prod, ".rds"))
 
   year <- unique(full_matrix$RELEASE_YEAR)
   rs_names <- c("Smolt 0+")
   salmonMSE::report_CM(
     samp,
     rs_names = rs_names, name = "Quinsam/Campbell", year = year,
-    dir = "CM", filename = paste0("QuinsamCampbell_09.29.26.", prod)
+    dir = "CM", filename = paste0("QuinsamCampbell_10.22.26.", prod)
   )
 
 }
