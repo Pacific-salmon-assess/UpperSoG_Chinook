@@ -1,0 +1,65 @@
+#-------------------------------------------------------------------------------
+# Run projections for Salmon River
+#-------------------------------------------------------------------------------
+
+# INPUTS:
+# Total hatchery releases:
+# file: data/Quinsam/2025-10-08-SalmonRiverChinookReleases-AllYears.xlsxx
+
+# SOM object, for base case productivity
+# (other productivities can be run by changing input SOM, and output location)
+# file: SOM/SOM_Salmon_base.rds
+
+# OUTPUTS:
+# SMSE objects for each model run, across 416 combinations of preterminal ERs
+# and hatchery production levels, labeled 1:416
+# file: SMSE/Salmon/QC1.rds to Salmon416.rds
+
+#-------------------------------------------------------------------------------
+
+# Libraries
+library(tidyverse)
+library(salmonMSE)
+
+
+
+# Create grid of u_preterminal and n_yearling
+# Default is u_preterminal is mean(UPT)=0.449 n_yearling in hatch_rel=3561051
+
+folder_path <- "SMSE/Salmon/NoHatch"
+if (!dir.exists(here::here(folder_path))) {
+  dir.create(here::here(folder_path), recursive = TRUE)
+}
+
+  g <- expand.grid(
+    u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
+    n_yearling = 0
+  )
+
+  nOM <- nrow(g)
+
+
+
+  library(snowfall)
+  library(parallel)
+  sfInit(TRUE, nOM, cpus=(parallel::detectCores()-1))
+
+
+  tictoc::tic()
+  SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
+    require(salmonMSE)
+
+    SOM <- readRDS(file.path("SOM", "SOM_Salmon_base.rds"))
+    # SOM@Hatchery@f_brood <- f_brood
+    SOM@Hatchery@n_yearling <- g$n_yearling[i]
+    SOM@Harvest@u_preterminal <- g$u_preterminal[i]
+    SMSE <- salmonMSE(SOM)
+
+    saveRDS(SMSE, file = file.path("SMSE", "Salmon", "NoHatch", paste0("Salmon", i, ".rds")))
+
+    invisible()
+
+  }, g = g)
+  tictoc::toc()
+
+#------------------------------------------------------------------------------

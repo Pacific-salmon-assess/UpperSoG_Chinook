@@ -350,40 +350,40 @@ Mjuv_HOS[, 4, , ] <- M_CTC[4]
 # # Apply ppnRemove_HOS value to  hatchery object below, or in a
 # # premove_HOS function in script 4
 
-# h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
-# Hatchery <- new(
-#   "Hatchery",
-#   n_r = n_r,
-#   n_yearling = 0, # Quinsam traditionals
-#   n_subyearling = 0,
-#   s_prespawn = 1, # # placeholder- hatchery obj not use
-#   s_egg_smolt = 1, # Brown et al. (2026) & B. Zoehner pers. comm. 2% mortality release-smolt x 10% mortality release-smolt   (1 - 0.98 x 0.9)=11.8% or 88.2%surv
-#   s_egg_subyearling = 1,
-#   s_year_smolt = 1, # placeholder- hatchery obj not used
-#   Mjuv_HOS = Mjuv_HOS,
-#   p_mature_HOS = p_mature, # Assume same maturity at NOS
-#   # stray_external = matrix(c(rep(0, 5), stray), maxage, 2),
-#   gamma = 0.8,  # HSRG standard, Sarita AHA inputs
-#   m = 1, # for purposes of premove_HOS for CWT sampling with is selective for marks. A different assumption (m=0) is made for f_brood - brood take rule is not selective for marks
-#   pmax_esc = 0.33, # Ignored if using Brood rule in projection.R file #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
-#   pmax_NOB = 1.0, # Ignored if using Brood rule in projection.R file #SEP guideline 0.5, suggested by Lian
-#   #f_brood = f_brood,  # Function defined in script 4
-#   ptarget_NOB = NA_real_,  # TBD
-#   phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
-#   hatchery_MSF = FALSE,
-#   premove_HOS = 0, #Fish removed for non-brood purposes, e.g. CWT. Alternative option in a function described in script 4.
-#   premove_NOS = 0,
-#   fec_brood = fec, #Assume the same age-specific fecundity in brood as in escapement
-#   fitness_type = c("Ford", "none"),
-#   theta = c(100, 80),
-#   rel_loss = rep(0, 3),
-#   zbar_start = c(90, 80),
-#   fitness_variance = 100,
-#   phenotype_variance = 10,
-#   heritability = h2,
-#   fitness_floor = 0.01
-# )
-#
+h2 <- EnvStats::rnormTrunc(nsim, 0.25, 0.15, min = 0, max = 0.5)
+Hatchery <- new(
+  "Hatchery",
+  n_r = n_r,
+  n_yearling = 0, # Quinsam traditionals
+  n_subyearling = 0,
+  s_prespawn = 1, # # placeholder- hatchery obj not use
+  s_egg_smolt = 1, # Brown et al. (2026) & B. Zoehner pers. comm. 2% mortality release-smolt x 10% mortality release-smolt   (1 - 0.98 x 0.9)=11.8% or 88.2%surv
+  s_egg_subyearling = 1,
+  s_year_smolt = 1, # placeholder- hatchery obj not used
+  Mjuv_HOS = Mjuv_HOS,
+  p_mature_HOS = p_mature, # Assume same maturity at NOS
+  # stray_external = matrix(c(rep(0, 5), stray), maxage, 2),
+  gamma = 0.8,  # HSRG standard, Sarita AHA inputs
+  m = 1, # for purposes of premove_HOS for CWT sampling with is selective for marks. A different assumption (m=0) is made for f_brood - brood take rule is not selective for marks
+  pmax_esc = 0.33, # Ignored if using Brood rule in projection.R file #SEP guideline = 0.33. but removals are up to to 63% of total returns to Quinsam (1-esc$p_spawn),
+  pmax_NOB = 1.0, # Ignored if using Brood rule in projection.R file #SEP guideline 0.5, suggested by Lian
+  #f_brood = f_brood,  # Function defined in script 4
+  ptarget_NOB = NA_real_,  # TBD
+  phatchery = NA_real_, #proportion of escapement that actually spawn from input data to CM #CHECK # Stand-in for ESSR fishery with HOS exploitation rates of 0.5, 0.75, or 1
+  hatchery_MSF = FALSE,
+  premove_HOS = 0, #Fish removed for non-brood purposes, e.g. CWT. Alternative option in a function described in script 4.
+  premove_NOS = 0,
+  fec_brood = fec, #Assume the same age-specific fecundity in brood as in escapement
+  fitness_type = c("Ford", "none"),
+  theta = c(100, 80),
+  rel_loss = rep(0, 3),
+  zbar_start = c(90, 80),
+  fitness_variance = 100,
+  phenotype_variance = 10,
+  heritability = h2,
+  fitness_floor = 0.01
+)
+
 
 ### Historical object ----
 
@@ -459,7 +459,7 @@ SOM <- new("SOM",
            Bio = Bio,
            Habitat = Habitat,
            Harvest = Harvest,
-           # Hatchery = Hatchery,
+           Hatchery = Hatchery,
            Historical = Historical)
 saveRDS(SOM, paste0("SOM/SOM_Adam_", msurv, ".rds"))
 

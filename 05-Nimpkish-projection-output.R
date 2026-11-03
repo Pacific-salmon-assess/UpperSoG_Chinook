@@ -22,7 +22,7 @@ library(ggplot2)
 pop <- "Nimpkish"
 
 # Get CM output for current PT and T ERs
-samp <- readRDS("CM/Woss_09.29.26.base.rds")
+samp <- readRDS("CM/Woss_10.22.26.base.rds")
 year1 <- 2001 # For Nimpkish/Woss
 save.files <- TRUE
 scenario <- "base"
@@ -210,24 +210,24 @@ val_sim <- val_sim_all %>%
     filter(Benchmark == "Sgen") %>%
     filter(Pop == pop) %>% select(med) %>% pull()
 
-#Sgen = 1645
-  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 1645) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 1645
+#Sgen = 1619
+  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 1619) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 1619
     mean(val)
   })
-#SMSY85 = 2569
-  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 2569) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 2569
-    mean(val)
-  })
-
-  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 1645) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 1645
+#SMSY85 = 2482
+  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 2482) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 2482
     mean(val)
   })
 
-  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 2569) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  2569
+  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 1619) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 1619
+    mean(val)
+  })
+
+  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 2482) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  2482
     mean(val)
   })
 
@@ -1205,17 +1205,17 @@ g <- val_sim %>%
   rename(value = median)
 
 if(scenario == "base" | scenario =="high") {
-  g <- g %>%
-    mutate(value = ifelse(value <= 300, "0-300",
-                          ifelse(value > 300 & value <= 600, "301-600",
-                                 ifelse(value > 600 & value <= 900, "601-900",
-                                        ifelse(value > 900 & value <= 1200, "901-1200",
-                                               ">1200")))))
+   g <- g %>%
+    mutate(value = ifelse(value < 500, "0-500",
+                          ifelse(value >= 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value < 1500, "1001-1500",
+                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
+                                               ">2000")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-300", "301-600", "601-900",
-                                        "901-1200", ">1200"))
-  col <- Ccol1200
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccolc#Ccol1200
 
 }
 
@@ -1270,16 +1270,27 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario == "high") {
   g <- g %>%
-    mutate(value = ifelse(value <= 250, "0-250",
-                          ifelse(value > 250 & value <= 500, "251-500",
-                                 ifelse(value > 500 & value <= 750, "501-750",
-                                        ifelse(value > 750 & value <= 1000, "751-1000",
-                                               ">1000")))))
+    mutate(value = ifelse(value < 500, "0-500",
+                          ifelse(value >= 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value < 1500, "1001-1500",
+                                        ifelse(value >= 1500 & value < 2000, "1501-2000",
+                                               ">2000")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-250", "251-500", "501-750",
-                                        "751-1000", ">1000"))
-  col <- Ccol1000
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccolc
+  # g <- g %>%
+  #   mutate(value = ifelse(value <= 300, "0-300",
+  #                         ifelse(value > 300 & value <= 600, "301-600",
+  #                                ifelse(value > 600 & value <= 900, "601-900",
+  #                                       ifelse(value > 900 & value <= 1200, "901-1200",
+  #                                              ">1200")))))
+  #
+  # # Specify order of legend elements:
+  # g$value <- factor(g$value, levels = c("0-300", "301-600", "601-900",
+  #                                       "901-1200", ">1200"))
+  # col <- Ccol1200#1000
 
 }
 
@@ -1417,7 +1428,7 @@ ggsave(file.path("figures", "SMSE", pop, paste0("gic3_", pop, file_suffix, ".png
 
 
 #### Trade-off figures
-# PNI vs natural spawners
+# PNI vs natural spawners - all sims
 
 PNI_NS <- val_sim %>%
   filter(variable %in% c("PNI", "Natural Spawners")) %>%
@@ -1432,61 +1443,6 @@ PNI_NS <- val_sim %>%
       include.lowest = TRUE, right = TRUE
     )
   )
-
-# pm1 <-  PNI_NS$`Natural Spawners`
-# pm2 <-  PNI_NS$PNI
-# x1 <-  factor(PNI_NS$u_preterminal)
-# x2 <-  PNI_NS$bin
-# # x2 = PNI_NS$n_yearling,
-# xlab <-  "Natural spawners (median)"
-# ylab <-  "PNI (median)"
-# x1lab <-  "Exploitation\nrate"
-# x2lab <-  "Relative\nhatchery\nproduction"
-#
-# #if (is.numeric(x1)) x1 <- factor(x1)
-# if (is.numeric(x2)) x2 <- factor(x2)
-# dt <- data.frame(
-#   pm1 = if (is.matrix(pm1)) pm1[, 2] else pm1,
-#   pm2 = if (is.matrix(pm1)) pm2[, 2] else pm2,
-#   pm1_lower = if (is.matrix(pm1)) pm1[, 1] else pm1,
-#   pm2_lower = if (is.matrix(pm1)) pm2[, 1] else pm2,
-#   pm1_upper = if (is.matrix(pm1)) pm1[, 3] else pm1,
-#   pm2_upper = if (is.matrix(pm1)) pm2[, 3] else pm2,
-#   x1 = x1,
-#   x2 = x2
-# )
-#
-# if (!missing(scenario)) {
-#   dt$scenario <- scenario
-# } else if (!missing(scenario_rows) && !missing(scenario_cols)) {
-#   dt$scenario_rows <- scenario_rows
-#   dt$scenario_cols <- scenario_cols
-# }
-#
-# # Initial ggplot call
-# g <- ggplot(dt, aes(pm1, pm2, colour = x1, shape = x2))
-#
-# # Add points, i.e., the results to figure
-# g <- g +
-#   geom_point() +
-#   theme_bw() +
-#   theme(panel.grid = element_blank())
-#
-# # Add errorbars
-# if (is.matrix(pm1)) {
-#   g <- g + geom_linerange(aes(xmin = .data$pm1_lower, xmax = .data$pm1_upper), linewidth = 0.25)
-# }
-# if (is.matrix(pm2)) {
-#   g <- g + geom_linerange(aes(ymin = .data$pm2_lower, ymax = .data$pm2_upper), linewidth = 0.25)
-# }
-#
-# # Remove legends if needed
-# if (length(unique(x1)) == 1) {
-#   g <- g + guides(colour = "none")
-# }
-# if (length(unique(x2)) == 1) {
-#   g <- g + guides(shape = "none")
-# }
 
 # Get abundances and PNI of current ER and hatch prod = 1
 df <- val_sim %>%
@@ -1518,6 +1474,231 @@ gto <- plot_tradeoff(
 # Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
 ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, ".png")), gto,
        height = 7, width = 7)
+
+# PNI vs natural spawners - close up around current
+
+PNI_NS <- val_sim %>%
+  filter(variable %in% c("PNI", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  filter(n_yearling %in% c(0.8, 0.9, 1.0, 1.1, 1.2))
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("PNI", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = PNI, x = 'Natural Spawners') %>% select(x, y)
+
+gto_close <- plot_tradeoff(
+  pm1 = PNI_NS$`Natural Spawners`,
+  pm2 = PNI_NS$PNI,
+  x1 = factor(PNI_NS$u_preterminal),
+  x2 = factor(PNI_NS$n_yearling),
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Natural spawners (median)",
+  ylab = "PNI (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  # geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
+  geom_vline(xintercept = Sgen, linetype = 3) + # SMSY
+  geom_vline(xintercept = SMSY85, linetype = 4) + # SMSY
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto_close_", pop, file_suffix, ".png")), gto_close,
+       height = 7, width = 7)
+
+# PNI vs total catch: all sims
+# get historical catches:
+medAggCatch <- read.csv("data/CatchAgg.base.csv") %>%
+  filter(pop == "Woss") %>%
+  pull(catch)
+
+
+PNI_Catch <- val_sim %>%
+  filter(variable %in% c("PNI", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  # filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  # filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("PNI", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = PNI, x = 'Aggcatch') %>% select(x, y)
+
+
+gto2 <- plot_tradeoff(
+  pm1 = PNI_Catch$`Aggcatch`,
+  pm2 = PNI_Catch$PNI,
+  x1 = factor(PNI_Catch$u_preterminal),
+  x2 = PNI_Catch$bin,
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "PNI (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
+  geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto2_", pop, file_suffix, ".png")), gto2,
+       height = 7, width = 7)
+
+# PNI vs total catch: close up around current
+# get historical catches:
+medAggCatch <- read.csv("data/CatchAgg.base.csv") %>%
+  filter(pop == "Woss") %>%
+  pull(catch)
+
+
+PNI_Catch <- val_sim %>%
+  filter(variable %in% c("PNI", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  filter(n_yearling %in% c(0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3))
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("PNI", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = PNI, x = 'Aggcatch') %>% select(x, y)
+
+
+gto2_close <- plot_tradeoff(
+  pm1 = PNI_Catch$`Aggcatch`,
+  pm2 = PNI_Catch$PNI,
+  x1 = factor(PNI_Catch$u_preterminal),
+  x2 = factor(PNI_Catch$n_yearling),
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "PNI (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  # geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
+  geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8, 18)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto2_close_", pop, file_suffix, ".png")), gto2_close,
+       height = 7, width = 7)
+
+# Spawners vs total catch: all sims
+Sp_Catch <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  # filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  # filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
+
+
+gto3 <- plot_tradeoff(
+  pm1 = Sp_Catch$`Aggcatch`,
+  pm2 = Sp_Catch$'Natural Spawners',
+  x1 = factor(Sp_Catch$u_preterminal),
+  x2 = Sp_Catch$bin,
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "Natural spawners (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+  geom_hline(yintercept = Sgen, linetype = 3) + # SMSY
+  geom_hline(yintercept = SMSY85, linetype = 4) + # SMSY
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto3_", pop, file_suffix, ".png")), gto3,
+       height = 7, width = 7)
+
+
+
+# Spawners vs total catch: close up around current
+Sp_Catch <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  filter(n_yearling %in% c(0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3))
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
+
+
+gto3_close <- plot_tradeoff(
+  pm1 = Sp_Catch$`Aggcatch`,
+  pm2 = Sp_Catch$'Natural Spawners',
+  x1 = factor(Sp_Catch$u_preterminal),
+  x2 = factor(Sp_Catch$n_yearling),
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "Natural spawners (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+  geom_hline(yintercept = Sgen, linetype = 3) + # SMSY
+  geom_hline(yintercept = SMSY85, linetype = 4) + # SMSY
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8, 18)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto3_close_", pop, file_suffix, ".png")), gto3_close,
+       height = 7, width = 7)
+
+
 
 #### Other Trade-off figures
 # Not implemented

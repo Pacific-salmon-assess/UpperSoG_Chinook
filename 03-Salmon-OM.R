@@ -127,7 +127,6 @@ fec_Salmon <- round(aveFecFemale * 0.5 * ppn4) # fecundity per total spawner by 
 fec <- fec_Salmon * 0.95
 
 
-
 phi <- sapply(report[sim_samp], getElement, "epro")
 tau <- sapply(report[sim_samp], getElement, "spro")
 

@@ -37,19 +37,19 @@ nOM <- nrow(gr)
 for (pop in c("QC", "Nimpkish", "Salmon", "Adam")){
 
 if(pop == "QC") {
-  samp <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
+  samp <- readRDS("CM/QuinsamCampbell_10.22.26.base.rds")
   year1 <- 1984 # For Quinsam/Campbell
 }
 if(pop == "Nimpkish") {
-  samp <- readRDS("CM/Woss_09.29.26.base.rds")
+  samp <- readRDS("CM/Woss_10.22.26.base.rds")
   year1 <- 2001
 }
 if(pop == "Salmon") {
-  samp <- readRDS("CM/Salmon_09.29.26.base.rds")
+  samp <- readRDS("CM/Salmon_10.22.26.base.rds")
   year1 <- 2002
 }
 if(pop == "Adam") {
-  samp <- readRDS("CM/Adam_09.29.26.base.rds")
+  samp <- readRDS("CM/Adam_10.22.26.base.rds")
   year1 <- 2002
   }
 
@@ -148,6 +148,25 @@ AggNOcatch <- sapply(SMSE_list, function(x) {#Aggregate natural-origin catch
 
 assign(paste0("AggNOcatch_", pop), AggNOcatch)
 
+
+PNI <- sapply(SMSE_list, function(x) {#Aggregate natural-origin catch
+  PNI <- x@PNI[ ,1, y]
+}) %>%
+  reshape2::melt() %>%
+  rename(Simulation = Var1, PNI = value, n = Var2)
+
+assign(paste0("PNI_", pop), PNI)
+
+
+pHOS <- sapply(SMSE_list, function(x) {#Aggregate natural-origin catch
+  PHOS <- x@pHOS_effective[ ,1, y]
+}) %>%
+  reshape2::melt() %>%
+  rename(Simulation = Var1, pHOS = value, n = Var2)
+
+assign(paste0("pHOS_", pop), pHOS)
+
+
 # Get PT ER for icecream plots
 report <- salmonMSE:::get_report(samp)
 d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
@@ -224,6 +243,20 @@ AggNOcatch_nat <- AggNOcatch_Nimpkish
 AggNOcatch_nat[,3] <- AggNOcatch_Nimpkish[,3] + AggNOcatch_Salmon[,3] +
   AggNOcatch_Adam[,3]
 
+totAbd <- NS_QC[,3] + NS_Nimpkish[,3] + NS_Salmon[,3] + NS_Adam[,3]
+pHOS_tot <- pHOS_QC
+pHOS_tot[,3] <- pHOS_QC[,3] * (NS_QC[,3] / totAbd) +
+  pHOS_Nimpkish[,3] * (NS_Nimpkish[,3] / totAbd) +
+  pHOS_Salmon[,3] * (NS_Salmon[,3] / totAbd) +
+  pHOS_Adam[,3] * (NS_Adam[,3] / totAbd)
+
+natAbd <- NS_Nimpkish[,3] + NS_Salmon[,3] + NS_Adam[,3]
+pHOS_nat <- pHOS_Nimpkish
+pHOS_nat[,3] <- pHOS_Nimpkish[,3] * (NS_Nimpkish[,3] / natAbd) +
+  pHOS_Salmon[,3] * (NS_Salmon[,3] / natAbd) +
+  pHOS_Adam[,3] * (NS_Adam[,3] / natAbd)
+
+
 # State variables for all simulations in year y in one data frame
 # val_sim_all_tot <- list(NS_tot, NS_nat, Ret_tot, Ret_nat, Tcatch_tot, Tcatch_nat,
 #                     PTcatch_tot, PTcatch_nat, Aggcatch_tot, Aggcatch_nat,
@@ -231,7 +264,8 @@ AggNOcatch_nat[,3] <- AggNOcatch_Nimpkish[,3] + AggNOcatch_Salmon[,3] +
 #                     AggNOcatch_nat) %>%
 val_sim_all_tot <- list(NS_tot, Ret_tot, Tcatch_tot,
                     PTcatch_tot, Aggcatch_tot,
-                    AggHOcatch_tot,  AggNOcatch_tot) %>%
+                    AggHOcatch_tot,  AggNOcatch_tot,
+                    pHOS_tot) %>%
   Reduce(left_join, .) %>%
   left_join(gr %>% select( n), by = "n") %>%#Option_name,
   # rename(Option = Option_name) %>%
@@ -252,7 +286,8 @@ val_sim_tot <- val_sim_all_tot %>%
 # State variables for all simulations in year y in one data frame
 val_sim_all_nat <- list(NS_nat, Ret_nat, Tcatch_nat,
                         PTcatch_nat, Aggcatch_nat,
-                        AggHOcatch_nat, AggNOcatch_nat) %>%
+                        AggHOcatch_nat, AggNOcatch_nat,
+                        pHOS_nat) %>%
   Reduce(left_join, .) %>%
   left_join(gr %>% select( n), by = "n") %>%#Option_name,
   # rename(Option = Option_name) %>%
@@ -269,6 +304,58 @@ val_sim_nat <- val_sim_all_nat %>%
             upr = quantile(value, 0.75, na.rm = TRUE),
             .by = c( "n", "variable"))
 
+
+# Prob of PNI >0.8 for both Salmon and Nimpkish
+
+
+SMSE_list_Nimpkish <- lapply(gr$n, function(i) {
+  SMSE <- readRDS(file.path("SMSE", "Nimpkish", paste0("Nimpkish", i, ".rds")))
+
+  # Update PNI = 1 when there is no brood & pHOS = 0
+  Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]
+  # Brood is age-selective. Take age-5s for purposes of setting PNI to 1
+  NoBrood <- Brood < 0.001
+  pHOS_zero <- SMSE@pHOS_effective < 0.001
+  # if(any(NoBrood)) print(i)
+  # if(any(pHOS_zero)) print(i)
+  SMSE@PNI[pHOS_zero] <- 1
+  SMSE@PNI[NoBrood] <- 1
+
+  return(SMSE)
+})
+
+SMSE_list_Salmon <- lapply(gr$n, function(i) {
+  SMSE <- readRDS(file.path("SMSE", "Salmon", paste0("Salmon", i, ".rds")))
+
+  # Update PNI = 1 when there is no brood & pHOS = 0
+  Brood <- SMSE@HOB[,,5,] + SMSE@NOB[,,5,]
+  # Brood is age-selective. Take age-5s for purposes of setting PNI to 1
+  NoBrood <- Brood < 0.001
+  pHOS_zero <- SMSE@pHOS_effective < 0.001
+  # if(any(NoBrood)) print(i)
+  # if(any(pHOS_zero)) print(i)
+  SMSE@PNI[pHOS_zero] <- 1
+  SMSE@PNI[NoBrood] <- 1
+
+  return(SMSE)
+})
+
+
+PNI_Salmon <- sapply(SMSE_list_Salmon, function(x) {
+  PNI <- x@PNI[, 1, y]
+})
+PNI_Nimpkish <- sapply(SMSE_list_Nimpkish, function(x) {
+  PNI <- x@PNI[, 1, y]
+})
+
+
+P_PNI80_combined <- sapply(seq_len(ncol(PNI_Salmon)), function(i) {
+  mean(PNI_Salmon[,i]>0.8 & PNI_Nimpkish[,i]>0.8)
+})
+# Test: mean(PNI_Salmon[,416]>0.8 & PNI_Nimpkish[,416]>0.8)
+P_PNI80 <- gr %>% select(!c(u_preterminal, n_yearling))
+P_PNI80$variable <- "PNI80"
+P_PNI80$median <- P_PNI80_combined
 
 # MSY ref points from conditioning model
 
@@ -1188,9 +1275,29 @@ gto2 <- plot_tradeoff(
 
 # Tradeoff figure 3: aggregate total catch vs natural spawners from natural-
 # dominated systems ----
+# Get abundances and PNI of current ER and hatch prod = 1
 
-medAggCatch <- read.csv("data/CatchAgg.base.csv") %>% pull(catch)
-sum_medAggCatch <- sum(medAggCatch)
+y.dum <- round(UPTmed,2)*100
+y.dum <- ifelse(y.dum %% 2 == 0, y.dum,
+       ifelse(UPTmed*100 > y.dum, y.dum + 1, y.dum - 1))
+#y.dum/100
+
+df <- val_sim_nat %>%
+  filter(variable %in% c("Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == y.dum/100 & n_yearling == 1.0) %>%
+  rename(x = 'Natural Spawners') %>% select(x)
+# add current$x to plot at median catch line, as a diamong
+df <- val_sim_tot %>%
+  filter(variable %in% c("Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current$y <- df %>% filter(u_preterminal == y.dum/100 & n_yearling == 1.0) %>%
+  rename(y = 'Aggcatch') %>% select(y) %>% pull(y)
+
+# medAggCatch <- read.csv("data/CatchAgg.base.csv") %>% pull(catch)
+# sum_medAggCatch <- sum(medAggCatch)
 
 Aggcatch_NS_nat <- val_sim_tot %>% # from val_sim_tot (all populations)
   filter(variable %in% c("Aggcatch")) %>%
@@ -1218,7 +1325,10 @@ gto3 <- plot_tradeoff(
   geom_vline(xintercept = CM_Sgen, linetype = 3) + # SMSY
   geom_vline(xintercept = CM_85SMSY, linetype = 4) + # SMSY
   geom_point(size = 3) +
-  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))  +
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+
 
 # Tradeoff figure 4: aggregate HO catch vs natural spawners from natural-
 # dominated systems ----
@@ -1253,6 +1363,123 @@ gto4 <- plot_tradeoff(
   geom_point(size = 3) +
   scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
 
+# Tradeoff figure 5: aggregate catch vs prob PNI >0.8 for both Salmon and
+# Nimpkish ----
+
+y.dum <- round(UPTmed,2)*100
+y.dum <- ifelse(y.dum %% 2 == 0, y.dum,
+                ifelse(UPTmed*100 > y.dum, y.dum + 1, y.dum - 1))
+
+df <- val_sim_tot %>%
+  filter(variable %in% c("Aggcatch")) %>%
+  add_row(P_PNI80) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == y.dum/100 & n_yearling == 1.0) %>%
+  rename(x = 'Aggcatch', y = 'PNI80') %>% select(x,y)
+# add current$x to plot at median catch line, as a diamong
+
+Aggcatch_PNI <- val_sim_tot %>% # from val_sim_tot (all populations)
+  filter(variable %in% c("Aggcatch")) %>%
+  add_row(P_PNI80) %>% # from val_sim_nat (only natural dominated pops)
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+
+gto5 <- plot_tradeoff(
+  pm1 = Aggcatch_PNI$Aggcatch,
+  pm2 = Aggcatch_PNI$PNI80,
+  x1 = factor(Aggcatch_PNI$u_preterminal),
+  x2 = Aggcatch_PNI$bin,
+  xlab = "Aggregate catch (median)",
+  ylab = "Probability that PNI >0.8 for\nall 3 natural-dominated populations",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = sum_medAggCatch, linetype = 2) +
+  geom_hline(yintercept = 0.5, linetype = 2) +
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+  # Lines make this too messy
+  # geom_line(aes(group = Aggcatch_PNI$n_yearling),
+  #         colour = "grey70")
+
+  # Plot close-up on this figure- n_yearling 0.7-1.3
+  #
+
+# Spawners vs total catch: close up around current
+Aggcatch_PNI <- val_sim_tot %>% # from val_sim_tot (all populations)
+  filter(variable %in% c("Aggcatch")) %>%
+  add_row(P_PNI80) %>% # from val_sim_nat (only natural dominated pops)
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  filter(n_yearling %in% c(0.8, 0.9, 1.0, 1.1, 1.2))
+gto5_close <- plot_tradeoff(
+  pm1 = Aggcatch_PNI$Aggcatch,
+  pm2 = Aggcatch_PNI$PNI80,
+  x1 = factor(Aggcatch_PNI$u_preterminal),
+  x2 = factor(Aggcatch_PNI$n_yearling),
+  xlab = "Aggregate catch (median)",
+  ylab = "Probability that PNI >0.8 for\nall 3 natural-dominated populations",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = sum_medAggCatch, linetype = 2) +
+  geom_hline(yintercept = 0.5, linetype = 2) +
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8, 18)) +
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+
+# Tradeoff figure 6: aggregate catch vs total pHOS (weighted ave based on
+# spawner abundances) ----
+df <- val_sim_tot %>%
+  filter(variable %in% c("Aggcatch", "pHOS")) %>%
+  add_row(P_PNI80) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == y.dum/100 & n_yearling == 1.0) %>%
+  rename(x = 'Aggcatch', y = 'pHOS') %>% select(x,y)
+# add current$x to plot at median catch line, as a diamong
+
+Aggcatch_pHOS <- val_sim_tot %>% # from val_sim_tot (all populations)
+  filter(variable %in% c("Aggcatch", "pHOS")) %>%
+  add_row(P_PNI80) %>% # from val_sim_nat (only natural dominated pops)
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+
+gto6 <- plot_tradeoff(
+  pm1 = Aggcatch_pHOS$Aggcatch,
+  pm2 = Aggcatch_pHOS$pHOS,
+  x1 = factor(Aggcatch_pHOS$u_preterminal),
+  x2 = Aggcatch_pHOS$bin,
+  xlab = "Aggregate catch (median)",
+  ylab = "pHOS (weighted average over all populations)",
+  x1lab = "Exploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = sum_medAggCatch, linetype = 2) +
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
 
 if(save.files){
   ggsave(file.path("figures", "SMSE", "Aggregate",
@@ -1267,6 +1494,16 @@ if(save.files){
   ggsave(file.path("figures", "SMSE", "Aggregate",
                    paste0("gto4_Agg", file_suffix, ".png")),
          gto4, height = 7, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto5_Agg", file_suffix, ".png")),
+         gto5, height = 7, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto5_Agg_close", file_suffix, ".png")),
+         gto5_close, height = 7, width = 7)
+  ggsave(file.path("figures", "SMSE", "Aggregate",
+                   paste0("gto6", file_suffix, ".png")),
+         gto6, height = 7, width = 7)
+
 }
 
 

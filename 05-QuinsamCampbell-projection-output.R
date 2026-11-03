@@ -42,7 +42,7 @@ library(ggplot2)
 
 
 # Get CM output for current PT and T ERs
-samp <- readRDS("CM/QuinsamCampbell_09.29.26.base.rds")
+samp <- readRDS("CM/QuinsamCampbell_10.22.26.base.rds")
 year1 <- 1984 # For Quinsam/Campbell
 save.files <- TRUE
 scenario <- "base"
@@ -1424,6 +1424,56 @@ if(save.files){
          gic2, height = 9, width = 7)
   # ggsave(file.path("figures", "SMSE", "gic3_QC.png"), gic3, height = 7, width = 5)
 }
+
+#### Trade-off figures
+
+# Spawners vs total catch: all sims
+Sp_Catch <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  # filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  # filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
+
+medAggCatch <- read.csv("data/CatchAgg.base.csv") %>%
+  filter(pop == "QC") %>%
+  pull(catch)
+
+gto3 <- plot_tradeoff(
+  pm1 = Sp_Catch$`Aggcatch`,
+  pm2 = Sp_Catch$'Natural Spawners',
+  x1 = factor(Sp_Catch$u_preterminal),
+  x2 = Sp_Catch$bin,
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "Natural spawners (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  # geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+ggsave(file.path("figures", "SMSE", pop, paste0("gto3_", pop, file_suffix, ".png")), gto3,
+       height = 7, width = 7)
 
 
 #### Trade-off figures

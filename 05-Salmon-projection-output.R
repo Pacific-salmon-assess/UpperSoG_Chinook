@@ -19,7 +19,7 @@ pop <- "Salmon"
 # source("92-decision-table-plots.R") #for alternative version of decision tables
 
 # Get CM output for current PT and T ERs
-samp <-  readRDS("CM/Salmon_09.29.26.base.rds")
+samp <-  readRDS("CM/Salmon_10.22.26.base.rds")
 year1 <- 2002 # For Salmon
 scenario <- "base"
 if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
@@ -207,23 +207,23 @@ val_sim <- val_sim_all %>%
     filter(Pop == pop) %>% select(med) %>% pull()
 
 #Sgen = 304
-  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 304) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 304
+  P_Sgen_NOS <- sapply(SMSE_list, function(x, Sgen = 308) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 308
     mean(val)
   })
 #SMSY85 = 429
-  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 429) {
-    val <- rowSums(x@NOS[, 1, , y]) >= 429
+  P_Smsy85_NOS <- sapply(SMSE_list, function(x, SMSY = 428) {
+    val <- rowSums(x@NOS[, 1, , y]) >= 428
     mean(val)
   })
 
-  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 304) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 304
+  P_Sgen <- sapply(SMSE_list, function(x, Sgen = 308) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >= 308
     mean(val)
   })
 
-  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 429) {
-    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  429
+  P_Smsy85 <- sapply(SMSE_list, function(x, SMSY = 428) {
+    val <- rowSums(x@NOS[, 1, , y] + x@HOS[, 1, , y]) >=  428
     mean(val)
   })
 
@@ -521,6 +521,30 @@ CcolSp <- c("0-200" = '#d01c8b', "201-400" = '#f1b6da',
             ">800" = '#4dac26')
 
 
+Ccol1000 <- c("0-250" = '#d01c8b', "251-500" = '#f1b6da',
+              "501-750" = '#f7f7f7', "751-1000" = '#b8e186',
+              ">1000" = '#4dac26')
+
+Ccol1200 <- c("0-300" = '#d01c8b', "301-600" = '#f1b6da',
+              "601-900" = '#f7f7f7', "901-1200" = '#b8e186',
+              ">1200" = '#4dac26')
+
+Ccol1600 <- c("0-400" = '#d01c8b', "401-800" = '#f1b6da',
+              "801-1200" = '#f7f7f7', "1201-1600" = '#b8e186',
+              ">1600" = '#4dac26')
+
+Ccol2000 <- c("0-500" = '#d01c8b', "501-1000" = '#f1b6da',
+              "1001-1500" = '#f7f7f7',
+              "1501-2000" = '#b8e186', ">2000" = '#4dac26')
+
+Ccol4000 <- c("0-1000" = '#d01c8b', "1001-2000" = '#f1b6da',
+              "2001-3000" = '#f7f7f7', "3001-4000" = '#b8e186',
+              ">4000" = '#4dac26')
+
+Ccol6000 <- c("0-1500" = '#d01c8b', "1501-3000" = '#f1b6da',
+              "3001-4500" = '#f7f7f7', "4501-6000" = '#b8e186',
+              ">6000" = '#4dac26')
+
 CcolRel <- c("0-1" = '#d01c8b',
             "1.1-2" = '#f1b6da',
             "2.1-3" = '#f7f7f7', "3.1-4" = '#b8e186',
@@ -529,10 +553,6 @@ CcolRel <- c("0-1" = '#d01c8b',
 CcolPNI <- c("0-0.30" = '#d01c8b', "0.31-0.50" = '#f1b6da',
              "0.51-0.70" = '#f7f7f7', "0.71-0.79" = '#b8e186',
              "0.80-1.0"= '#4dac26')
-
-CcolTc <- c("0-10" = '#d01c8b', "11-20" = '#f1b6da',
-             "21-30" = '#f7f7f7', "31-40" = '#b8e186',
-             ">40" = '#4dac26')
 
 
 Ccolc <- c("0-100" = '#d01c8b', "101-200" = '#f1b6da',
@@ -557,9 +577,6 @@ Ccolhoc <- c("0-50" = '#d01c8b', "51-100" = '#f1b6da',
            ">200" = '#4dac26')
 
 
-CcolTc <- c("0-5" = '#d01c8b', "6-10" = '#f1b6da',
-           "11-15" = '#f7f7f7', "16-20" = '#b8e186',
-           ">20" = '#4dac26')
 
 
 CcolRet <- c("0-400" = '#d01c8b', "401-800" = '#f1b6da',
@@ -725,15 +742,15 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario =="high"){
   g <- g %>%
-    mutate(value = ifelse(value < 200, "0-200",
-                          ifelse(value >= 200 & value <= 400, "201-400",
-                                 ifelse(value > 400 & value < 600, "401-600",
-                                        ifelse(value >= 600 & value < 800, "601-800",
-                                               ">800")))))
+    mutate(value = ifelse(value <= 500, "0-500",
+                          ifelse(value > 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value <= 1500, "1001-1500",
+                                        ifelse(value > 1500 & value <= 2000, "1501-2000",
+                                               ">2000")))))
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
-                                        "601-800", ">800"))
-  col <- CcolSp
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccol2000
 }
 
 if(scenario == "low"){
@@ -935,16 +952,16 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario =="high") {
   g <- g %>%
-    mutate(value = ifelse(value < 200, "0-200",
-                          ifelse(value >= 200 & value <= 400, "201-400",
-                                 ifelse(value > 400 & value < 600, "401-600",
-                                        ifelse(value >= 600 & value < 800, "601-800",
-                                               ">800")))))
+    mutate(value = ifelse(value <= 500, "0-500",
+                          ifelse(value > 500 & value <= 1000, "501-1000",
+                                 ifelse(value > 1000 & value <= 1500, "1001-1500",
+                                        ifelse(value > 1500 & value <= 2000, "1501-2000",
+                                               ">2000")))))
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-200", "201-400", "401-600",
-                                        "601-800", ">800"))
-  col <- CcolSp
-}
+  g$value <- factor(g$value, levels = c("0-500", "501-1000", "1001-1500",
+                                        "1501-2000", ">2000"))
+  col <- Ccol2000
+  }
 if(scenario == "low"){
   g <- g %>%
     mutate(value = ifelse(value <= 100, "0-100",
@@ -1054,16 +1071,16 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario == "high"){
   g <- g %>%
-    mutate(value = ifelse(value < 100, "0-100",
-                          ifelse(value >= 100 & value <= 200, "101-200",
-                                 ifelse(value > 200 & value < 300, "201-300",
-                                        ifelse(value >= 300 & value < 400, "301-400",
-                                               ">400")))))
+    mutate(value = ifelse(value <= 300, "0-300",
+                          ifelse(value > 300 & value <= 600, "301-600",
+                                 ifelse(value > 600 & value <= 900, "601-900",
+                                        ifelse(value > 900 & value <= 1200, "901-1200",
+                                               ">1200")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
-                                        "301-400", ">400"))
-  col <- Ccolc
+  g$value <- factor(g$value, levels = c("0-300", "301-600", "601-900",
+                                        "901-1200", ">1200"))
+  col <- Ccol1200
 
 }
 if(scenario == "low"){
@@ -1183,16 +1200,16 @@ g <- val_sim %>%
   rename(value = median)
 if(scenario == "base" | scenario =="high"){
   g <- g %>%
-    mutate(value = ifelse(value < 50, "0-50",
-                          ifelse(value >= 50 & value <= 100, "51-100",
-                                 ifelse(value > 100 & value < 150, "101-150",
-                                        ifelse(value >= 150 & value < 200, "151-200",
-                                               ">200")))))
+    mutate(value = ifelse(value <= 250, "0-250",
+                          ifelse(value > 250 & value <= 500, "251-500",
+                                 ifelse(value > 500 & value <= 750, "501-750",
+                                        ifelse(value > 750 & value <= 1000, "751-1000",
+                                               ">1000")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-50", "51-100", "101-150",
-                                        "151-200", ">200"))
-  col <- Ccolhoc
+  g$value <- factor(g$value, levels = c("0-250", "251-500", "501-750",
+                                        "751-1000", ">1000"))
+  col <- Ccol1000
 
 }
 if(scenario == "low"){
@@ -1246,16 +1263,16 @@ g <- val_sim %>%
 
 if(scenario == "base" | scenario == "high"){
   g <- g %>%
-    mutate(value = ifelse(value < 100, "0-100",
-                          ifelse(value >= 100 & value <= 200, "101-200",
-                                 ifelse(value > 200 & value < 300, "201-300",
-                                        ifelse(value >= 300 & value < 400, "301-400",
-                                               ">400")))))
+    mutate(value = ifelse(value <= 300, "0-300",
+                          ifelse(value > 300 & value <= 600, "301-600",
+                                 ifelse(value > 600 & value <= 900, "601-900",
+                                        ifelse(value > 900 & value <= 1200, "901-1200",
+                                               ">1200")))))
 
   # Specify order of legend elements:
-  g$value <- factor(g$value, levels = c("0-100", "101-200", "201-300",
-                                        "301-400", ">400"))
-  col <- Ccolc
+  g$value <- factor(g$value, levels = c("0-300", "301-600", "601-900",
+                                        "901-1200", ">1200"))
+  col <- Ccol1200
 }
 
 if(scenario == "low"){
@@ -1310,21 +1327,22 @@ g <- val_sim %>%
   filter(variable == "Tcatch") %>%
   select(u_preterminal, n_yearling, median, n) %>%
   rename(value = median) %>%
-  mutate(value = ifelse(value <= 25, "0-25",
-                        ifelse(value > 25 & value <= 50, "26-50",
-                               ifelse(value > 50 & value <= 75, "51-75",
-                                      ifelse(value > 75 & value <= 100, "76-100",
-                                             ">100")))))
+  mutate(value = ifelse(value <= 10, "0-10",
+                        ifelse(value > 10 & value <= 20, "11-20",
+                               ifelse(value > 20 & value <= 30, "21-30",
+                                      ifelse(value > 30 & value <= 40, "31-40",
+                                             ">40")))))
 
 # Specify order of legend elements:
-g$value <- factor(g$value, levels = c("0-25", "26-50", "51-75",
-                                      "76-100", ">100"))
+g$value <- factor(g$value, levels = c("0-10", "11-20", "21-30",
+                                      "31-40", ">40"))
+col <- Ccol40
 
 gtc<- g %>% ggplot(aes(x = n_yearling, y = u_preterminal, fill = value,
                        z = value)) +
   geom_raster() +
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_manual(values = Ccol100,
+  scale_fill_manual(values = col,
                     name = "Terminal\ncatch") +
   theme(legend.position = "top", legend.text = element_text(size = 10),
         legend.title = element_text(size = 13)) +
@@ -1393,6 +1411,16 @@ PNI_NS <- val_sim %>%
       include.lowest = TRUE, right = TRUE
     )
   )
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("PNI", "Natural Spawners")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = PNI, x = 'Natural Spawners') %>% select(x, y)
+
+
 gto <- plot_tradeoff(
   pm1 = PNI_NS$`Natural Spawners`,
   pm2 = PNI_NS$PNI,
@@ -1404,17 +1432,118 @@ gto <- plot_tradeoff(
   x1lab = "Exploitation\nrate",
   x2lab = "Relative\nhatchery\nproduction"
 ) +
-  geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
+  # geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
   geom_vline(xintercept = Sgen, linetype = 3) + # SMSY
   geom_vline(xintercept = SMSY85, linetype = 4) + # SMSY
   geom_point(size = 3) +
-  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8))
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
 
 
 ggsave(file.path("figures", "SMSE", pop, paste0("gto_", pop, file_suffix, ".png")), gto,
        height = 7, width = 7)
 
 
+# PNI vs total catch
+# get historical catches
+medAggCatch <- read.csv("data/CatchAgg.base.csv") %>%
+  filter(pop == "Salmon") %>%
+  pull(catch)
+
+
+PNI_Catch <- val_sim %>%
+  filter(variable %in% c("PNI", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  # filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  # filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("PNI", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = PNI, x = 'Aggcatch') %>% select(x, y)
+
+
+gto2 <- plot_tradeoff(
+  pm1 = PNI_Catch$`Aggcatch`,
+  pm2 = PNI_NS$PNI,
+  x1 = factor(PNI_NS$u_preterminal),
+  x2 = PNI_NS$bin,
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "PNI (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  # geom_hline(yintercept = 0.8, linetype = 2) + # PNI target
+  geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto2_", pop, file_suffix, ".png")), gto2,
+       height = 7, width = 7)
+
+
+# Spawners vs total catch
+Sp_Catch <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median") %>%
+  # filter(u_preterminal %in% c(0.00, 0.10, 0.20, 0.30, 0.40, 0.50)) %>%
+  # filter(n_yearling %in% c(0.50, 0.75, 1.00, 1.25, 1.50))
+  mutate(
+    bin = cut(
+      n_yearling, breaks = seq(0.5, 2.0, length.out = 7),
+      labels = c("50-75%", "75-100%", "100-125%", "125-150%", "150-175%", "175-200%"),
+      include.lowest = TRUE, right = TRUE
+    )
+  )
+
+# Get abundances and PNI of current ER and hatch prod = 1
+df <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+current <- df %>% filter(u_preterminal == round(UPTmed,2) & n_yearling == 1.0) %>%
+  rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
+
+
+gto3 <- plot_tradeoff(
+  pm1 = Sp_Catch$`Aggcatch`,
+  pm2 = Sp_Catch$'Natural Spawners',
+  x1 = factor(Sp_Catch$u_preterminal),
+  x2 = Sp_Catch$bin,
+  # x2 = PNI_NS$n_yearling,
+  xlab = "Aggregate catch (median)",
+  ylab = "Natural spawners (median)",
+  x1lab = "Pre-terminal\nexploitation\nrate",
+  x2lab = "Relative\nhatchery\nproduction"
+) +
+  geom_vline(xintercept = medAggCatch, linetype = 3) + # median historical total catch
+  geom_hline(yintercept = Sgen, linetype = 3) + # SMSY
+  geom_hline(yintercept = SMSY85, linetype = 4) + # SMSY
+  geom_point(size = 3) +
+  scale_shape_manual(values = c(15, 3, 16, 4, 17, 8)) +
+  # geom_point(data = current, aes(x=current$x,y=current$y), shape = 18, size = 3)
+  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+
+# Have to use geom_point is I want to add a legend for the diamone (current), but can't get it working mabybe beucase I'm layering several geom_points?
+ggsave(file.path("figures", "SMSE", pop, paste0("gto3_", pop, file_suffix, ".png")), gto3,
+       height = 7, width = 7)
 
 # #### Plot Simulated CYER- Quang's archived plots
 # CYER_PT <- calc_CYER(SMSE_list[[1]], PT = TRUE)

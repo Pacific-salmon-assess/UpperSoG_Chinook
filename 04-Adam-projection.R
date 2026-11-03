@@ -36,10 +36,11 @@ if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
-  # g <- expand.grid(
+  g <- expand.grid(
 
-g <- data.frame(u_preterminal = seq(0, 0.5, 0.02)#,# Add in FMSY
-    # n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
+    # g <- data.frame(u_preterminal = seq(0, 0.5, 0.02)#,# Add in FMSY
+    u_preterminal = seq(0, 0.5, 0.02),#,# Add in FMSY
+    n_yearling = hatch_rel * seq(0.5, 2.0, 0.1)
    )
 
   nOM <- nrow(g)
@@ -50,12 +51,12 @@ g <- data.frame(u_preterminal = seq(0, 0.5, 0.02)#,# Add in FMSY
   plot.base.case <- FALSE
 
   if(plot.base.case == TRUE){
-    SOM <- readRDS(file.path("SOM", "SOM_Adam_low.rds"))
-    # SOM <- readRDS(file.path("SOM", "SOM_Adam_base.rds"))
+    # SOM <- readRDS(file.path("SOM", "SOM_Adam_low.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Adam_base.rds"))
 
     # Add brood rule and premove_HOS rules to SOM
-    # SOM@Hatchery@f_brood <- f_brood
-    # SOM@Hatchery@premove_HOS <- premove_HOS
+    SOM@Hatchery@f_brood <- f_brood
+    SOM@Hatchery@premove_HOS <- premove_HOS
 
     SMSE <- salmonMSE(SOM)
     report(SMSE , dir = "SMSE")
