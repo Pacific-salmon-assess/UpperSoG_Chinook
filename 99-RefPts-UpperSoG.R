@@ -285,6 +285,16 @@ kappa <- median(as.numeric(exp(pars$log_cr))) #a
 vulPT <- sapply(report, getElement, "vulPT") %>% apply(1, median)
 vulT <- sapply(report, getElement, "vulT") %>% apply(1, median)
 
+
+# Terminal ER, median overall years and MC trials
+year <- year1 + seq(1, d$Ldyr) - 1
+year_borrow <- seq(max(year) - 9, max(year) - 5)
+
+
+UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
+                         index_AEQ = match(year_borrow, year)) %>% median(na.rm=T)
+
+
 compare_ref(
   a = kappa,
   Smax = Smax,
@@ -294,5 +304,6 @@ compare_ref(
   vulT = vulT,
   M = Mjuv,
   fec = fec,
-  p_mature = p_mature
+  p_mature = p_mature,
+  U_T = UT
 )
