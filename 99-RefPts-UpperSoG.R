@@ -307,5 +307,6 @@ compare_ref(
   M = Mjuv,
   fec = fec,
   p_mature = p_mature,
-  U_T = UT
+  U_T = UT,
+  s_enroute = 0.9
 )
