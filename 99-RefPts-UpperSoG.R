@@ -238,9 +238,11 @@ compare_ref(
 # Input Conditioning Model results
 maxage <- 5
 nsim <- 500
+year1 <- 2002
 ERM <- readRDS("CM/Salmon_10.22.26.base.rds")
 report <- salmonMSE:::get_report(ERM)
 d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+pars <- rstan::extract(ERM)
 
 # Take maturity average from the 5 most recent brood years (2020-2024)
 matt <- sapply(report, getElement, "matt", simplify = "array") %>%
