@@ -109,6 +109,7 @@ compare_ref <- function(a = 3, # Units of adults/spawner
                         M = c(1, 0.8, 0.6, 0.4),
                         fec = c(0, 1500, 3000, 3200, 3500),
                         p_mature = c(0, 0.1, 0.2, 0.3, 1),
+                        s_enroute = 1,
                         maximize = c("MSY", "MER")) {
 
   require(salmonMSE)
@@ -121,7 +122,7 @@ compare_ref <- function(a = 3, # Units of adults/spawner
     p_mature = p_mature,
     p_female = p_female,
     fec = fec,
-    s_enroute = 1
+    s_enroute = s_enroute
   )
 
   # To convert Smax from units of spawners to eggs:
@@ -135,7 +136,7 @@ compare_ref <- function(a = 3, # Units of adults/spawner
     p_mature = p_mature,
     p_female = p_female,
     fec = fec,
-    s_enroute = 1,
+    s_enroute = s_enroute,
     output = "spawner"
   )
 
@@ -163,7 +164,7 @@ compare_ref <- function(a = 3, # Units of adults/spawner
     vulPT = vulPT,
     vulT = vulT,
     p_mature = p_mature,
-    s_enroute = 1,
+    s_enroute = s_enroute,
     SRRpars = SRRpars,
     maximize = maximize,
     AEQ = TRUE,
@@ -178,7 +179,7 @@ compare_ref <- function(a = 3, # Units of adults/spawner
     vulPT = vulPT,
     vulT = vulT,
     p_mature = p_mature,
-    s_enroute = 1,
+    s_enroute = s_enroute,
     SRRpars = SRRpars,
     maximize = maximize,
     AEQ = TRUE,
