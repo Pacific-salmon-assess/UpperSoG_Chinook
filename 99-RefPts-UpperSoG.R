@@ -20,7 +20,7 @@ calc_eq_PT <- function(.F, Mjuv, fec, p_female, gamma = 1, U_T = 0.1, vulPT, vul
       catch <- surv_return * (1 - exp(-vulT * .F))
       sum(catch)/sum(surv_return) - U_T
     }
-    opt_UT <- uniroot(opt_fn, c(1e-8, 10))
+    opt_UT <- uniroot(opt_fn, c(1e-8, 10), U_T = U_T)
     Fopt <- opt_UT$root
   } else {
     Fopt <- 0
@@ -176,6 +176,7 @@ compare_ref <- function(a = 3, # Units of adults/spawner
     Mjuv = M,
     fec = fec,
     p_female = p_female,
+    U_T = U_T,
     vulPT = vulPT,
     vulT = vulT,
     p_mature = p_mature,
@@ -226,6 +227,7 @@ compare_ref(
   Smax = 1000,
   maxage = 5,
   p_female = 1,
+  U_T = 0.04,
   vulPT = c(0, 0.1, 0.2, 0.4, 1),
   vulT = c(0, 0.1, 0.2, 0.4, 1),
   M = c(1, 0.3, 0.2, 0.1),
