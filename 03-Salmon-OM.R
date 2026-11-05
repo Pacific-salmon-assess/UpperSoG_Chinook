@@ -93,7 +93,7 @@ if(msurv %in% c("low", "high")){
   m1_sample <- -log(s1_sim_trans)
 }
 
-Mjuv_NOS[, 1, , 1] <- m1_sample
+Mjuv_NOS[, 1, , 1] <- m1_sample#median(df, na.rm=T)#m1_sample
 
 
 # Age 2-5
@@ -373,5 +373,5 @@ SOM <- new("SOM",
            Hatchery = Hatchery,
            Harvest = Harvest,
            Historical = Historical)
-saveRDS(SOM, paste0("SOM/SOM_Salmon_", msurv, ".rds"))
+saveRDS(SOM, paste0("SOM/SOM_Salmon_", msurv, "_nontv.rds"))
 

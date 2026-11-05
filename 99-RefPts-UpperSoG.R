@@ -298,7 +298,7 @@ UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
                          index_AEQ = match(year_borrow, year)) %>% median(na.rm=T)
 
 
-compare_ref(
+SalmonRP <- compare_ref(
   a = kappa,
   Smax = Smax,
   maxage = 5,
@@ -311,3 +311,242 @@ compare_ref(
   U_T = UT,
   s_enroute = 0.9
 )
+# SalmonRP$salmonMSE[['UMSY (preterminal)']]
+
+
+#############################################################################
+# Apply to Salmon River
+# Input Conditioning Model results
+maxage <- 5
+nsim <- 500
+year1 <- 2002
+ERM <- readRDS("CM/Salmon_10.22.26.base.rds")
+report <- salmonMSE:::get_report(ERM)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+pars <- rstan::extract(ERM)
+
+# Take maturity average from the 5 most recent brood years (2020-2024)
+matt <- sapply(report, getElement, "matt", simplify = "array") %>%
+  aperm(c(1, 2, 4, 3))
+matt_avg <- apply(matt[seq((d$Ldyr - 4), d$Ldyr), , ,1], c(2,3), mean)
+p_mature <- apply (matt_avg,1,median)
+
+
+### Natural mortality - NOS ----
+# Marine survival from CTC 23-06 p. 9
+M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
+# Age 1 value of Marine survival
+df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
+Mjuv <- median(df)
+
+# Age 2-5
+Mjuv[2] <- M_CTC[2]
+Mjuv[3] <- M_CTC[3]
+Mjuv[4] <- M_CTC[4]
+
+
+## Eggs/total spawner: Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
+aveFecFemale <- 5871 # From Brendan Zoehner, SEP, assuming for age 4
+fec_QC <- c(0, 0, 800, 2000, 2500) # fecundity by age for Quinsam
+ppn4 <- fec_QC/fec_QC[4] # proportion of fecundity rleative to age 4
+fec_Salmon <- round(aveFecFemale * 0.5 * ppn4) # fecundity per total spawner by age for Salmon River
+
+# This is assumed to already account for ppn female as age-3 fecundity is so low
+# Accounts for pre-spawn mortality (5%)
+fec <- fec_Salmon * 0.95
+
+
+phi <- sapply(report, getElement, "epro")
+tau <- sapply(report, getElement, "spro")
+
+SRbeta <- median(sapply(report, getElement, "beta"))
+Emax <- 1/SRbeta
+Smax <- median(Emax * tau/phi)
+kappa <- median(as.numeric(exp(pars$log_cr))) #a
+
+
+vulPT <- sapply(report, getElement, "vulPT") %>% apply(1, median)
+vulT <- sapply(report, getElement, "vulT") %>% apply(1, median)
+
+
+# Terminal ER, median overall years and MC trials
+year <- year1 + seq(1, d$Ldyr) - 1
+year_borrow <- seq(max(year) - 9, max(year) - 5)
+
+
+UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
+                         index_AEQ = match(year_borrow, year)) %>% median(na.rm=T)
+
+
+SalmonRP <- compare_ref(
+  a = kappa,
+  Smax = Smax,
+  maxage = 5,
+  p_female = 1,
+  vulPT = vulPT,
+  vulT = vulT,
+  M = Mjuv,
+  fec = fec,
+  p_mature = p_mature,
+  U_T = UT,
+  s_enroute = 0.9
+)
+# SalmonRP$salmonMSE[['UMSY (preterminal)']]
+
+
+
+#############################################################################
+# Apply to Nimpkish River
+# Input Conditioning Model results
+maxage <- 5
+nsim <- 500
+year1 <- 2001
+ERM <- readRDS("CM/Woss_10.22.26.base.rds")
+report <- salmonMSE:::get_report(ERM)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+pars <- rstan::extract(ERM)
+
+# Take maturity average from the 5 most recent brood years (2020-2024)
+matt <- sapply(report, getElement, "matt", simplify = "array") %>%
+  aperm(c(1, 2, 4, 3))
+matt_avg <- apply(matt[seq((d$Ldyr - 4), d$Ldyr), , ,1], c(2,3), mean)
+p_mature <- apply (matt_avg,1,median)
+
+
+### Natural mortality - NOS ----
+# Marine survival from CTC 23-06 p. 9
+M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
+# Age 1 value of Marine survival
+df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
+Mjuv <- median(df)
+
+# Age 2-5
+Mjuv[2] <- M_CTC[2]
+Mjuv[3] <- M_CTC[3]
+Mjuv[4] <- M_CTC[4]
+
+
+## Eggs/total spawner: Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
+fec_QC <- c(0, 0, 800, 2000, 2500) # fecundity by age for Quinsam
+
+# This is assumed to already account for ppn female as age-3 fecundity is so low
+# Accounts for pre-spawn mortality (5%)
+fec <- fec_QC * 0.95
+
+
+phi <- sapply(report, getElement, "epro")
+tau <- sapply(report, getElement, "spro")
+
+SRbeta <- median(sapply(report, getElement, "beta"))
+Emax <- 1/SRbeta
+Smax <- median(Emax * tau/phi)
+kappa <- median(as.numeric(exp(pars$log_cr))) #a
+
+
+vulPT <- sapply(report, getElement, "vulPT") %>% apply(1, median)
+vulT <- sapply(report, getElement, "vulT") %>% apply(1, median)
+
+
+# Terminal ER, median overall years and MC trials
+year <- year1 + seq(1, d$Ldyr) - 1
+year_borrow <- seq(max(year) - 9, max(year) - 5)
+
+
+UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
+                         index_AEQ = match(year_borrow, year)) %>% median(na.rm=T)
+
+
+NimpkishRP <- compare_ref(
+  a = kappa,
+  Smax = Smax,
+  maxage = 5,
+  p_female = 1,
+  vulPT = vulPT,
+  vulT = vulT,
+  M = Mjuv,
+  fec = fec,
+  p_mature = p_mature,
+  U_T = UT,
+  s_enroute = 0.9
+)
+# NimpkishRP$salmonMSE[['UMSY (preterminal)']]
+
+#############################################################################
+# Apply to Adam River
+# Input Conditioning Model results
+maxage <- 5
+nsim <- 500
+year1 <- 2001
+ERM <- readRDS("CM/Adam_10.22.26.base.rds")
+ERM_Salmon <- readRDS("CM/Salmon_10.22.26.base.rds")
+report <- salmonMSE:::get_report(ERM)
+report_Salmon <- salmonMSE:::get_report(ERM_Salmon)
+d <- salmonMSE:::get_CMdata(ERM@.MISC$CMfit)
+pars <- rstan::extract(ERM)
+
+# Take maturity average from the 5 most recent brood years (2020-2024)
+matt <- sapply(report, getElement, "matt", simplify = "array") %>%
+  aperm(c(1, 2, 4, 3))
+matt_avg <- apply(matt[seq((d$Ldyr - 4), d$Ldyr), , ,1], c(2,3), mean)
+p_mature <- apply (matt_avg,1,median)
+
+
+### Natural mortality - NOS ----
+# Marine survival from CTC 23-06 p. 9
+M_CTC <- -log(1 - c(0.9, 0.3, 0.2, 0.1, 0.1))
+# Age 1 value of Marine survival
+df <- sapply(report, getElement, "mo", simplify = "array")[,1,] # year x age x sim, only age 1
+Mjuv <- median(df)
+
+# Age 2-5
+Mjuv[2] <- M_CTC[2]
+Mjuv[3] <- M_CTC[3]
+Mjuv[4] <- M_CTC[4]
+
+
+## Eggs/total spawner: Walters and Korman (2024) removing age6=3000; Filipovic et al. (in revision) RPA.
+fec_QC <- c(0, 0, 800, 2000, 2500) # fecundity by age for Quinsam
+
+# This is assumed to already account for ppn female as age-3 fecundity is so low
+# Accounts for pre-spawn mortality (5%)
+fec <- fec_QC * 0.95
+
+
+phi <- sapply(report, getElement, "epro")
+tau <- sapply(report, getElement, "spro")
+
+SRbeta <- median(sapply(report, getElement, "beta"))
+Emax <- 1/SRbeta
+Smax <- median(Emax * tau/phi)
+kappa <- median(as.numeric(exp(pars$log_cr))) #a
+
+
+vulPT <- sapply(report_Salmon, getElement, "vulPT") %>% apply(1, median)
+vulT <- sapply(report_Salmon, getElement, "vulT") %>% apply(1, median)
+
+
+# Terminal ER, median overall years and MC trials
+year <- year1 + seq(1, d$Ldyr) - 1
+year_borrow <- seq(max(year) - 9, max(year) - 5)
+
+
+UT <- salmonMSE:::.CM_ER(report_Salmon, brood = FALSE, type = "T",  r = 1,
+                         index_AEQ = match(year_borrow, year)) %>% median(na.rm=T)
+
+
+
+AdamRP <- compare_ref(
+  a = kappa,
+  Smax = Smax,
+  maxage = 5,
+  p_female = 1,
+  vulPT = vulPT,
+  vulT = vulT,
+  M = Mjuv,
+  fec = fec,
+  p_mature = p_mature,
+  U_T = UT,
+  s_enroute = 0.9
+)
+# AdamRP$salmonMSE[['UMSY (preterminal)']]
+

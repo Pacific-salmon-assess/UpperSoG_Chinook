@@ -18,20 +18,20 @@ samp <-  readRDS("CM/Salmon_10.22.26.base.rds")
 # scenario <- "base"
 # if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
-folder_path <- "figures/SMSE/Salmon"
+folder_path <- "figures/SMSE/Salmon/NoHatch"
 
 if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
-# Get UMSY from the Conditioning model = 28%
-report <- salmonMSE:::get_report(samp)
-d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
-
-UMSY_s <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, type = "u")
-UMSY_avg <- salmonMSE:::.CM_MSY(report, d, simple = TRUE,
-                                mean_bio = TRUE, type = "u")
-quantile(UMSY_avg, c(0.05, 0.25, 0.5, 0.75, 0.95))
+# # Get UMSY from the Conditioning model = 28%
+# report <- salmonMSE:::get_report(samp)
+# d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
+#
+# UMSY_s <- salmonMSE:::.CM_MSY(report, d, simple = TRUE, type = "u")
+# UMSY_avg <- salmonMSE:::.CM_MSY(report, d, simple = TRUE,
+#                                 mean_bio = TRUE, type = "u")
+# quantile(UMSY_avg, c(0.05, 0.25, 0.5, 0.75, 0.95))
 
 # Now plot catches and spawner abundances across a range of pre-terminal ERs (scenarios), with no hatchery relesases
 
@@ -99,7 +99,7 @@ Sp_Catch <- val_sim %>%
   reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
 
 
-# Get abundances and catch of current ER
+# Get abundances and catch of Ricker UMSY
 df <- val_sim %>%
   filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
   left_join(select(gr, u_preterminal, n_yearling, n)) %>%
@@ -107,6 +107,22 @@ df <- val_sim %>%
 current <- df %>% filter(u_preterminal == round(UPTmed,2) ) %>%
   rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
 
+log_cr <- rstan::extract(samp)[["log_cr"]]
+umsy <- calc_Umsy_Ricker(log_cr) %>% median() - 0.0275
+# Round umsy to an even number
+umsy <- round(umsy * 100 /2) * 2 /100
+rickerMSY <- df %>% filter(u_preterminal == umsy) %>%
+  rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
+
+# Get abundances and catch of salmonMSE UMSY
+# source('99-RefPts-UpperSoG.R')
+df <- val_sim %>%
+  filter(variable %in% c("Natural Spawners", "Aggcatch")) %>%
+  left_join(select(gr, u_preterminal, n_yearling, n)) %>%
+  reshape2::dcast(u_preterminal + n_yearling ~ variable, value.var = "median")
+umsy_sMSE <- round(SalmonRP$salmonMSE[['UMSY (preterminal)']] * 100 /2) * 2 /100
+sMSEMSY <- df %>% filter(u_preterminal == umsy_sMSE) %>%
+  rename(y = 'Natural Spawners', x = 'Aggcatch') %>% select(x, y)
 
 gto3 <- plot_tradeoff(
   pm1 = Sp_Catch$`Aggcatch`,
@@ -120,11 +136,13 @@ gto3 <- plot_tradeoff(
 ) +
   geom_point(size = 3) +
   scale_shape_manual(values = 16) +
-  annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+  # annotate("point", x = current$x, y = current$y, shape = 18, size = 5)
+  annotate("point", x = rickerMSY$x, y = rickerMSY$y, shape = 8, size = 3) +
+  annotate("point", x = sMSEMSY$x, y = sMSEMSY$y, shape = 6, size = 3)
 
 gto3
 
-# ggsave(file.path("figures", "SMSE", pop, paste0("gto3_NoHatch_", pop, file_suffix, ".png")), gto3,
-#        height = 7, width = 7)
-
+ggsave(file.path("figures", "SMSE", pop, "NoHatch",  paste0("gto3_NoHatch_", pop, file_suffix, ".png")), gto3,
+       height = 7, width = 7)
+#
 

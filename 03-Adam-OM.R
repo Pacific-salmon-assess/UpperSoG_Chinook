@@ -461,5 +461,5 @@ SOM <- new("SOM",
            Harvest = Harvest,
            Hatchery = Hatchery,
            Historical = Historical)
-saveRDS(SOM, paste0("SOM/SOM_Adam_", msurv, ".rds"))
+saveRDS(SOM, paste0("SOM/SOM_Adam_NonTV_", msurv, ".rds"))
 
