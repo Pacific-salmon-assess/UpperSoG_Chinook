@@ -129,7 +129,7 @@ if(prod == "ensemble"){
 }
 
 
-for (pop in c("Adam", "Salmon", "Woss")){
+for (pop in c("Adam", "Salmon", "Woss", "QC")){
   samp <- get(paste0("ERM_", pop))
   d <- salmonMSE:::get_CMdata(samp@.MISC$CMfit)
   if(pop == "QC") year1 <- 1984
@@ -423,7 +423,27 @@ for (pop in c("Adam", "Salmon", "Woss")){
               # hjust = -1, vjust = 1.8)
               label = ifelse(pop =="Adam", "f", "i"),
               hjust = -1, vjust = 1.8, size = 6, fontface = "bold")
+  if(pop == "QC"){
+    g6 <- Spawners_q %>%
+      ggplot(aes(Year, .data$median, colour= label, fill=label, group=label)) +
+      geom_line(aes(linetype = label)) +
+      geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.1, color= NA,
+                  show.legend = FALSE) +
+      scale_fill_manual(values = c( "Spawners" = "black")) +
+      scale_colour_manual(values = c("Spawners" = "black")) +
+      labs(x = "Calendar Year", y = ylab) +
+      # coord_cartesian(ylim =
+      #                   c(0,max(c(Spawners_q$median, SMSY_s_q$median, SMSY_s_q$upper),
+      #                           na.rm=T))) +#c(0,8000)) +#c(0,3000)) +# c(0,800))
+      ylab("Spawners") +
+      theme(legend.position = "none") +
+      annotate( "text",  x = -Inf, y = Inf,
+                # label = "b",
+                # hjust = -1, vjust = 1.8)
+                label = "i",
+                hjust = -1, vjust = 1.8, size = 6, fontface = "bold")
 
+  }
   # gNew <- g6
   g6
   if(write_figures) ggsave(paste0(folder_path, pop, "_SMSY.png"), g6, height = 3.5, width = 6)
@@ -495,7 +515,24 @@ for (pop in c("Adam", "Salmon", "Woss")){
               label = ifelse(pop =="Adam", "g", "j"),
               hjust = -1, vjust = 1.8, size = 6, fontface = "bold")
 
+if(pop=="QC"){
+  gUMSY <- ER %>%
+    ggplot(aes(Year, .data$median, colour= label, fill=label, group=label)) +
+    geom_line(aes(linetype = label)) +
+    scale_fill_manual(values = c("ER (AEQ)" = "black")) +
+    scale_colour_manual(values = c("ER (AEQ)"  = "black")) +
+    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.1, color= NA,
+                show.legend = FALSE) +
+    labs(x = "Calendar Year", y = ylab)+
+    theme(legend.title = element_blank()) +
+    ylab("Exploitation rate (AEQ)") +
+    ylim(0,1) +
+    theme(legend.position = "none") +
+    annotate( "text",  x = -Inf, y = Inf,
+              label = ifelse(pop =="Adam", "g", "j"),
+              hjust = -1, vjust = 1.8, size = 6, fontface = "bold")
 
+}
   gUMSY
 
   if(write_figures) ggsave(paste0(folder_path, pop, "_UMSY.png"), gUMSY, height = 3.5, width = 6)
@@ -945,10 +982,9 @@ for (pop in c("Adam", "Salmon", "Woss", "QC")){
       geom_errorbar(aes(ymin = .data$`2.5%`, ymax = .data$`97.5%`), width = 0.1)
   }
 
-  if(pop!="QC") {
-    gSp <- get(paste0("gSp_", pop))
-    gU <- get(paste0("gU_", pop))
-  }
+  gSp <- get(paste0("gSp_", pop))
+  gU <- get(paste0("gU_", pop))
+
 
   gCM1 <- (gSRR + gSurv)/
     (gMat + gProd)
@@ -963,18 +999,16 @@ for (pop in c("Adam", "Salmon", "Woss", "QC")){
       plot_layout(heights = c(1,1))
   }
 
-  if(pop != "QC"){
-    gCM3 <- (gSp + gU)/
-      plot_spacer() +
-      plot_layout(heights = c(1, 1))
-  }
+  gCM3 <- (gSp + gU)/
+    plot_spacer() +
+    plot_layout(heights = c(1, 1))
 
 
   if(write_figures) ggsave(paste0(folder_path, pop, "_gCM1.png"), gCM1, height = 7, width = 10)
 
   if(write_figures) ggsave(paste0(folder_path, pop, "_gCM2.png"), gCM2, height = 7, width = 10)
 
-  if(!pop %in% c("QC", "Adam") & write_figures == TRUE) ggsave(paste0(folder_path, pop, "_gCM3.png"), gCM3, height = 7, width = 10)
+  if(!pop %in% c("Adam") & write_figures == TRUE) ggsave(paste0(folder_path, pop, "_gCM3.png"), gCM3, height = 7, width = 10)
 
 }
 
