@@ -18,7 +18,7 @@ samp <-  readRDS("CM/Salmon_10.22.26.base.rds")
 # scenario <- "base"
 # if (scenario !="base") {file_suffix <- paste0("_", scenario)} else {file_suffix <- ""}
 
-folder_path <- "figures/SMSE/Salmon/NoHatch"
+folder_path <- "figures/SMSE/Salmon/NoHatch/NoTV/SimpleFecVul"
 
 if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
@@ -47,7 +47,7 @@ gr$n <- 1:length(gr$u_preterminal)
 # scenario_unique <- unique(gr$Option_name) # Represented by individual table
 
 SMSE_list <- lapply(gr$n, function(i) {
-  SMSE <- readRDS(file.path("SMSE",pop, "NoHatch", paste0(pop, i, ".rds")))
+  SMSE <- readRDS(file.path("SMSE",pop, "NoHatch", "NonTV", "SimpleFecVul", paste0(pop, i, ".rds")))
   return(SMSE)
 })
 
@@ -142,7 +142,7 @@ gto3 <- plot_tradeoff(
 
 gto3
 
-ggsave(file.path("figures", "SMSE", pop, "NoHatch",  paste0("gto3_NoHatch_", pop, file_suffix, ".png")), gto3,
+ggsave(file.path("figures", "SMSE", pop, "NoHatch",  "NonTV", "SimpleFecVul", paste0("gto3_NoHatch_", pop, file_suffix, ".png")), gto3,
        height = 7, width = 7)
 #
 

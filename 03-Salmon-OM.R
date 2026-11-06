@@ -93,7 +93,7 @@ if(msurv %in% c("low", "high")){
   m1_sample <- -log(s1_sim_trans)
 }
 
-Mjuv_NOS[, 1, , 1] <- m1_sample#median(df, na.rm=T)#m1_sample
+Mjuv_NOS[, 1, , 1] <- median(df, na.rm=T)#m1_sample
 
 
 # Age 2-5
@@ -155,12 +155,12 @@ Bio <- new(
   SRrel = "Ricker",
   kappa = kappa,# Includes random variability
   Smax = Smax,# Includes random variability
-  SRdev = wt_mat, # Matrix of egg-smolt annual deviations from Ricker curve
+  # SRdev = wt_mat, # Matrix of egg-smolt annual deviations from Ricker curve
   phi = phi,
   tau = tau,
   Mjuv_NOS = Mjuv_NOS, # Includes random variability in 1st year M
   p_female = 1, # p_female specified in fecundity
-  fec = fec,
+  fec = rep(mean(fec),5),#fec,
   s_enroute = (1 - 0.1)# M.  Clarke pers. comm. (2025), same as CM
 )
 
@@ -208,8 +208,8 @@ Harvest <- new(
   MSF_PT = FALSE,
   MSF_T = FALSE,
   release_mort = c(0.1,0.1), # mark-selective fishery not included for this stock
-  vulPT = t(vulPT),
-  vulT = t(vulT)
+  vulPT = rep(1,5), #t(vulPT),
+  vulT = rep(1,5)#t(vulT)
 )
 
 
@@ -373,5 +373,5 @@ SOM <- new("SOM",
            Hatchery = Hatchery,
            Harvest = Harvest,
            Historical = Historical)
-saveRDS(SOM, paste0("SOM/SOM_Salmon_", msurv, "_nontv.rds"))
+saveRDS(SOM, paste0("SOM/SOM_Salmon_", msurv, "_nontv_simpleFecVul.rds"))
 
