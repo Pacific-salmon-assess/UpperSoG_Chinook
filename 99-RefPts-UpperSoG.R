@@ -237,7 +237,7 @@ compare_ref(
 
 
 #############################################################################
-# Apply to Salmon River
+# Apply to Salmon River - simple
 # Input Conditioning Model results
 maxage <- 5
 nsim <- 500
@@ -300,17 +300,17 @@ UT <- salmonMSE:::.CM_ER(report, brood = FALSE, type = "T",  r = 1,
                          index_AEQ = match(year_borrow, year)) %>% median(na.rm=T)
 
 
-SalmonRP <- compare_ref(
+SalmonRP_simple <- compare_ref(
   a = kappa,
   Smax = Smax,
   maxage = 5,
   p_female = 1,
-  vulPT = vulPT,
-  vulT = vulT,
+  vulPT = rep(0,5), #vulPT,
+  vulT = rep(1,5), #vulT,
   M = Mjuv,
-  fec = fec,
-  p_mature = p_mature,
-  U_T = UT,
+  fec = rep(mean(fec), 5), #fec,
+  p_mature = c(0,0,0,0,1),#p_mature,
+  U_T = 0,#UT,
   s_enroute = 0.9
 )
 # SalmonRP$salmonMSE[['UMSY (preterminal)']]

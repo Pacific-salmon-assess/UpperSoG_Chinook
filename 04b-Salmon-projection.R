@@ -26,13 +26,14 @@ library(salmonMSE)
 # Create grid of u_preterminal and n_yearling
 # Default is u_preterminal is mean(UPT)=0.449 n_yearling in hatch_rel=3561051
 
-folder_path <- "SMSE/Salmon/NoHatch/NonTV/SimpleFecVul"
+folder_path <- "SMSE/Salmon/NoHatch/SimpleFecVul/TF/SingleAge/NoEnroute"
 if (!dir.exists(here::here(folder_path))) {
   dir.create(here::here(folder_path), recursive = TRUE)
 }
 
   g <- expand.grid(
-    u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
+    # u_preterminal = seq(0, 0.5, 0.02),# Add in FMSY
+    u_terminal = seq(0, 0.5, 0.02),
     n_yearling = 0
   )
 
@@ -49,13 +50,14 @@ if (!dir.exists(here::here(folder_path))) {
   SMSE_list <- sfLapply(1:nrow(g), function(i, g) {
     require(salmonMSE)
 
-    SOM <- readRDS(file.path("SOM", "SOM_Salmon_base_nontv_SimpleFecVul.rds"))
+    SOM <- readRDS(file.path("SOM", "SOM_Salmon_base_SimpleFecVul_TF_SingleAge_NoEnroute.rds"))
     # SOM@Hatchery@f_brood <- f_brood
     SOM@Hatchery@n_yearling <- g$n_yearling[i]
-    SOM@Harvest@u_preterminal <- g$u_preterminal[i]
-    SMSE <- salmonMSE(SOM)
+    SOM@Harvest@u_preterminal <- 0#g$u_preterminal[i]
+    SOM@Harvest@u_terminal <- g$u_terminal[i]
+     SMSE <- salmonMSE(SOM)
 
-    saveRDS(SMSE, file = file.path("SMSE", "Salmon", "NoHatch", "NonTV", "SimpleFecVul", paste0("Salmon", i, ".rds")))
+    saveRDS(SMSE, file = file.path("SMSE", "Salmon", "NoHatch",  "SimpleFecVul", "TF", "SingleAge", "NoEnroute", paste0("Salmon", i, ".rds")))
 
     invisible()
 
